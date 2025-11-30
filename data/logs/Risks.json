@@ -1,0 +1,122 @@
+[
+  {
+    "title": "Budget Overrun",
+    "description": "Project costs may exceed the allocated budget due to rising vendor prices.",
+    "likelihood": "High",
+    "impact": "High",
+    "level": "High",
+    "owner": "Finance Lead",
+    "status": "Open",
+    "mitigation": "Negotiate fixed-price contracts.",
+    "dateLogged": "2025-11-01",
+    "notes": "Initial assessment done."
+  },
+  {
+    "title": "Resource Shortage",
+    "description": "Key developers may be pulled to other priority projects.",
+    "likelihood": "Medium",
+    "impact": "High",
+    "level": "High",
+    "owner": "Project Manager",
+    "status": "Open",
+    "mitigation": "Secure resource commitment from management.",
+    "dateLogged": "2025-11-02",
+    "notes": "Discussed with Dept Head."
+  },
+  {
+    "title": "Technology Delay",
+    "description": "New server hardware delivery might be delayed by 2 weeks.",
+    "likelihood": "Medium",
+    "impact": "Medium",
+    "level": "Medium",
+    "owner": "IT Ops",
+    "status": "Open",
+    "mitigation": "Prepare cloud fallback.",
+    "dateLogged": "2025-11-03",
+    "notes": "Vendor tracking checked."
+  },
+  {
+    "title": "Scope Creep",
+    "description": "Stakeholders keep adding minor feature requests.",
+    "likelihood": "High",
+    "impact": "Medium",
+    "level": "High",
+    "owner": "Product Owner",
+    "status": "Open",
+    "mitigation": "Strict change control process.",
+    "dateLogged": "2025-11-04",
+    "notes": "Change board set up."
+  },
+  {
+    "title": "Regulatory Change",
+    "description": "New data privacy laws may affect compliance requirements.",
+    "likelihood": "Low",
+    "impact": "High",
+    "level": "Medium",
+    "owner": "Legal",
+    "status": "Open",
+    "mitigation": "Consult with legal team early.",
+    "dateLogged": "2025-11-05",
+    "notes": "Meeting scheduled."
+  },
+  {
+    "title": "Vendor Insolvency",
+    "description": "Primary software vendor is facing financial difficulties.",
+    "likelihood": "Low",
+    "impact": "Critical",
+    "level": "Medium",
+    "owner": "Procurement",
+    "status": "Open",
+    "mitigation": "Identify backup vendors.",
+    "dateLogged": "2025-11-06",
+    "notes": "Market analysis ongoing."
+  },
+  {
+    "title": "User Adoption",
+    "description": "End users may resist the new interface changes.",
+    "likelihood": "Medium",
+    "impact": "Medium",
+    "level": "Medium",
+    "owner": "Change Mgr",
+    "status": "Open",
+    "mitigation": "Conduct training sessions.",
+    "dateLogged": "2025-11-07",
+    "notes": "Training plan drafted."
+  },
+  {
+    "title": "Data Migration Failure",
+    "description": "Legacy data format may not map 100% to new schema.",
+    "likelihood": "Medium",
+    "impact": "High",
+    "level": "High",
+    "owner": "Data Lead",
+    "status": "Open",
+    "mitigation": "Run dry runs and validation scripts.",
+    "dateLogged": "2025-11-08",
+    "notes": "Script testing started."
+  },
+  {
+    "title": "Security Breach",
+    "description": "Potential vulnerability in the authentication module.",
+    "likelihood": "Low",
+    "impact": "Critical",
+    "level": "Medium",
+    "owner": "Security Lead",
+    "status": "Closed",
+    "mitigation": "Patch applied and tested.",
+    "dateLogged": "2025-11-09",
+    "notes": "Resolved in sprint 4."
+  },
+  {
+    "title": "Key Person Risk",
+    "description": "Lead architect is the only one who understands the core engine.",
+    "likelihood": "Medium",
+    "impact": "High",
+    "level": "High",
+    "owner": "HR / PM",
+    "status": "Open",
+    "mitigation": "Start documentation and knowledge transfer.",
+    "dateLogged": "2025-11-10",
+    "notes": "Wiki updated."
+  }
+]

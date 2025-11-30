@@ -1,0 +1,92 @@
+[
+  {
+    "title": "API Release",
+    "description": "Waiting for Vendor X to release API v2.",
+    "type": "Upstream",
+    "owner": "Integration Lead",
+    "status": "Open",
+    "dateLogged": "2025-11-01",
+    "notes": "Expected Dec 1st."
+  },
+  {
+    "title": "Hardware Install",
+    "description": "Server rack installation by Data Center team.",
+    "type": "Upstream",
+    "owner": "Ops Mgr",
+    "status": "Open",
+    "dateLogged": "2025-11-02",
+    "notes": "Scheduled for Friday."
+  },
+  {
+    "title": "Marketing Launch",
+    "description": "Marketing campaign launch depends on our go-live.",
+    "type": "Downstream",
+    "owner": "CMO",
+    "status": "Open",
+    "dateLogged": "2025-11-03",
+    "notes": "Coordination meeting set."
+  },
+  {
+    "title": "Legal Approval",
+    "description": "Terms of Service sign-off needed.",
+    "type": "Upstream",
+    "owner": "Legal",
+    "status": "Closed",
+    "dateLogged": "2025-11-04",
+    "notes": "Signed off."
+  },
+  {
+    "title": "Data Cleanse",
+    "description": "Client must cleanse data before migration.",
+    "type": "Upstream",
+    "owner": "Client PM",
+    "status": "Open",
+    "dateLogged": "2025-11-05",
+    "notes": "50% complete."
+  },
+  {
+    "title": "Mobile App",
+    "description": "Mobile team needs our API ready to start testing.",
+    "type": "Downstream",
+    "owner": "Mobile Lead",
+    "status": "Open",
+    "dateLogged": "2025-11-06",
+    "notes": "API specs shared."
+  },
+  {
+    "title": "Firewall Rules",
+    "description": "SecOps needs to open port 443.",
+    "type": "Upstream",
+    "owner": "SecOps",
+    "status": "Open",
+    "dateLogged": "2025-11-07",
+    "notes": "Ticket #1234."
+  },
+  {
+    "title": "User Manual",
+    "description": "Training team needs screenshots for the manual.",
+    "type": "Downstream",
+    "owner": "Tech Writer",
+    "status": "Open",
+    "dateLogged": "2025-11-08",
+    "notes": "Pending UI freeze."
+  },
+  {
+    "title": "Payment Provider",
+    "description": "Merchant account activation.",
+    "type": "Upstream",
+    "owner": "Finance",
+    "status": "Open",
+    "dateLogged": "2025-11-09",
+    "notes": "Docs submitted."
+  },
+  {
+    "title": "Audit Sign-off",
+    "description": "External audit must pass before public launch.",
+    "type": "Upstream",
+    "owner": "Compliance",
+    "status": "Open",
+    "dateLogged": "2025-11-10",
+    "notes": "Auditors on site next week."
+  }
+]

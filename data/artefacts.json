@@ -1,0 +1,86 @@
+[
+  {
+    "id": "business-case",
+    "name": "Business Case",
+    "phase": "Initiating",
+    "status": "In Progress"
+  },
+  {
+    "id": "project-charter",
+    "name": "Project Charter",
+    "phase": "Initiating",
+    "status": "In Progress"
+  },
+  {
+    "id": "stakeholder-matrix",
+    "name": "Stakeholder Matrix",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-work-plan",
+    "name": "Project Work Plan",
+    "phase": "Planning",
+    "status": "Complete"
+  },
+  {
+    "id": "requirements-doc",
+    "name": "Requirements Document",
+    "phase": "Planning",
+    "status": "Complete"
+  },
+  {
+    "id": "risk-log",
+    "name": "Risk Log",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "quality-plan",
+    "name": "Quality Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "comm-plan",
+    "name": "Communication Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "procurement-plan",
+    "name": "Procurement Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-handbook",
+    "name": "Project Handbook",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "status-reports",
+    "name": "Status Reports",
+    "phase": "Executing",
+    "status": "In Progress"
+  },
+  {
+    "id": "deliverables",
+    "name": "Deliverables",
+    "phase": "Executing",
+    "status": "Not Started"
+  },
+  {
+    "id": "end-project-report",
+    "name": "End-of-Project Report",
+    "phase": "Closing",
+    "status": "Not Started"
+  },
+  {
+    "id": "lessons-learned",
+    "name": "Lessons Learned",
+    "phase": "Closing",
+    "status": "Not Started"
+  }
+]

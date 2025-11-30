@@ -1,0 +1,221 @@
+{
+    "initiating": {
+        "overview": "The Initiating Phase establishes the project’s foundation by clarifying the need, defining the initial scope, identifying stakeholders, confirming feasibility, and producing the core initiating artefacts. This phase ensures the project is viable, aligned with organisational objectives, and authorised to progress to Planning.",
+        "activities": [
+            "Understand and articulate the problem, need or opportunity the project addresses.",
+            "Identify key stakeholders and analyse their needs, expectations and interests.",
+            "Define the initial project scope, boundaries, constraints and assumptions.",
+            "Define the initial project organisation and governance structure.",
+            "Assess preliminary feasibility and viability, including expected benefits.",
+            "Identify initial risks, issues, assumptions and dependencies.",
+            "Develop the Project Initiation Request (PIR).",
+            "Develop or refine the Business Case.",
+            "Develop the Project Charter, formalising objectives, scope, governance and success criteria.",
+            "Secure approval of the Charter and authorisation to proceed to Planning."
+        ],
+        "inputs": [
+            "Identified need or problem statement",
+            "Strategic or organisational objectives",
+            "Stakeholder inputs",
+            "Existing background studies or feasibility information"
+        ],
+        "outputs": [
+            "Project Initiation Request (PIR)",
+            "Business Case",
+            "Project Charter",
+            "Initial Stakeholder Matrix",
+            "Initial RAID entries"
+        ],
+        "responsibilities": [
+            "Project Owner (PO): Provides strategic guidance and approves initiating artefacts.",
+            "Business Manager (BM): Clarifies business needs and supports Business Case creation.",
+            "Project Manager (PM): Coordinates initiating activities and drafts artefacts.",
+            "Stakeholders: Provide needs, expectations and constraints.",
+            "Project Support Office (PSO): Provides templates and standards."
+        ],
+        "phase_gate": {
+            "name": "Ready for Planning",
+            "criteria": [
+                "Project Charter approved.",
+                "Business Case validated.",
+                "High-level objectives and scope defined.",
+                "Key stakeholders identified and analysed.",
+                "Initial risks and assumptions recorded.",
+                "Governance structure defined."
+            ]
+        }
+    },
+    "planning": {
+        "overview": "The Planning Phase develops the detailed plans required to deliver the project. This includes defining requirements, refining scope, establishing the delivery approach, scheduling work, assessing risks, and preparing management plans. Its purpose is to ensure the project is realistically planned, properly governed and ready for execution.",
+        "activities": [
+            "Confirm and elaborate requirements.",
+            "Refine the project scope and baseline it.",
+            "Define deliverables, acceptance criteria and detailed work packages.",
+            "Develop the Project Work Plan (schedule, tasks, sequencing, resources).",
+            "Develop the Communication Management Plan.",
+            "Develop the Quality Management Plan.",
+            "Develop the Risk Management approach and update RAID.",
+            "Develop the Procurement Plan, if applicable.",
+            "Develop the Project Handbook (integrating management plans and governance arrangements).",
+            "Estimate costs and refine the Business Case if required.",
+            "Define monitoring and reporting mechanisms.",
+            "Prepare the Planning Phase outputs for approval."
+        ],
+        "inputs": [
+            "Approved Project Charter",
+            "Business Case",
+            "Initial stakeholder analysis",
+            "Initial RAID information",
+            "Any existing requirements or constraints"
+        ],
+        "outputs": [
+            "Project Work Plan",
+            "Requirements Documentation",
+            "Communication Management Plan",
+            "Quality Management Plan",
+            "Risk Management updates (RAID)",
+            "Procurement Plan (if needed)",
+            "Project Handbook"
+        ],
+        "responsibilities": [
+            "Project Manager (PM): Leads planning, creates plans, coordinates contributors.",
+            "Business Manager (BM): Clarifies requirements and validates business-related plans.",
+            "Project Owner (PO): Reviews and approves plans.",
+            "Project Team Members: Provide estimates, technical input and planning contributions.",
+            "Project Support Office (PSO): Ensures plan templates and standards are followed."
+        ],
+        "phase_gate": {
+            "name": "Ready for Execution",
+            "criteria": [
+                "Project Work Plan baselined.",
+                "Management plans approved.",
+                "Requirements documented and agreed.",
+                "Scope baseline established.",
+                "Costs and schedule validated.",
+                "Risks assessed and mitigation planned."
+            ]
+        }
+    },
+    "executing": {
+        "overview": "The Executing Phase delivers the project outputs through coordinated work. The focus is on managing the team, producing deliverables, controlling performance, managing risks and issues, and communicating progress. Execution follows the plans established during the Planning Phase.",
+        "activities": [
+            "Execute tasks and produce deliverables according to the Project Work Plan.",
+            "Coordinate and manage the project team.",
+            "Manage suppliers and contractors.",
+            "Perform quality assurance and control activities.",
+            "Monitor progress and update schedules where necessary.",
+            "Manage risks, issues, changes and dependencies.",
+            "Communicate progress through status reporting.",
+            "Validate interim deliverables with stakeholders.",
+            "Ensure adherence to governance and approval requirements."
+        ],
+        "inputs": [
+            "Baselined Project Work Plan",
+            "Approved management plans",
+            "Requirements documentation",
+            "Stakeholder information",
+            "Current RAID information"
+        ],
+        "outputs": [
+            "Approved deliverables",
+            "Status Reports",
+            "Updated RAID logs",
+            "Updated plans and forecasts",
+            "Change Requests (if applicable)"
+        ],
+        "responsibilities": [
+            "Project Manager (PM): Directs execution, manages team, monitors performance.",
+            "Project Team Members: Produce deliverables and report progress.",
+            "Business Manager (BM): Reviews deliverables from the business perspective.",
+            "Project Owner (PO): Provides decisions and direction as needed.",
+            "PSO: Supports reporting, governance and quality assurance."
+        ],
+        "phase_gate": {
+            "name": "Ready for Closing",
+            "criteria": [
+                "All planned deliverables completed and accepted.",
+                "Stakeholder acceptance confirmed.",
+                "Outstanding changes, issues or risks addressed.",
+                "Project performance reviewed.",
+                "Transition preparations completed."
+            ]
+        }
+    },
+    "closing": {
+        "overview": "The Closing Phase finalises the project by ensuring deliverables are accepted, transitioning outputs to operations, capturing lessons learned and completing administrative closure. Its purpose is to confirm the project has met its objectives and to formally close the project in accordance with organisational standards.",
+        "activities": [
+            "Obtain formal acceptance of all deliverables.",
+            "Complete transition of outputs to operations or beneficiaries.",
+            "Confirm achievement of project objectives and benefits (as applicable).",
+            "Conduct the Final Project Review.",
+            "Capture Lessons Learned.",
+            "Archive project documentation.",
+            "Release project resources.",
+            "Prepare and approve the End-of-Project Report."
+        ],
+        "inputs": [
+            "Accepted deliverables",
+            "Performance information",
+            "Updated RAID logs",
+            "Project documentation",
+            "Transition results"
+        ],
+        "outputs": [
+            "End-of-Project Report",
+            "Lessons Learned",
+            "Archived documentation",
+            "Formal project closure confirmation"
+        ],
+        "responsibilities": [
+            "Project Manager (PM): Leads closing activities and prepares End-of-Project Report.",
+            "Project Owner (PO): Confirms closure and validates outcomes.",
+            "Business Manager (BM): Confirms benefit realisation where applicable.",
+            "Project Team: Contributes to lessons learned and final reviews.",
+            "PSO: Ensures archiving and compliance with organisational closure standards."
+        ],
+        "phase_gate": {
+            "name": "Project Closed",
+            "criteria": [
+                "All deliverables accepted.",
+                "End-of-Project Report approved.",
+                "Lessons Learned captured and shared.",
+                "All project documentation archived.",
+                "Resources released.",
+                "Formal closure confirmed."
+            ]
+        }
+    },
+    "monitor_control": {
+        "overview": "Monitor & Control is a continuous process across all phases of the project. It ensures the project remains aligned with plans, objectives and governance through ongoing tracking, reporting and control activities.",
+        "activities": [
+            "Monitor project performance against baselines.",
+            "Track and manage risks, issues and changes.",
+            "Monitor quality and compliance with standards.",
+            "Ensure timely decision-making and escalation.",
+            "Update plans and forecasts where necessary.",
+            "Maintain stakeholder engagement and communication.",
+            "Report progress and status regularly.",
+            "Verify that governance, roles and responsibilities remain appropriate."
+        ],
+        "inputs": [
+            "Project Work Plan",
+            "Management plans",
+            "Progress updates",
+            "RAID information",
+            "Stakeholder inputs"
+        ],
+        "outputs": [
+            "Updated RAID logs",
+            "Updated plans and forecasts",
+            "Status Reports",
+            "Decision records"
+        ],
+        "responsibilities": [
+            "Project Manager (PM): Leads monitoring and control activities.",
+            "Project Owner (PO): Provides oversight and decisions.",
+            "Business Manager (BM): Monitors business impacts.",
+            "PSO: Ensures reporting standards and governance compliance."
+        ],
+        "phase_gate": null
+    }
+}
