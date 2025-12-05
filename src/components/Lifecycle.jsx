@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import lifecycleData from "../data/lifecycle.json";
 
-const Lifecycle = () => {
-    const [openPhase, setOpenPhase] = useState(null);
+const Lifecycle = ({ activePhase, onPhaseChange }) => {
+    // Local state fallback if not controlled
+    const [localPhase, setLocalPhase] = useState(null);
+
+    // Determine effective state and setter
+    const openPhase = activePhase !== undefined ? activePhase : localPhase;
+    const setOpenPhase = onPhaseChange || setLocalPhase;
 
     const togglePhase = (key) => {
         setOpenPhase(prev => (prev === key ? null : key));

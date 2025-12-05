@@ -1,0 +1,96 @@
+{
+  "title": "Planning Phase",
+  "summary": "",
+  "sections": [
+    {
+      "number": "6",
+      "title": "Planning Phase",
+      "markdown": "The second phase of a PM² project is the Planning Phase. It begins with the Planning Kick-off Meeting and ends once all project plans have been developed and baselined, and an appropriate management and implementation approach has been established. Most of a project's artefacts are created during the Planning Phase.\n\n![](/pm2/figures/fig-6-1.png)\n\n**Fig 6.1** Planning Phase activities and main outputs\n\n+------------+-------------------------------------------------+\n| **Artefact | **Description**                                 |\n| Type**     |                                                 |\n+============+=================================================+\n| Management | These plans define the various processes to be  |\n| Plans      | used (e.g. for Risk Management). PM² provides   |\n| (standard) | Management Plan templates along with guidelines |\n|            | on how to tailor and customise them to the      |\n|            | project's context and needs.                    |\n+------------+-------------------------------------------------+\n| Project    | These plans are specific to the project (e.g.   |\n| Plans      | the Project Work Plan) and are built according  |\n| (specific) | to the project needs and the team's analysis    |\n|            | and experience. PM² provides templates and      |\n|            | guidelines for these plans.                     |\n+------------+-------------------------------------------------+\n| Other      | These artefacts are specific to the project     |\n| (domain    | domain (e.g. system models for IT projects).    |\n| specific)  | PM² does not provide templates for these        |\n|            | artefacts.                                      |\n+------------+-------------------------------------------------+\n\n![](/pm2/figures/fig-6-2.png)\n\n**Fig 6.2** Planning Phase artefacts"
+    },
+    {
+      "number": "6.1",
+      "title": "Planning Kick-off Meeting",
+      "markdown": "The Planning Phase starts with an official Planning Kick-off Meeting, the aim of which is to:\n\n- ensure that everyone understands the project scope\n- clarify the expectations of all key project stakeholders\n- identify project risks\n- discuss the project plans.\n\nAt this early stage, past experiences, and especially Lessons Learned from previous similar projects, will significantly help the project team.\nPM² provides templates for the Meeting Agenda and the Minutes of Meeting (MoM).\n\n+--------------------------+-----------------------------------+\n| **Key Participants**     | **Description**                   |\n+==========================+===================================+\n| Project Manager (PM)     | Organises the meeting.            |\n+--------------------------+-----------------------------------+\n| Project Core Team (PCT)  | Required participants.            |\n+--------------------------+-----------------------------------+\n| Business Implementation  |                                   |\n| Group (BIG) / URs        | Required participants.            |\n+--------------------------+-----------------------------------+\n| Solution Provider (SP)   | Required participant.             |\n+--------------------------+-----------------------------------+\n| Project Owner (PO)       | Required participant.             |\n+--------------------------+-----------------------------------+\n| Business Manager (BM)    | Required participant.             |\n+--------------------------+-----------------------------------+\n| PMA / PSO                | Required if assigned.             |\n+--------------------------+-----------------------------------+\n| Other roles              | Optional.                         |\n+--------------------------+-----------------------------------+\n\n#### Inputs\n- Business Case\n- Project Charter\n\n#### Steps (Before)\n1. Plan the meeting.\n2. Draft and send agenda.\n3. Confirm attendees.\n4. Prepare materials.\n\n#### Steps (During)\n1. Introductions.\n2. Nominate minute-taker.\n3. Walk through the Project Charter.\n4. Explain Planning Phase goals.\n5. Discuss roles & responsibilities.\n6. Discuss timeline.\n7. Discuss delivery approach.\n8. Discuss required project plans.\n9. Discuss risks, constraints, assumptions.\n10. Discuss tools.\n11. Questions.\n12. Summaries.\n13. Next steps.\n\n#### Steps (After)\n1. Distribute MoM.\n2. Log issues, risks, decisions.\n\n![](/pm2/figures/fig-6-3.png)\n\n**Fig 6.3** Planning Kick-off inputs/outputs\n\n**Outputs:**\n- Kick-off Meeting Agenda ☑\n- Minutes of Meeting (MoM) ☑"
+    },
+    {
+      "number": "6.2",
+      "title": "Project Handbook",
+      "markdown": "The Project Handbook summarises the project objectives and documents the selected approach for achieving the project goals. It documents CSFs, processes, escalation, rules, mindsets, and governance.\n\n+-----------------------------+-----------------------------------------------+\n| **Key Participants**        | **Description**                               |\n+=============================+===============================================+\n| Project Manager (PM)        | Prepares the Project Handbook.                |\n+-----------------------------+-----------------------------------------------+\n| Business Manager (BM)       | Contributes to key elements.                  |\n+-----------------------------+-----------------------------------------------+\n| Stakeholders                | Review.                                       |\n+-----------------------------+-----------------------------------------------+\n| Project Core Team (PCT)     | Consulted.                                    |\n+-----------------------------+-----------------------------------------------+\n\n#### Inputs\n- Business Case & Project Charter\n- Planning Kick-off MoM\n\n#### Guidelines\n- Use MoM as baseline.\n- Keep updated.\n- Treat management plans as part of Handbook.\n- Archive properly.\n\n#### Steps\n1. Reuse material from similar projects.\n2. Summarise objectives, constraints, dependencies.\n3. Identify CSFs.\n4. Tailoring/customisation decisions.\n5. Define delivery approach.\n6. Define rules of conduct.\n7. Define escalation procedure.\n8. Define controlling processes.\n9. Define reporting approach.\n10. Determine necessary artefacts.\n11. Document roles.\n\n![](media/image74.png)\n\n**Output:** Project Handbook ☑"
+    },
+    {
+      "number": "6.3",
+      "title": "Project Roles & Responsibilities",
+      "markdown": "### Project Roles & Responsibilities\n\nThe purpose of this section of the Project Handbook is to document the roles and responsibilities for the project. Any deviations from the standard PM² Roles & Responsibilities should be justified and documented, and any new roles defined with their responsibilities clearly described.\nBased on this, the Project Stakeholder Matrix can be tailored to the project and named people assigned to all project roles (preliminary information is taken from the Project Charter)."
+    },
+    {
+      "number": "6.4",
+      "title": "Project Management Plans",
+      "markdown": "### Project Management Plans\n\nPM² suggests several Project Management Plans which outline the various project management processes.\nThese plans define how the organisation manages standard processes. They are:\n1. Requirements Management Plan\n2. Project Change Management Plan\n3. Risk Management Plan\n4. Quality Management Plan\n5. Issue Management Plan\n6. Communications Management Plan\nThese plans may exist as short definitions within the Project Handbook or as separate management plans using PM² templates when more detailed documentation is needed."
+    },
+    {
+      "number": "6.5",
+      "title": "Project-Specific Plans",
+      "markdown": "### Project-Specific Plans\n\nPM² defines a set of recommended project plans that are specific to the project. Templates and guidelines are provided.\nThese plans usually require significant effort because their content is specific to the project’s needs.\nThe optimal level of detail depends on:\n- project type\n- size and complexity\n- management context\n- team experience\nAll Project-Specific Plans required for the project should be listed in the Project Handbook."
+    },
+    {
+      "number": "6.6",
+      "title": "Domain-Specific Artefacts",
+      "markdown": "### Domain-Specific Artefacts\n\nThese artefacts are specific to the project domain and form part of the planning and documentation. PM² does not provide templates.\nExamples:\n- System designs (IT projects)\n- Architectural layouts (relocation or renovation projects)\n- Laws and policy documents (policy projects)\nThese should still be identified and listed in the Project Handbook as Planning Phase outputs."
+    },
+    {
+      "number": "6.7",
+      "title": "Other Considerations",
+      "markdown": "### Other Considerations\n\n**Escalation Procedure**\nAn escalation procedure and tolerances should be defined and included in the Project Handbook. This procedure is referenced by management plans to ensure consistency.\n\n**Resource Needs**\nThe Project Handbook must define how people and equipment will be used.\nAs planning progresses, define:\n- skills required\n- training needs\n- whether additional staff are required\n- how and when resources will be released\nA Training Plan may be annexed if needed."
+    },
+    {
+      "number": "6.8",
+      "title": "Project Stakeholder Matrix",
+      "markdown": "## Project Stakeholder Matrix\n\nThe Project Stakeholder Matrix lists all key project stakeholders, their contact details, and their roles in the project. It may also include stakeholder categories.\nPM² provides a Stakeholder Matrix template, grouping roles into:\n- Teams (e.g. Project Steering Committee)\n- Roles (e.g. PO, SP, URs)\n- Support (e.g. PSO, PMA)\n- Operational roles\n- Domain-specific roles\n**Privacy note:** Follow all applicable regulations on personal data and privacy.\n\n#### Inputs\n- Business Case\n- Project Charter\n- Planning Kick-off MoM\n\n#### Steps\n1. Identify everyone involved in the project.\n2. Assign each person a role based on the PM² Roles & Responsibilities.\n\n![](media/image76.png)\n\n**Output:** Project Stakeholder Matrix ☑"
+    },
+    {
+      "number": "6.9",
+      "title": "Project Work Plan",
+      "markdown": "## Project Work Plan\n\nThe Project Work Plan elaborates the project scope and organises the work and deliverables needed to achieve the project goals. It forms the basis for estimating duration, calculating resource needs, and scheduling the work.\nIt should be baselined, kept up to date throughout the project, and capture all project-related work including risks, issues, corrective actions, and newly emerged tasks.\n\n#### Key Participants\n- **Project Manager (PM):** Coordinates all activities\n- **Project Core Team (PCT):** Assists the PM\n- **Project Support Office (PSO):** May provide technical/scheduling advice\n\n#### Inputs\n- Business Case\n- Project Charter\n\n### Steps\nThe Project Work Plan has three core components:\n\n1. **Work Breakdown** – hierarchical breakdown of all deliverables, work packages, activities, and tasks.\n2. **Effort & Cost Estimates** – estimates of resource needs, effort, and costs.\n3. **Project Schedule** – dependencies, start and end dates, timeline.\n\n![](media/image78.png)\n\n**Output:** Project Work Plan ☑"
+    },
+    {
+      "number": "6.9.1",
+      "title": "Work Breakdown",
+      "markdown": "### Work Breakdown\n\nBreaks the project into smaller, manageable components (deliverables, work packages, activities, tasks). Each level provides progressively more detail.\n\n#### Inputs\n- Business Case\n- Project Charter\n- Project Requirements\n\n#### Output\n- Work Breakdown (part of the Project Work Plan)"
+    },
+    {
+      "number": "6.9.2",
+      "title": "Effort & Cost Estimates",
+      "markdown": "### Effort & Cost Estimates\n\nEstimate the effort needed for each task based on resource availability and capability. After assigning tasks to resources, cost can be calculated.\n\n#### Inputs\n- Work Breakdown\n\n#### Output\n- Effort & Cost Estimates (part of the Project Work Plan)"
+    },
+    {
+      "number": "6.9.3",
+      "title": "Project Schedule",
+      "markdown": "### Project Schedule\n\nDocuments task dependencies, start and end dates, and the project’s overall duration. Scheduling can be done upfront or progressively elaborated.\n\n#### Inputs\n- Project Charter\n- Work Breakdown\n- Effort & Cost Estimates\n\n#### Output\n- Project Schedule (part of the Project Work Plan)"
+    },
+    {
+      "number": "6.10",
+      "title": "Outsourcing Plan",
+      "markdown": "## Outsourcing Plan\n\nDefines the *what* and *how* for outsourced products or services. Identifies outsourcing scope, strategies, responsibilities, and compliance with organisational procurement rules.\n\n#### Key Participants\n- **PM:** Prepares the plan\n- **SP:** Reviews the plan\n\n#### Inputs\n- Business Case & Project Charter\n- Project Work Plan\n- Project Handbook\n- Organisational procurement rules\n\n### Steps\n1. Identify deliverables/activities to be outsourced.\n2. Define who can interface with contractors.\n3. Set evaluation criteria for contractor selection.\n4. Identify constraints (preferred suppliers, etc.).\n5. Choose contracting methods.\n6. Identify required approvals.\n7. Provide a timeline for outsourced work.\n8. Define documentation required from contractors.\n\n![](media/image80.png)\n\n**Output:** Outsourcing Plan ☑"
+    },
+    {
+      "number": "6.11",
+      "title": "Deliverables Acceptance Plan",
+      "markdown": "## Deliverables Acceptance Plan\n\nDefines the agreed criteria, responsibilities, activities, and timing for deliverables acceptance. Ensures that acceptance happens efficiently and on objective criteria.\n\n#### Key Participants\n- **PSC:** Approves\n- **PM:** Prepares (with PQA, PSO, etc.)\n- **BM:** Reviews and validates\n\n#### Inputs\n- Project Charter\n- Requirements\n- Project Handbook\n- Project Work Plan\n- Requirements and Quality Management Plans\n\n### Guidelines\n- Avoid duplication with other plans.\n- Ensure all deliverables and support material are included.\n- Include acceptance activities in the Project Work Plan.\n- Tailor the Acceptance Checklist.\n- Document acceptance process for outsourced work in contracts.\n\n### Steps\n1. Define overall acceptance approach, criteria and tools.\n2. Define tolerances and validation activities.\n3. Define process for non-acceptance.\n4. Define level of formality.\n5. Define roles and responsibilities.\n6. Tailor Acceptance Checklist.\n7. Document outsourced acceptance processes.\n8. Communicate plan.\n\n![](media/image82.png)\n\n**Outputs:**\n- Deliverables Acceptance Plan ☑\n- Deliverables Acceptance Checklist (setup) ☑"
+    },
+    {
+      "number": "6.12",
+      "title": "Transition Plan",
+      "markdown": "## Transition Plan\n\nThe Transition Plan defines the goals, prerequisites, activities, and responsibilities for transitioning from the old (pre-project) to the new (post-project) state. It seeks to minimise business disruption and ensure a smooth roll-out of the project's outputs.\n\n#### Key Participants\n- **PM:** Prepares the Transition Plan\n- **PCT:** Consulted\n- **Other stakeholders:** Review/approve\n\n#### Inputs\n- Business Case & Project Charter\n- Project Work Plan\n- Project Change Management Plan\n- Business Implementation Plan\n\n### Steps\n1. Identify roles and responsibilities for the transition.\n2. Document prerequisites for starting and finishing the transition.\n3. Determine required changes to physical/virtual environments.\n4. Identify potential business interruptions.\n5. Determine coordination needs between stakeholders.\n6. Define operational support and maintenance needs.\n7. Define transfer of responsibility from SP to PO.\n8. Plan formal announcement of transition start/end.\n9. Add all transition activities to the Project Work Plan.\n\n![](media/image84.png)\n\n**Outputs:**\n- Transition Plan ☑\n- Transition Checklist (setup) ☑"
+    },
+    {
+      "number": "6.13",
+      "title": "Business Implementation Plan",
+      "markdown": "## Business Implementation Plan\n\nDefines the activities needed to help the organisation adopt the project's outputs and achieve the desired outcomes and benefits. Covers impact analysis, process changes, communications, and change-management activities.\n\n#### Key Participants\n- **BM:** Prepares the plan\n- **PM:** Assists and updates the Project Work Plan\n- **BIG & stakeholders:** Consulted and involved\n- **PO:** Reviews and approves\n\n#### Inputs\n- Business Case & Project Charter\n- Project Handbook & Work Plan\n- Transition Plan\n- Quality Management Plan\n\n### Steps\n1. Analyse the project's impact on processes, people, culture.\n2. Plan process redesign/update.\n3. Define communication and change-management activities.\n4. Identify sources of resistance; plan involvement.\n5. Determine training needs.\n6. Add all business implementation activities to the Work Plan.\n7. Identify follow-up activities required after the project ends.\n\n![](media/image86.png)\n\n**Outputs:**\n- Business Implementation Plan ☑\n- Business Implementation Checklist (setup) ☑"
+    },
+    {
+      "number": "6.14",
+      "title": "Phase Gate: RfE (Ready for Executing)",
+      "markdown": "## Phase Gate: RfE (Ready for Executing)\n\nThe second PM² phase gate. A review and approval are recommended before the project moves from the Planning Phase to the Executing Phase.\nThe Project Manager (PM) evaluates whether the Planning Phase goals have been achieved, then seeks approval from the Project Steering Committee (PSC) to proceed.\n\nIf major deviations from the approved Business Case or Project Charter are found, PSC must obtain additional approval from the Appropriate Governance Body (AGB).\n\nPM² provides a Phase Exit Review Checklist for the PM to use alongside a review of the phase goals.\n\n**Output:**\n- Approval to proceed to the Executing Phase (RfE)"
+    }
+  ]
+}

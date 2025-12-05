@@ -12,6 +12,17 @@ import {
     TrashIcon
 } from '@heroicons/react/24/outline'
 import Lifecycle from './components/Lifecycle'
+import GuidancePage from './components/GuidancePage'
+import Home from './pages/Home'
+import Initiating from './pages/lifecycle/Initiating'
+import Planning from './pages/lifecycle/Planning'
+import Executing from './pages/lifecycle/Executing'
+import Closing from './pages/lifecycle/Closing'
+import MonitorControl from './pages/lifecycle/MonitorControl'
+import InitiatingPhaseExitChecklist from './components/artefacts/InitiatingPhaseExitChecklist'
+import ProjectInitiationRequest from './components/artefacts/ProjectInitiationRequest'
+import InitialStakeholderIdentification from './components/activities/InitialStakeholderIdentification'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function DeleteConfirmationModal({ isOpen, onClose, onConfirm }) {
     if (!isOpen) return null
@@ -235,10 +246,26 @@ function App() {
     const [artefacts, setArtefacts] = useState([])
     const [activeArtefact, setActiveArtefact] = useState(null)
     const [deleteConfirmation, setDeleteConfirmation] = useState(null)
+    const [expandedMenu, setExpandedMenu] = useState(null)
+    const [activeGuidanceTopic, setActiveGuidanceTopic] = useState(null)
+    const [activeGuidanceSection, setActiveGuidanceSection] = useState(null)
+    const [guidanceReturnPath, setGuidanceReturnPath] = useState(null)
+    const [artefactReturnTab, setArtefactReturnTab] = useState(null)
+    const [activeActivity, setActiveActivity] = useState(null)
 
     const navItems = [
         { name: 'Home', icon: HomeIcon },
-        { name: 'Lifecycle', icon: ArrowPathIcon },
+        {
+            name: 'Lifecycle',
+            icon: ArrowPathIcon,
+            children: [
+                { name: 'Initiating', phase: 'Initiating' },
+                { name: 'Planning', phase: 'Planning' },
+                { name: 'Executing', phase: 'Executing' },
+                { name: 'Closing', phase: 'Closing' },
+                { name: 'Monitor & Control', phase: 'Monitor & Control' }
+            ]
+        },
         { name: 'Artefacts', icon: DocumentDuplicateIcon },
         { name: 'Logs', icon: ClipboardDocumentListIcon },
         { name: 'Guidance', icon: BookOpenIcon },
@@ -249,9 +276,11 @@ function App() {
     const logTabs = ['Risks', 'Assumptions', 'Issues', 'Dependencies']
 
     const defaultArtefacts = [
+        { id: 'project-initiation-request', name: 'Project Initiation Request', phase: 'Initiating', status: 'Not Started' },
+        { id: 'stakeholder-matrix', name: 'Stakeholder Matrix', phase: 'Initiating', status: 'Not Started' },
         { id: 'business-case', name: 'Business Case', phase: 'Initiating', status: 'Not Started' },
         { id: 'project-charter', name: 'Project Charter', phase: 'Initiating', status: 'Not Started' },
-        { id: 'stakeholder-matrix', name: 'Stakeholder Matrix', phase: 'Initiating', status: 'Not Started' },
+        { id: 'initiating-phase-exit-checklist', name: 'Initiating Phase Exit Checklist', phase: 'Initiating', status: 'Not Started' },
         { id: 'project-work-plan', name: 'Project Work Plan', phase: 'Planning', status: 'Not Started' },
         { id: 'requirements-doc', name: 'Requirements Document', phase: 'Planning', status: 'Not Started' },
         { id: 'risk-log', name: 'Risk Log', phase: 'Planning', status: 'Not Started' },
@@ -281,12 +310,38 @@ function App() {
 
                 // Load Artefacts
                 const loadedArtefacts = await window.electronAPI.readJSON('data/artefacts.json')
+
+                // Merge loaded artefacts with default artefacts to ensure all required artefacts exist
+                // and preserve the order defined in defaultArtefacts
+                let mergedArtefacts = []
+
                 if (loadedArtefacts && loadedArtefacts.length > 0) {
-                    setArtefacts(loadedArtefacts)
+                    // Create a map of loaded artefacts for easy lookup
+                    const loadedMap = new Map(loadedArtefacts.map(a => [a.id, a]))
+
+                    // Iterate through defaultArtefacts to enforce order and add missing ones
+                    mergedArtefacts = defaultArtefacts.map(def => {
+                        const loaded = loadedMap.get(def.id)
+                        if (loaded) {
+                            // Use loaded status but keep default metadata if needed (or just use loaded)
+                            return { ...def, ...loaded }
+                        } else {
+                            // New default artefact not in loaded data
+                            return def
+                        }
+                    })
+
+                    // If there are any extra artefacts in loaded that are not in default (custom ones?), append them
+                    // For now, we strictly follow defaultArtefacts structure for the main ones
+                    // If we want to support custom artefacts, we'd filter loadedMap for unused keys
                 } else {
-                    setArtefacts(defaultArtefacts)
-                    await window.electronAPI.writeJSON('data/artefacts.json', defaultArtefacts)
+                    mergedArtefacts = defaultArtefacts
                 }
+
+                setArtefacts(mergedArtefacts)
+
+                // Always write back to ensure the file is up to date with new structure
+                await window.electronAPI.writeJSON('data/artefacts.json', mergedArtefacts)
             } else {
                 setArtefacts(defaultArtefacts)
             }
@@ -386,6 +441,18 @@ function App() {
         if (activeArtefact && activeArtefact.id === id) {
             setActiveArtefact({ ...activeArtefact, status: newStatus })
         }
+
+        if (window.electronAPI) {
+            await window.electronAPI.writeJSON('data/artefacts.json', updatedArtefacts)
+        }
+    }
+
+    const handleSaveArtefactContent = async (updatedArtefact) => {
+        const updatedArtefacts = artefacts.map(art =>
+            art.id === updatedArtefact.id ? updatedArtefact : art
+        )
+        setArtefacts(updatedArtefacts)
+        setActiveArtefact(updatedArtefact)
 
         if (window.electronAPI) {
             await window.electronAPI.writeJSON('data/artefacts.json', updatedArtefacts)
@@ -494,17 +561,35 @@ function App() {
         return <span className="text-sm text-gray-700">{value}</span>
     }
 
-    const renderArtefactStatusChip = (status) => {
-        const colors = {
-            'Not Started': 'bg-gray-100 text-gray-600',
-            'In Progress': 'bg-blue-100 text-blue-700',
-            'Complete': 'bg-green-100 text-green-700',
+    const renderArtefactStatusChip = (artefact) => {
+        const { status, modifiedAfterApproval } = artefact
+
+        let displayStatus = status
+        let colorClass = 'bg-gray-100 text-gray-600' // Default / Not Started
+
+        if (status === 'In Progress') {
+            colorClass = 'bg-blue-100 text-blue-700'
+        } else if (status === 'Approved' || status === 'Completed') {
+            if (modifiedAfterApproval) {
+                displayStatus = 'Approved — Modified'
+                colorClass = 'bg-yellow-100 text-yellow-800'
+            } else {
+                displayStatus = 'Approved'
+                colorClass = 'bg-green-100 text-green-700'
+            }
         }
+
         return (
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors['Not Started']}`}>
-                {status}
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+                {displayStatus}
             </span>
         )
+    }
+
+    const handleLifecycleNavigation = (phase) => {
+        setActiveTab('Lifecycle')
+        setActivePhase(phase)
+        setExpandedMenu('Lifecycle')
     }
 
     return (
@@ -520,22 +605,54 @@ function App() {
                 <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                     {navItems.map((item) => {
                         const Icon = item.icon
+                        const isExpanded = expandedMenu === item.name
+                        const isActive = activeTab === item.name || (item.children && item.children.some(child => activeTab === 'Lifecycle' && activePhase === child.phase))
+
                         return (
-                            <button
-                                key={item.name}
-                                onClick={() => {
-                                    setActiveTab(item.name)
-                                    setActiveArtefact(null) // Reset artefact detail view
-                                }}
-                                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 group ${activeTab === item.name
-                                    ? 'bg-blue-600 text-white shadow-md'
-                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                                    }`}
-                            >
-                                <Icon className={`mr-3 h-5 w-5 flex-shrink-0 ${activeTab === item.name ? 'text-white' : 'text-gray-500 group-hover:text-white'
-                                    }`} />
-                                {item.name}
-                            </button>
+                            <div key={item.name}>
+                                <button
+                                    onClick={() => {
+                                        if (item.children) {
+                                            setExpandedMenu(isExpanded ? null : item.name)
+                                        } else {
+                                            setActiveTab(item.name)
+                                            setActiveArtefact(null)
+                                        }
+                                    }}
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 group ${isActive
+                                        ? 'bg-blue-600 text-white shadow-md'
+                                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                        }`}
+                                >
+                                    <div className="flex items-center">
+                                        <Icon className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-white'}`} />
+                                        {item.name}
+                                    </div>
+                                    {item.children && (
+                                        <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? 'transform rotate-180' : ''}`} />
+                                    )}
+                                </button>
+
+                                {item.children && isExpanded && (
+                                    <div className="mt-1 space-y-1 pl-11">
+                                        {item.children.map((child) => (
+                                            <button
+                                                key={child.name}
+                                                onClick={() => {
+                                                    setActiveTab('Lifecycle')
+                                                    setActivePhase(child.phase)
+                                                }}
+                                                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 whitespace-nowrap ${activeTab === 'Lifecycle' && activePhase === child.phase
+                                                    ? 'text-blue-400 bg-gray-800'
+                                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                                    }`}
+                                            >
+                                                {child.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )
                     })}
                 </nav>
@@ -558,7 +675,7 @@ function App() {
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Top Bar (Optional) */}
                 <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10">
-                    <h2 className="text-lg font-semibold text-gray-800">{activeTab}</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">{activeTab === 'Lifecycle' ? activePhase : activeTab}</h2>
                     <div className="flex items-center space-x-4">
                         {/* Add top bar actions here if needed */}
                         <button className="text-sm text-gray-500 hover:text-gray-700">Help</button>
@@ -571,45 +688,133 @@ function App() {
                     <div className="w-full h-full">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[500px] h-full flex flex-col">
 
-                            {activeTab === 'Lifecycle' ? (
-                                <Lifecycle />
+                            {activeTab === 'Home' ? (
+                                <Home onNavigate={handleLifecycleNavigation} />
+                            ) : activeTab === 'Lifecycle' ? (
+                                <>
+                                    {activePhase === 'Initiating' && (
+                                        activeActivity === 'stakeholder-identification' ? (
+                                            <InitialStakeholderIdentification
+                                                onBack={() => setActiveActivity(null)}
+                                                onOpenGuidance={(topic, section, returnInfo) => {
+                                                    setActiveTab('Guidance')
+                                                    setActiveGuidanceTopic(topic || 'Roles & Organisation')
+                                                    if (section) setActiveGuidanceSection(section)
+                                                    if (returnInfo) setGuidanceReturnPath(returnInfo)
+                                                }}
+                                            />
+                                        ) : (
+                                            <ErrorBoundary>
+                                                <Initiating
+                                                    artefacts={artefacts}
+                                                    onOpenArtefact={(artefact) => {
+                                                        setActiveTab('Artefacts')
+                                                        setActiveArtefact(artefact)
+                                                        setArtefactReturnTab('Lifecycle')
+                                                    }}
+                                                    onOpenActivity={(activityId) => {
+                                                        setActiveActivity(activityId)
+                                                    }}
+                                                    onOpenGuidance={(topic, section, returnInfo) => {
+                                                        setActiveTab('Guidance')
+                                                        setActiveGuidanceTopic(topic || 'Initiating Phase')
+                                                        if (section) setActiveGuidanceSection(section)
+                                                        if (returnInfo) setGuidanceReturnPath(returnInfo)
+                                                    }}
+                                                    onOpenLogs={() => {
+                                                        setActiveTab('Logs')
+                                                        setActiveLogTab('Risks')
+                                                    }}
+                                                />
+                                            </ErrorBoundary>
+                                        )
+                                    )}
+                                    {activePhase === 'Planning' && <Planning />}
+                                    {activePhase === 'Executing' && <Executing />}
+                                    {activePhase === 'Closing' && <Closing />}
+                                    {activePhase === 'Monitor & Control' && <MonitorControl />}
+                                </>
                             ) : activeTab === 'Artefacts' ? (
                                 <div className="flex flex-col h-full">
                                     {activeArtefact ? (
-                                        // Artefact Detail View
-                                        <div className="flex flex-col h-full">
-                                            <div className="flex items-center mb-6">
-                                                <button
-                                                    onClick={() => setActiveArtefact(null)}
-                                                    className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
-                                                >
-                                                    <ArrowLeftIcon className="h-5 w-5" />
-                                                </button>
-                                                <div>
-                                                    <h3 className="text-2xl font-bold text-gray-900">{activeArtefact.name}</h3>
-                                                    <p className="text-sm text-gray-500">{activeArtefact.phase}</p>
-                                                </div>
-                                                <div className="ml-auto flex items-center space-x-3">
-                                                    <span className="text-sm font-medium text-gray-700">Status:</span>
-                                                    <select
-                                                        value={activeArtefact.status}
-                                                        onChange={(e) => handleArtefactStatusChange(activeArtefact.id, e.target.value)}
-                                                        className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                        activeArtefact.id === 'initiating-phase-exit-checklist' ? (
+                                            <InitiatingPhaseExitChecklist
+                                                artefact={activeArtefact}
+                                                onSave={handleSaveArtefactContent}
+                                                onBack={() => {
+                                                    setActiveArtefact(null)
+                                                    if (artefactReturnTab) {
+                                                        setActiveTab(artefactReturnTab)
+                                                        setArtefactReturnTab(null)
+                                                    }
+                                                }}
+                                                onOpenGuidance={(topic, section, returnInfo) => {
+                                                    setActiveTab('Guidance')
+                                                    setActiveGuidanceTopic(topic || 'Initiating Phase')
+                                                    if (section) setActiveGuidanceSection(section)
+                                                    if (returnInfo) setGuidanceReturnPath(returnInfo)
+                                                }}
+                                            />
+                                        ) : activeArtefact.id === 'project-initiation-request' ? (
+                                            <ProjectInitiationRequest
+                                                artefact={activeArtefact}
+                                                onSave={handleSaveArtefactContent}
+                                                onBack={() => {
+                                                    setActiveArtefact(null)
+                                                    if (artefactReturnTab) {
+                                                        setActiveTab(artefactReturnTab)
+                                                        setArtefactReturnTab(null)
+                                                    }
+                                                }}
+                                                onOpenGuidance={(topic, section, returnInfo) => {
+                                                    setActiveTab('Guidance')
+                                                    setActiveGuidanceTopic(topic || 'Initiating Phase')
+                                                    if (section) setActiveGuidanceSection(section)
+                                                    if (returnInfo) setGuidanceReturnPath(returnInfo)
+                                                }}
+                                            />
+                                        ) : (
+                                            // Artefact Detail View
+                                            <div className="flex flex-col h-full">
+                                                <div className="flex items-center mb-6">
+                                                    <button
+                                                        onClick={() => {
+                                                            setActiveArtefact(null)
+                                                            if (artefactReturnTab) {
+                                                                setActiveTab(artefactReturnTab)
+                                                                setArtefactReturnTab(null)
+                                                            }
+                                                        }}
+                                                        className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
                                                     >
-                                                        <option value="Not Started">Not Started</option>
-                                                        <option value="In Progress">In Progress</option>
-                                                        <option value="Complete">Complete</option>
-                                                    </select>
+                                                        <ArrowLeftIcon className="h-5 w-5" />
+                                                    </button>
+                                                    <div>
+                                                        <h3 className="text-2xl font-bold text-gray-900">{activeArtefact.name}</h3>
+                                                        <p className="text-sm text-gray-500">{activeArtefact.phase}</p>
+                                                    </div>
+                                                    <div className="ml-auto flex items-center space-x-3">
+                                                        <span className="text-sm font-medium text-gray-700">Status:</span>
+                                                        <select
+                                                            value={activeArtefact.status}
+                                                            onChange={(e) => handleArtefactStatusChange(activeArtefact.id, e.target.value)}
+                                                            className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                                        >
+                                                            <option value="Not Started">Not Started</option>
+                                                            <option value="In Progress">In Progress</option>
+                                                            <option value="Complete">Complete</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="flex-1 bg-gray-50 rounded-lg border border-gray-200 border-dashed flex items-center justify-center">
-                                                <div className="text-center">
-                                                    <DocumentDuplicateIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                                                    <p className="text-gray-500 font-medium">Content for this artefact will be added later.</p>
+                                                <div className="flex-1 bg-gray-50 rounded-lg border border-gray-200 border-dashed flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <DocumentDuplicateIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                                                        <p className="text-gray-500 font-medium">Content for this artefact will be added later.</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )
                                     ) : (
                                         // Artefacts List View
                                         <div className="flex flex-col h-full">
@@ -646,7 +851,7 @@ function App() {
                                                                                 {artefact.phase}
                                                                             </td>
                                                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                                                {renderArtefactStatusChip(artefact.status)}
+                                                                                {renderArtefactStatusChip(artefact)}
                                                                             </td>
                                                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                                                 <button
@@ -756,6 +961,20 @@ function App() {
                                         </div>
                                     </div>
                                 </div>
+                            ) : activeTab === 'Guidance' ? (
+                                <GuidancePage
+                                    initialTopic={activeGuidanceTopic}
+                                    targetSection={activeGuidanceSection}
+                                    returnPath={guidanceReturnPath}
+                                    onReturn={() => {
+                                        if (guidanceReturnPath) {
+                                            setActiveTab(guidanceReturnPath.tab)
+                                            setGuidanceReturnPath(null)
+                                            setActiveGuidanceSection(null)
+                                        }
+                                    }}
+                                    onClearTarget={() => setActiveGuidanceSection(null)}
+                                />
                             ) : (
                                 <>
                                     <h3 className="text-lg font-medium text-gray-900 mb-4">Welcome to {activeTab}</h3>
@@ -773,7 +992,6 @@ function App() {
                                     </div>
                                 </>
                             )}
-
                         </div>
                     </div>
                 </div>
@@ -798,4 +1016,3 @@ function App() {
 }
 
 export default App
-
