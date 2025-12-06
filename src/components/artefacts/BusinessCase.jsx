@@ -206,7 +206,35 @@ const BusinessCase = ({ artefact, onSave, onBack, onOpenGuidance }) => {
             description="Justify the project investment and strategy (PM² Template 5.3)"
             actions={<CustomActions />}
             initialData={{
-                'Version': '1.0'
+                'Version': '1.0',
+                // Generate default empty strings for all fields to prevent false dirty states
+                ...sections.reduce((acc, section) => {
+                    if (section.id === 'alternatives') {
+                        // Alternatives A, B, C
+                        ['A', 'B', 'C'].forEach(alt => {
+                            const prefix = `Alt${alt}`
+                            acc[`${prefix}_Description`] = ''
+                            acc[`${prefix}_Strengths`] = ''
+                            acc[`${prefix}_Weaknesses`] = ''
+                            acc[`${prefix}_Opportunities`] = ''
+                            acc[`${prefix}_Threats`] = ''
+                            acc[`${prefix}_Qualitative`] = ''
+                        })
+                        // Chosen Alternative
+                        acc['Chosen_Alternative'] = ''
+                        acc['Chosen_Rationale'] = ''
+                        acc['Chosen_Summary'] = ''
+                    } else if (section.id === 'roadmap') {
+                        // Roadmap specific
+                        acc['Start Date'] = ''
+                        acc['Target Delivery Date'] = ''
+                        acc['Major Milestones'] = ''
+                    } else if (section.fields) {
+                        // Standard sections
+                        section.fields.forEach(field => acc[field] = '')
+                    }
+                    return acc
+                }, {})
             }}
         >
             {({ data, handleContentChange }) => {

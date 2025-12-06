@@ -18,9 +18,9 @@ const MenuButton = ({ onClick, isActive, disabled, children, title }) => (
         onClick={onClick}
         disabled={disabled}
         className={`p-1.5 rounded-md transition-colors ${disabled ? 'opacity-50 cursor-not-allowed text-gray-400' :
-                isActive
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+            isActive
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
             }`}
         title={title}
     >
@@ -41,10 +41,14 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
                 emptyEditorClass: 'is-editor-empty',
             })
         ],
-        content: value || '',
+        content: (value === '<p></p>') ? '' : (value || ''),
         editable: !disabled,
         onUpdate: ({ editor }) => {
-            const html = editor.getHTML()
+            let html = editor.getHTML()
+            // Normalize empty paragraph to empty string to prevent false dirty states
+            if (html === '<p></p>') {
+                html = ''
+            }
             onChange(html)
         },
         // We use these handlers to toggle visibility of the toolbar
@@ -69,8 +73,8 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
             {/* Toolbar: Visible ONLY when editor is focused (or purely active) */}
             {editor && !disabled && (
                 <div className={`flex flex-wrap gap-1 px-2 py-2 border-b border-slate-200 bg-gray-50 transition-all duration-200 overflow-hidden ${isFocused
-                        ? 'opacity-100 max-h-20'
-                        : 'opacity-0 max-h-0 border-0 py-0'
+                    ? 'opacity-100 max-h-20'
+                    : 'opacity-0 max-h-0 border-0 py-0'
                     }`}>
                     <MenuButton
                         onClick={() => editor.chain().focus().toggleBold().run()}

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeftIcon, PlusIcon, TrashIcon, CheckCircleIcon, ArrowPathIcon, ExclamationCircleIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 import { ArtefactField, ArtefactInput, ArtefactTextarea } from '../artefacts/ui/ArtefactFields'
 import ArtefactSection from '../artefacts/ui/ArtefactSection'
+import RichTextEditor from '../artefacts/ui/RichTextEditor'
 
 const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
     // Data State
@@ -22,6 +23,27 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
     const [isDirty, setIsDirty] = useState(false)
     const [saveStatus, setSaveStatus] = useState('idle') // idle, saving, success, error
 
+    // Baseline for dirty check
+    const baselineRef = useRef(null)
+
+    // Helper to normalize data for comparison (handling rich text empty states and wrapping)
+    const normalizeForComparison = (obj) => {
+        if (!obj) return obj
+        return JSON.parse(JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'string') {
+                // Handle empty rich text
+                if (value === '<p></p>') return ''
+                // Handle wrapped text (e.g. "Text" vs "<p>Text</p>")
+                // This is a naive strip, but sufficient for dirty check on simple content
+                if (value.startsWith('<p>') && value.endsWith('</p>')) {
+                    return value.slice(3, -4)
+                }
+            }
+            if (value === null) return ''
+            return value
+        }))
+    }
+
     // Load Data
     useEffect(() => {
         const loadData = async () => {
@@ -30,23 +52,43 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                     await window.electronAPI.ensureFolder('data/initiating')
                     const loadedData = await window.electronAPI.readJSON('data/initiating/stakeholders.json')
                     if (loadedData) {
-                        setData(prev => ({
-                            ...prev,
-                            ...loadedData,
-                            projectOwner: { ...prev.projectOwner, ...loadedData.projectOwner },
-                            businessManager: { ...prev.businessManager, ...loadedData.businessManager },
-                            solutionProvider: { ...prev.solutionProvider, ...loadedData.solutionProvider },
+                        // Prepare the full data object based on loaded + defaults
+                        const fullData = {
+                            projectOwner: { name: '', organisation: '', expectations: '', ...loadedData.projectOwner },
+                            businessManager: { name: '', organisation: '', expectations: '', ...loadedData.businessManager },
+                            solutionProvider: { name: '', organisation: '', expectations: '', ...loadedData.solutionProvider },
                             additionalStakeholders: loadedData.additionalStakeholders || []
-                        }))
+                        }
+
+                        setData(fullData)
+                        // snapshot baseline
+                        baselineRef.current = JSON.stringify(normalizeForComparison(fullData))
+                        setIsDirty(false)
+                    } else {
+                        // New form, snapshot default
+                        baselineRef.current = JSON.stringify(normalizeForComparison(data))
                     }
                 } catch (error) {
                     console.error("Error loading stakeholder data", error)
                 }
+            } else {
+                // Mock / Browser
+                baselineRef.current = JSON.stringify(normalizeForComparison(data))
             }
             setIsLoading(false)
         }
         loadData()
     }, [])
+
+    // Robust Dirty Check Effect
+    useEffect(() => {
+        if (!isLoading && baselineRef.current) {
+            const currentStr = JSON.stringify(normalizeForComparison(data))
+            const isChanged = currentStr !== baselineRef.current
+            setIsDirty(isChanged)
+            if (isChanged && saveStatus !== 'idle') setSaveStatus('idle')
+        }
+    }, [data, isLoading, saveStatus])
 
     const saveData = async () => {
         setSaveStatus('saving')
@@ -54,17 +96,17 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
             try {
                 await window.electronAPI.writeJSON('data/initiating/stakeholders.json', data)
                 setSaveStatus('success')
+                // Update baseline to new clean state
+                baselineRef.current = JSON.stringify(normalizeForComparison(data))
                 setIsDirty(false)
-
-                // Reset success status after a moment
                 setTimeout(() => setSaveStatus('idle'), 2000)
             } catch (error) {
                 console.error("Error saving stakeholder data", error)
                 setSaveStatus('error')
             }
         } else {
-            // Mock
             setSaveStatus('success')
+            baselineRef.current = JSON.stringify(normalizeForComparison(data))
             setIsDirty(false)
             setTimeout(() => setSaveStatus('idle'), 2000)
         }
@@ -78,8 +120,6 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                 [field]: value
             }
         }))
-        setIsDirty(true)
-        if (saveStatus !== 'idle') setSaveStatus('idle')
     }
 
     const handleAdditionalChange = (id, field, value) => {
@@ -89,8 +129,6 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
             )
             return { ...prev, additionalStakeholders: updatedList }
         })
-        setIsDirty(true)
-        if (saveStatus !== 'idle') setSaveStatus('idle')
     }
 
     const handleAddStakeholder = () => {
@@ -107,8 +145,6 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                 additionalStakeholders: [...prev.additionalStakeholders, newRow]
             }
         })
-        setIsDirty(true)
-        if (saveStatus !== 'idle') setSaveStatus('idle')
     }
 
     const handleDeleteClick = (id) => {
@@ -122,19 +158,17 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
             return { ...prev, additionalStakeholders: updatedList }
         })
         setDeleteId(null)
-        setIsDirty(true)
-        if (saveStatus !== 'idle') setSaveStatus('idle')
     }
 
     const toggleSection = (id) => {
         setSectionsOpen(prev => ({ ...prev, [id]: !prev[id] }))
     }
 
+    const [showExitModal, setShowExitModal] = useState(false)
+
     const handleBack = () => {
         if (isDirty) {
-            if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-                onBack()
-            }
+            setShowExitModal(true)
         } else {
             onBack()
         }
@@ -224,10 +258,10 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                                 </ArtefactField>
                                 <div className="md:col-span-2">
                                     <ArtefactField label="Expectations / Needs">
-                                        <ArtefactTextarea
+                                        <RichTextEditor
                                             value={data.projectOwner.expectations}
-                                            onChange={(e) => handleChange('projectOwner', 'expectations', e.target.value)}
-                                            rows={3}
+                                            onChange={(val) => handleChange('projectOwner', 'expectations', val)}
+                                            placeholder="What does this stakeholder expect?"
                                         />
                                     </ArtefactField>
                                 </div>
@@ -252,10 +286,10 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                                 </ArtefactField>
                                 <div className="md:col-span-2">
                                     <ArtefactField label="Expectations / Needs">
-                                        <ArtefactTextarea
+                                        <RichTextEditor
                                             value={data.businessManager.expectations}
-                                            onChange={(e) => handleChange('businessManager', 'expectations', e.target.value)}
-                                            rows={3}
+                                            onChange={(val) => handleChange('businessManager', 'expectations', val)}
+                                            placeholder="What does this stakeholder expect?"
                                         />
                                     </ArtefactField>
                                 </div>
@@ -280,10 +314,10 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                                 </ArtefactField>
                                 <div className="md:col-span-2">
                                     <ArtefactField label="Expectations / Needs">
-                                        <ArtefactTextarea
+                                        <RichTextEditor
                                             value={data.solutionProvider.expectations}
-                                            onChange={(e) => handleChange('solutionProvider', 'expectations', e.target.value)}
-                                            rows={3}
+                                            onChange={(val) => handleChange('solutionProvider', 'expectations', val)}
+                                            placeholder="What does this stakeholder expect?"
                                         />
                                     </ArtefactField>
                                 </div>
@@ -349,11 +383,11 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                                                 />
                                             </ArtefactField>
                                             <ArtefactField label="Expectations" className="bg-white">
-                                                <ArtefactTextarea
+                                                <RichTextEditor
                                                     value={row.expectations}
-                                                    onChange={(e) => handleAdditionalChange(row.id, 'expectations', e.target.value)}
-                                                    className="border-gray-200 min-h-[50px] h-[50px]"
-                                                    rows={1}
+                                                    onChange={(val) => handleAdditionalChange(row.id, 'expectations', val)}
+                                                    className=""
+                                                    placeholder="Expectations"
                                                 />
                                             </ArtefactField>
                                         </div>
@@ -383,6 +417,30 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
                             >
                                 Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Exit Confirmation Modal */}
+            {showExitModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-8">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Unsaved Changes</h3>
+                        <p className="text-gray-500 mb-6">You have unsaved changes. Are you sure you want to leave without saving?</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowExitModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onBack}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                            >
+                                Leave Without Saving
                             </button>
                         </div>
                     </div>

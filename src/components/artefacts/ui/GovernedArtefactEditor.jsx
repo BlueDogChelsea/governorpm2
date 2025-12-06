@@ -64,6 +64,14 @@ const GovernedArtefactEditor = ({
             // Merge with initialData to ensure structure exists
             let mergedContent = { ...initialData, ...(restContent || {}) }
 
+            // NORMALIZE: Ensure any legacy rich text values of "<p></p>" are converted to ""
+            // This prevents an immediate false dirty state when the RichTexEditor component mounts (which auto-normalizes)
+            Object.keys(mergedContent).forEach(key => {
+                if (mergedContent[key] === '<p></p>') {
+                    mergedContent[key] = ''
+                }
+            })
+
             // Allow parent to process/cleanup content (e.g. legacy data migration)
             if (processLoadedContent) {
                 mergedContent = processLoadedContent(mergedContent)
@@ -72,8 +80,10 @@ const GovernedArtefactEditor = ({
             setContentData(mergedContent)
 
             // 2. Load Approval
+            let currentApproval = { ...approval }
             if (savedApproval) {
                 setApproval(savedApproval)
+                currentApproval = savedApproval
 
                 // If it IS approved, we snapshot the content *as loaded*.
                 // Because if it's loaded as Approved, it means it was clean when saved.
@@ -83,7 +93,14 @@ const GovernedArtefactEditor = ({
                 }
             }
 
-            // 3. Banner Logic
+            // 3. Reset Dirty Check Baseline
+            // We must explicitly tell the hook that this merged state is the "clean" state
+            // to prevent "false dirty" flags due to initialData filling in missing fields.
+            if (resetBaseline) {
+                resetBaseline({ ...mergedContent, approval: currentApproval })
+            }
+
+            // 4. Banner Logic
             // If the persisted status says it's modified, show the banner
             // We rely on the wrapper's logic to maintain this truth.
             if (artefact.status === 'Approved' && artefact.modifiedAfterApproval) {
@@ -231,7 +248,7 @@ const GovernedArtefactEditor = ({
 
     // Use the hook primarily for "Dirty Checking" and "Saving State" (loading/error/success)
     // BUT we will override the executeSave to inject our custom Status Logic
-    const { saveStatus, isDirty, executeSave: hookExecuteSave } = useArtefactSave(fullContent, onSave, artefact)
+    const { saveStatus, isDirty, executeSave: hookExecuteSave, resetBaseline } = useArtefactSave(fullContent, onSave, artefact)
 
     const handleSave = () => {
         hookExecuteSave(() => {
@@ -313,68 +330,104 @@ const GovernedArtefactEditor = ({
     }, [artefact])
 
 
+    const [showExitModal, setShowExitModal] = useState(false)
+
+    const handleBack = () => {
+        if (isDirty) {
+            setShowExitModal(true)
+        } else {
+            onBack()
+        }
+    }
+
     return (
-        <ArtefactPage
-            title={title}
-            description={description}
-            onBack={onBack}
-            actions={
-                <>
-                    {actions}
-                    <ArtefactSaveButton
-                        onSave={handleSave}
-                        status={saveStatus}
-                        isDirty={isDirty}
-                        label="Artefact"
-                    />
-                </>
-            }
-            banner={showModifiedBanner && (
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md shadow-sm relative">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm text-yellow-700">
-                                <span className="font-medium">This artefact was previously approved.</span>{' '}
-                                You have made changes. If they are material, update the approval section.
-                            </p>
-                        </div>
-                        <div className="ml-auto pl-3">
-                            <div className="-mx-1.5 -my-1.5">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowModifiedBanner(false)}
-                                    className="inline-flex bg-yellow-50 rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-50 focus:ring-yellow-600"
-                                >
-                                    <span className="sr-only">Dismiss</span>
-                                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-                                </button>
+        <>
+            <ArtefactPage
+                title={title}
+                description={description}
+                onBack={handleBack}
+                actions={
+                    <>
+                        {actions}
+                        <ArtefactSaveButton
+                            onSave={handleSave}
+                            status={saveStatus}
+                            isDirty={isDirty}
+                            label="Artefact"
+                        />
+                    </>
+                }
+                banner={showModifiedBanner && (
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md shadow-sm relative">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
                             </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-yellow-700">
+                                    <span className="font-medium">This artefact was previously approved.</span>{' '}
+                                    You have made changes. If they are material, update the approval section.
+                                </p>
+                            </div>
+                            <div className="ml-auto pl-3">
+                                <div className="-mx-1.5 -my-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowModifiedBanner(false)}
+                                        className="inline-flex bg-yellow-50 rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-50 focus:ring-yellow-600"
+                                    >
+                                        <span className="sr-only">Dismiss</span>
+                                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            >
+                <div className="space-y-8">
+                    {/* Content Injection */}
+                    {children && (typeof children === 'function'
+                        ? children({ data: contentData, onDataChange: updateContent, handleContentChange })
+                        : React.cloneElement(children, { data: contentData, onDataChange: updateContent, handleContentChange })
+                    )}
+
+                    {/* Standard Approval Section */}
+                    <ArtefactApprovalSection
+                        approvalState={approval}
+                        onUpdate={handleApprovalChange}
+                        onToggleApproval={handleApprovalToggle}
+                        isOpen={isApprovalOpen}
+                        onToggle={() => setIsApprovalOpen(!isApprovalOpen)}
+                        isModified={showModifiedBanner}
+                    />
+                </div>
+            </ArtefactPage>
+
+            {/* Exit Confirmation Modal */}
+            {showExitModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-8">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Unsaved Changes</h3>
+                        <p className="text-gray-500 mb-6">You have unsaved changes. Are you sure you want to leave without saving?</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowExitModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onBack}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                            >
+                                Leave Without Saving
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-        >
-            <div className="space-y-8">
-                {/* Content Injection */}
-                {children && (typeof children === 'function'
-                    ? children({ data: contentData, onDataChange: updateContent, handleContentChange })
-                    : React.cloneElement(children, { data: contentData, onDataChange: updateContent, handleContentChange })
-                )}
-
-                {/* Standard Approval Section */}
-                <ArtefactApprovalSection
-                    approvalState={approval}
-                    onUpdate={handleApprovalChange}
-                    onToggleApproval={handleApprovalToggle}
-                    isOpen={isApprovalOpen}
-                    onToggle={() => setIsApprovalOpen(!isApprovalOpen)}
-                    isModified={showModifiedBanner}
-                />
-            </div>
-        </ArtefactPage>
+        </>
     )
 }
 

@@ -21,13 +21,6 @@ export const useArtefactSave = (content, onSave, artefact) => {
         }
     }, [content, saveStatus])
 
-    // Specific effect for initial load of artefact to set baseline if not set
-    useEffect(() => {
-        if (artefact && artefact.content && initialContentRef.current === null) {
-            initialContentRef.current = JSON.parse(JSON.stringify(artefact.content))
-        }
-    }, [artefact])
-
     // Check for changes
     useEffect(() => {
         if (initialContentRef.current) {
@@ -36,6 +29,11 @@ export const useArtefactSave = (content, onSave, artefact) => {
             setIsDirty(currentString !== initialString)
         }
     }, [content])
+
+    const resetBaseline = (newContent) => {
+        initialContentRef.current = JSON.parse(JSON.stringify(newContent))
+        setIsDirty(false)
+    }
 
     const executeSave = async (prepareDataFn = null, force = false) => {
         if (!force && !isDirty && saveStatus !== 'error') return
@@ -119,6 +117,7 @@ export const useArtefactSave = (content, onSave, artefact) => {
     return {
         saveStatus,
         isDirty,
-        executeSave
+        executeSave,
+        resetBaseline
     }
 }
