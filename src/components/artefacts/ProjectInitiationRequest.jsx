@@ -9,7 +9,7 @@ import { projectInitiationRequestSchema } from '../../data/schemas/ProjectInitia
 import DocumentGenerator from '../../services/DocumentGenerator'
 import pirTemplate from '../../templates/PIRTemplate.json'
 
-const ProjectInitiationRequest = ({ artefact, onSave, onBack, onOpenGuidance }) => {
+const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // Use imported schema
     const sections = projectInitiationRequestSchema
 
@@ -104,6 +104,7 @@ const ProjectInitiationRequest = ({ artefact, onSave, onBack, onOpenGuidance }) 
     return (
         <>
             <GovernedArtefactEditor
+                projectId={projectId}
                 artefact={artefact}
                 onSave={onSave}
                 onBack={onBack}

@@ -4,7 +4,7 @@ import { ArtefactField, ArtefactInput, ArtefactTextarea } from '../artefacts/ui/
 import ArtefactSection from '../artefacts/ui/ArtefactSection'
 import RichTextEditor from '../artefacts/ui/RichTextEditor'
 
-const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
+const InitialStakeholderIdentification = ({ projectId, onBack, onOpenGuidance }) => {
     // Data State
     const [data, setData] = useState({
         projectOwner: { name: '', organisation: '', expectations: '' },
@@ -47,10 +47,11 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
     // Load Data
     useEffect(() => {
         const loadData = async () => {
-            if (window.electronAPI) {
+            if (window.electronAPI && projectId) {
                 try {
-                    await window.electronAPI.ensureFolder('data/initiating')
-                    const loadedData = await window.electronAPI.readJSON('data/initiating/stakeholders.json')
+                    const filePath = `projects/${projectId}/initialStakeholders.json`
+                    const loadedData = await window.electronAPI.readJSON(filePath)
+
                     if (loadedData) {
                         // Prepare the full data object based on loaded + defaults
                         const fullData = {
@@ -65,8 +66,20 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
                         baselineRef.current = JSON.stringify(normalizeForComparison(fullData))
                         setIsDirty(false)
                     } else {
-                        // New form, snapshot default
-                        baselineRef.current = JSON.stringify(normalizeForComparison(data))
+                        // New project or file missing - create default file
+                        const defaultData = {
+                            projectOwner: { name: '', organisation: '', expectations: '' },
+                            businessManager: { name: '', organisation: '', expectations: '' },
+                            solutionProvider: { name: '', organisation: '', expectations: '' },
+                            additionalStakeholders: []
+                        }
+
+                        // Write default to file immediately as per requirements
+                        await window.electronAPI.writeJSON(filePath, defaultData)
+
+                        setData(defaultData)
+                        baselineRef.current = JSON.stringify(normalizeForComparison(defaultData))
+                        setIsDirty(false)
                     }
                 } catch (error) {
                     console.error("Error loading stakeholder data", error)
@@ -78,7 +91,7 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
             setIsLoading(false)
         }
         loadData()
-    }, [])
+    }, [projectId])
 
     // Robust Dirty Check Effect
     useEffect(() => {
@@ -92,9 +105,10 @@ const InitialStakeholderIdentification = ({ onBack, onOpenGuidance }) => {
 
     const saveData = async () => {
         setSaveStatus('saving')
-        if (window.electronAPI) {
+        if (window.electronAPI && projectId) {
             try {
-                await window.electronAPI.writeJSON('data/initiating/stakeholders.json', data)
+                const filePath = `projects/${projectId}/initialStakeholders.json`
+                await window.electronAPI.writeJSON(filePath, data)
                 setSaveStatus('success')
                 // Update baseline to new clean state
                 baselineRef.current = JSON.stringify(normalizeForComparison(data))

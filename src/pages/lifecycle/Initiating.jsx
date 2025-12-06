@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { CheckCircleIcon, ArrowTopRightOnSquareIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
 
-const Initiating = ({ artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance, onOpenLogs }) => {
+const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance, onOpenLogs }) => {
     const [meetingCompleted, setMeetingCompleted] = useState(false)
     const [showDiagram, setShowDiagram] = useState(false)
 
@@ -31,10 +31,10 @@ const Initiating = ({ artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance,
 
     useEffect(() => {
         const checkStakeholderStatus = async () => {
-            if (window.electronAPI) {
+            if (window.electronAPI && projectId) {
                 try {
-                    await window.electronAPI.ensureFolder('data/initiating')
-                    const data = await window.electronAPI.readJSON('data/initiating/stakeholders.json')
+                    const filePath = `projects/${projectId}/initialStakeholders.json`
+                    const data = await window.electronAPI.readJSON(filePath)
 
                     if (data) {
                         const hasProjectOwner = data.projectOwner && (data.projectOwner.name || data.projectOwner.organisation || data.projectOwner.expectations)
@@ -52,6 +52,8 @@ const Initiating = ({ artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance,
                         } else {
                             setStakeholderStatus('Not Started')
                         }
+                    } else {
+                        setStakeholderStatus('Not Started')
                     }
                 } catch (err) {
                     console.warn("Could not check stakeholder status", err)
@@ -63,7 +65,7 @@ const Initiating = ({ artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance,
         // Since we don't have a reliable "onFocus" for the tab switch in this component easily without props, 
         // we can check it when the component mounts (which happens when we switch back to 'Lifecycle' tab from activity).
         checkStakeholderStatus()
-    }, []) // Check on mount
+    }, [projectId]) // Check on mount and specific project
 
     const renderStatusChip = (artefact) => {
         if (!artefact) {

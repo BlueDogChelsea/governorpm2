@@ -9,7 +9,7 @@ import { businessCaseSchema } from '../../data/schemas/BusinessCaseSchema'
 import DocumentGenerator from '../../services/DocumentGenerator'
 import businessCaseTemplate from '../../templates/BusinessCaseTemplate.json'
 
-const BusinessCase = ({ artefact, onSave, onBack, onOpenGuidance }) => {
+const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // Use imported schema
     const sections = businessCaseSchema
 
@@ -102,11 +102,12 @@ const BusinessCase = ({ artefact, onSave, onBack, onOpenGuidance }) => {
     return (
         <>
             <GovernedArtefactEditor
+                projectId={projectId}
                 artefact={artefact}
                 onSave={onSave}
                 onBack={onBack}
                 title="Business Case"
-                description="Justify the project investment and strategy (PM² Template 5.3)"
+                description="Justify the project investment and strategy"
                 actions={<CustomActions />}
                 initialData={initialData}
             >

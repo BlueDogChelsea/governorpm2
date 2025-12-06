@@ -1,0 +1,26 @@
+{
+  "projectOwner": {
+    "name": "Peter Owner",
+    "organisation": "1",
+    "expectations": "<p>Everything</p>"
+  },
+  "businessManager": {
+    "name": "Bob Manager",
+    "organisation": "2",
+    "expectations": "<p>Nothing</p>"
+  },
+  "solutionProvider": {
+    "name": "Steven Solution",
+    "organisation": "3",
+    "expectations": "<p>Something</p>"
+  },
+  "additionalStakeholders": [
+    {
+      "id": 1765049242012,
+      "name": "Andy Additional",
+      "role": "Developer",
+      "organisation": "4",
+      "expectations": "<p>The World</p>"
+    }
+  ]
+}

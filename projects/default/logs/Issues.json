@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Login Timeout",
+    "description": "Users are logged out randomly after 5 minutes.",
+    "severity": "Major",
+    "owner": "Backend Dev",
+    "status": "Open",
+    "dateLogged": "2025-11-11",
+    "notes": "Investigating session token expiry."
+  },
+  {
+    "title": "Slow Report Gen",
+    "description": "Monthly report takes 20 mins to generate.",
+    "severity": "Minor",
+    "owner": "DBA",
+    "status": "Open",
+    "dateLogged": "2025-11-12",
+    "notes": "Index optimization needed."
+  },
+  {
+    "title": "Data Corrupt",
+    "description": "User profile data showing garbage characters.",
+    "severity": "Critical",
+    "owner": "Lead Dev",
+    "status": "Open",
+    "dateLogged": "2025-11-13",
+    "notes": "Encoding issue identified."
+  },
+  {
+    "title": "UI Glitch",
+    "description": "Sidebar overlaps content on mobile.",
+    "severity": "Minor",
+    "owner": "Frontend Dev",
+    "status": "Closed",
+    "dateLogged": "2025-11-14",
+    "notes": "Fixed in CSS."
+  },
+  {
+    "title": "API 500 Error",
+    "description": "Payment gateway returning 500 on checkout.",
+    "severity": "Critical",
+    "owner": "Integration Lead",
+    "status": "Open",
+    "dateLogged": "2025-11-15",
+    "notes": "Vendor contacted."
+  },
+  {
+    "title": "Missing Icons",
+    "description": "Menu icons not loading in IE11.",
+    "severity": "Minor",
+    "owner": "Frontend Dev",
+    "status": "Open",
+    "dateLogged": "2025-11-16",
+    "notes": "Polyfill required?"
+  },
+  {
+    "title": "Email Failure",
+    "description": "Password reset emails not being delivered.",
+    "severity": "Major",
+    "owner": "Ops",
+    "status": "Open",
+    "dateLogged": "2025-11-17",
+    "notes": "SMTP server blocked."
+  },
+  {
+    "title": "Search Broken",
+    "description": "Search bar returns 0 results for known items.",
+    "severity": "Major",
+    "owner": "Search Team",
+    "status": "Open",
+    "dateLogged": "2025-11-18",
+    "notes": "Re-indexing."
+  },
+  {
+    "title": "Backup Fail",
+    "description": "Nightly backup failed last night.",
+    "severity": "Critical",
+    "owner": "SysAdmin",
+    "status": "Closed",
+    "dateLogged": "2025-11-19",
+    "notes": "Disk full, cleared space."
+  },
+  {
+    "title": "Typo on Home",
+    "description": "Spelling mistake in the main banner.",
+    "severity": "Minor",
+    "owner": "Content Mgr",
+    "status": "Open",
+    "dateLogged": "2025-11-20",
+    "notes": "Ticket raised."
+  }
+]

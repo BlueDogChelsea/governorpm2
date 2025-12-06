@@ -9,10 +9,13 @@ import {
     ChevronUpIcon,
     ChevronDownIcon,
     ArrowLeftIcon,
-    TrashIcon
+    TrashIcon,
+    Squares2X2Icon
 } from '@heroicons/react/24/outline'
 import Lifecycle from './components/Lifecycle'
 import GuidancePage from './components/GuidancePage'
+import ProjectsPage from './pages/ProjectsPage' // Import ProjectsPage
+import { ProjectService } from './services/ProjectService' // Import ProjectService
 import Home from './pages/Home'
 import Initiating from './pages/lifecycle/Initiating'
 import Planning from './pages/lifecycle/Planning'
@@ -254,7 +257,12 @@ function App() {
     const [artefactReturnTab, setArtefactReturnTab] = useState(null)
     const [activeActivity, setActiveActivity] = useState(null)
 
+    // Project State
+    const [projects, setProjects] = useState([])
+    const [activeProjectId, setActiveProjectId] = useState(null)
+
     const navItems = [
+        { name: 'Projects', icon: Squares2X2Icon },
         { name: 'Home', icon: HomeIcon },
         {
             name: 'Lifecycle',
@@ -294,60 +302,114 @@ function App() {
         { id: 'lessons-learned', name: 'Lessons Learned', phase: 'Closing', status: 'Not Started' },
     ]
 
-    // Load data on mount
+    // Load Projects and Data
     useEffect(() => {
-        const loadData = async () => {
+        const init = async () => {
             if (window.electronAPI) {
-                await window.electronAPI.ensureFolder('data/logs')
+                // 1. Migrate Legacy Data
+                const migratedId = await ProjectService.migrateLegacyData();
 
-                // Load Logs
-                const loadedLogs = {}
-                for (const tab of logTabs) {
-                    const data = await window.electronAPI.readJSON(`data/logs/${tab}.json`)
-                    loadedLogs[tab] = data
-                }
-                setLogs(loadedLogs)
+                // 2. Load Projects
+                const projList = await ProjectService.getProjects();
 
-                // Load Artefacts
-                const loadedArtefacts = await window.electronAPI.readJSON('data/artefacts.json')
+                // 3. Determine Active Project
+                let activeId = activeProjectId || migratedId;
 
-                // Merge loaded artefacts with default artefacts to ensure all required artefacts exist
-                // and preserve the order defined in defaultArtefacts
-                let mergedArtefacts = []
-
-                if (loadedArtefacts && loadedArtefacts.length > 0) {
-                    // Create a map of loaded artefacts for easy lookup
-                    const loadedMap = new Map(loadedArtefacts.map(a => [a.id, a]))
-
-                    // Iterate through defaultArtefacts to enforce order and add missing ones
-                    mergedArtefacts = defaultArtefacts.map(def => {
-                        const loaded = loadedMap.get(def.id)
-                        if (loaded) {
-                            // Use loaded status but keep default metadata if needed (or just use loaded)
-                            return { ...def, ...loaded }
-                        } else {
-                            // New default artefact not in loaded data
-                            return def
-                        }
-                    })
-
-                    // If there are any extra artefacts in loaded that are not in default (custom ones?), append them
-                    // For now, we strictly follow defaultArtefacts structure for the main ones
-                    // If we want to support custom artefacts, we'd filter loadedMap for unused keys
-                } else {
-                    mergedArtefacts = defaultArtefacts
+                if (!activeId) {
+                    if (projList.length > 0) {
+                        activeId = projList[0].id;
+                    } else {
+                        // Create default if somehow empty
+                        activeId = await ProjectService.createProject("My First Project");
+                        projList.push({ id: activeId, name: "My First Project", createdAt: new Date().toISOString() });
+                    }
                 }
 
-                setArtefacts(mergedArtefacts)
-
-                // Always write back to ensure the file is up to date with new structure
-                await window.electronAPI.writeJSON('data/artefacts.json', mergedArtefacts)
+                setProjects(projList);
+                setActiveProjectId(activeId);
             } else {
-                setArtefacts(defaultArtefacts)
+                // Web/Dev fallback
+                setArtefacts(defaultArtefacts);
             }
         }
-        loadData()
-    }, [])
+        init();
+    }, []);
+
+    // Load Data when Active Project Changes
+    useEffect(() => {
+        const loadProjectData = async () => {
+            if (!activeProjectId || !window.electronAPI) return;
+
+            // Load Logs
+            const loadedLogs = {}
+            for (const tab of logTabs) {
+                const data = await window.electronAPI.readJSON(`projects/${activeProjectId}/logs/${tab}.json`)
+                loadedLogs[tab] = data || []
+            }
+            setLogs(loadedLogs)
+
+            // Load Artefacts
+            const loadedArtefacts = await window.electronAPI.readJSON(`projects/${activeProjectId}/artefacts.json`)
+
+            // Merge loaded artefacts with default artefacts
+            let mergedArtefacts = []
+
+            if (loadedArtefacts && loadedArtefacts.length > 0) {
+                const loadedMap = new Map(loadedArtefacts.map(a => [a.id, a]))
+                mergedArtefacts = defaultArtefacts.map(def => {
+                    const loaded = loadedMap.get(def.id)
+                    return loaded ? { ...def, ...loaded } : def
+                })
+            } else {
+                mergedArtefacts = defaultArtefacts
+            }
+
+            setArtefacts(mergedArtefacts)
+        }
+        loadProjectData();
+    }, [activeProjectId]);
+
+    const handleCreateProject = async (name) => {
+        const id = await ProjectService.createProject(name);
+        if (id) {
+            const newProject = { id, name, createdAt: new Date().toISOString() };
+            setProjects([...projects, newProject]);
+            setActiveProjectId(id);
+            setActiveTab('Home'); // Redirect to Home
+            setActivePhase('Initiating');
+        }
+    };
+
+    const handleOpenProject = (id) => {
+        setActiveProjectId(id);
+        setActiveTab('Home'); // Requirement: Redirect to Home
+    };
+
+    const handleRenameProject = async (id, newName) => {
+        const success = await ProjectService.renameProject(id, newName);
+        if (success) {
+            setProjects(projects.map(p => p.id === id ? { ...p, name: newName } : p));
+        }
+    };
+
+    const handleDeleteProject = async (id) => {
+        const success = await ProjectService.deleteProject(id);
+        if (success) {
+            const updatedProjects = projects.filter(p => p.id !== id);
+            setProjects(updatedProjects);
+            if (activeProjectId === id) {
+                // If deleted active project, switch to another or clear
+                if (updatedProjects.length > 0) {
+                    setActiveProjectId(updatedProjects[0].id);
+                } else {
+                    // Create default again if all deleted
+                    const newId = await ProjectService.createProject("My First Project");
+                    setProjects([{ id: newId, name: "My First Project", createdAt: new Date().toISOString() }]);
+                    setActiveProjectId(newId);
+                }
+            }
+        }
+    };
 
     const handleSaveLog = async (entry) => {
         let updatedList = [...logs[activeLogTab]]
@@ -367,8 +429,8 @@ function App() {
         }))
 
         // Persist to file
-        if (window.electronAPI) {
-            await window.electronAPI.writeJSON(`data/logs/${activeLogTab}.json`, updatedList)
+        if (window.electronAPI && activeProjectId) {
+            await window.electronAPI.writeJSON(`projects/${activeProjectId}/logs/${activeLogTab}.json`, updatedList)
         }
 
         setEditingIndex(null)
@@ -391,8 +453,8 @@ function App() {
         }))
 
         // Persist to file
-        if (window.electronAPI) {
-            await window.electronAPI.writeJSON(`data/logs/${activeLogTab}.json`, updatedList)
+        if (window.electronAPI && activeProjectId) {
+            await window.electronAPI.writeJSON(`projects/${activeProjectId}/logs/${activeLogTab}.json`, updatedList)
         }
 
         setDeleteConfirmation(null)
@@ -442,8 +504,8 @@ function App() {
             setActiveArtefact({ ...activeArtefact, status: newStatus })
         }
 
-        if (window.electronAPI) {
-            await window.electronAPI.writeJSON('data/artefacts.json', updatedArtefacts)
+        if (window.electronAPI && activeProjectId) {
+            await window.electronAPI.writeJSON(`projects/${activeProjectId}/artefacts.json`, updatedArtefacts)
         }
     }
 
@@ -454,8 +516,8 @@ function App() {
         setArtefacts(updatedArtefacts)
         setActiveArtefact(updatedArtefact)
 
-        if (window.electronAPI) {
-            await window.electronAPI.writeJSON('data/artefacts.json', updatedArtefacts)
+        if (window.electronAPI && activeProjectId) {
+            await window.electronAPI.writeJSON(`projects/${activeProjectId}/artefacts.json`, updatedArtefacts)
         }
     }
 
@@ -675,7 +737,14 @@ function App() {
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Top Bar (Optional) */}
                 <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10">
-                    <h2 className="text-lg font-semibold text-gray-800">{activeTab === 'Lifecycle' ? activePhase : activeTab}</h2>
+                    <div className="flex items-center space-x-4">
+                        <h2 className="text-lg font-semibold text-gray-800">{activeTab === 'Lifecycle' ? activePhase : activeTab}</h2>
+                        {activeProjectId && (
+                            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100">
+                                Active Project: {projects.find(p => p.id === activeProjectId)?.name || 'Loading...'}
+                            </span>
+                        )}
+                    </div>
                     <div className="flex items-center space-x-4">
                         {/* Add top bar actions here if needed */}
                         <button className="text-sm text-gray-500 hover:text-gray-700">Help</button>
@@ -688,13 +757,23 @@ function App() {
                     <div className="w-full h-full">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[500px] h-full flex flex-col">
 
-                            {activeTab === 'Home' ? (
+                            {activeTab === 'Projects' ? (
+                                <ProjectsPage
+                                    projects={projects}
+                                    activeProjectId={activeProjectId}
+                                    onCreateProject={handleCreateProject}
+                                    onOpenProject={handleOpenProject}
+                                    onRenameProject={handleRenameProject}
+                                    onDeleteProject={handleDeleteProject}
+                                />
+                            ) : activeTab === 'Home' ? (
                                 <Home onNavigate={handleLifecycleNavigation} />
                             ) : activeTab === 'Lifecycle' ? (
                                 <>
                                     {activePhase === 'Initiating' && (
                                         activeActivity === 'stakeholder-identification' ? (
                                             <InitialStakeholderIdentification
+                                                projectId={activeProjectId}
                                                 onBack={() => setActiveActivity(null)}
                                                 onOpenGuidance={(topic, section, returnInfo) => {
                                                     setActiveTab('Guidance')
@@ -706,6 +785,7 @@ function App() {
                                         ) : (
                                             <ErrorBoundary>
                                                 <Initiating
+                                                    projectId={activeProjectId}
                                                     artefacts={artefacts}
                                                     onOpenArtefact={(artefact) => {
                                                         setActiveTab('Artefacts')
@@ -723,9 +803,9 @@ function App() {
                                                     }}
                                                     onOpenLogs={() => {
                                                         setActiveTab('Logs')
-                                                        setActiveLogTab('Risks')
                                                     }}
                                                 />
+
                                             </ErrorBoundary>
                                         )
                                     )}
@@ -757,6 +837,7 @@ function App() {
                                             />
                                         ) : activeArtefact.id === 'project-initiation-request' ? (
                                             <ProjectInitiationRequest
+                                                projectId={activeProjectId}
                                                 artefact={activeArtefact}
                                                 onSave={handleSaveArtefactContent}
                                                 onBack={() => {
@@ -775,6 +856,7 @@ function App() {
                                             />
                                         ) : activeArtefact.id === 'business-case' ? (
                                             <BusinessCase
+                                                projectId={activeProjectId}
                                                 artefact={activeArtefact}
                                                 onSave={handleSaveArtefactContent}
                                                 onBack={() => {

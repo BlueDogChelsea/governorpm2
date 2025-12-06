@@ -50,6 +50,40 @@ ipcMain.handle('write-json', async (event, filePath, data) => {
     return true;
 });
 
+ipcMain.handle('list-dir', async (event, dirPath) => {
+    const fullPath = path.join(app.getAppPath(), dirPath);
+    if (fs.existsSync(fullPath)) {
+        return fs.readdirSync(fullPath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
+    }
+    return [];
+});
+
+ipcMain.handle('delete-path', async (event, targetPath) => {
+    const fullPath = path.join(app.getAppPath(), targetPath);
+    if (fs.existsSync(fullPath)) {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+        return true;
+    }
+    return false;
+});
+
+ipcMain.handle('rename-path', async (event, oldPath, newPath) => {
+    const fullOld = path.join(app.getAppPath(), oldPath);
+    const fullNew = path.join(app.getAppPath(), newPath);
+    if (fs.existsSync(fullOld)) {
+        fs.renameSync(fullOld, fullNew);
+        return true;
+    }
+    return false;
+});
+
+ipcMain.handle('path-exists', async (event, targetPath) => {
+    const fullPath = path.join(app.getAppPath(), targetPath);
+    return fs.existsSync(fullPath);
+});
+
 app.whenReady().then(() => {
     createWindow();
 

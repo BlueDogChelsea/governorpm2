@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ExclamationTriangleIcon, XMarkIcon, ArrowDownOnSquareIcon } from '@heroicons/react/24/outline'
+import ArtefactImportService from '../../../services/ArtefactImportService'
 import ArtefactPage from './ArtefactPage'
 import ArtefactSaveButton from './ArtefactSaveButton'
 import ArtefactApprovalSection from './ArtefactApprovalSection'
@@ -25,6 +26,7 @@ import { useArtefactSave } from '../hooks/useArtefactSave'
  * @param {Object} initialData Default structure for the content (excluding approval)
  */
 const GovernedArtefactEditor = ({
+    projectId,
     artefact,
     onSave,
     onBack,
@@ -34,9 +36,16 @@ const GovernedArtefactEditor = ({
     children,
     initialData = {},
     processLoadedContent
+
 }) => {
     // Top-level state for the *Content* of the artefact (excluding approval)
     const [contentData, setContentData] = useState(initialData)
+
+    // Import Logic State
+    const [importPromptShown, setImportPromptShown] = useState(false)
+    const [showImportModal, setShowImportModal] = useState(false)
+    const [showManualImport, setShowManualImport] = useState(false)
+    const [importCandidates, setImportCandidates] = useState([])
 
     // Top-level state for *Approval*
     const [approval, setApproval] = useState({
@@ -112,7 +121,72 @@ const GovernedArtefactEditor = ({
             // New Artefact
             setContentData(initialData)
         }
+
+        if (artefact) {
+            setImportPromptShown(artefact.importPromptShown || false)
+        }
     }, [artefact])
+
+    // -- Import Logic --
+    useEffect(() => {
+        const checkImports = async () => {
+            if (!artefact || !artefact.id) return
+            // Wait for projectId to be available
+            if (!projectId && projectId !== 0) return
+
+            // 1. Should we prompt?
+            // Only if NOT prompted before and status is Not Started (clean)
+            // And we verify content is actually empty (apart from maybe initialData structure)
+            if (artefact.importPromptShown) return
+            if (artefact.status !== 'Not Started') return
+
+            // Check if we have candidates
+            const candidates = await ArtefactImportService.getAvailableImports(projectId, artefact.id)
+            if (candidates.length > 0) {
+                setImportCandidates(candidates)
+                setShowImportModal(true)
+            }
+        }
+        checkImports()
+    }, [artefact?.id, projectId]) // Run when ID loads or project ID updates
+
+    const handleImport = async (sourceId, overwrite = false) => {
+        if (!sourceId) return
+
+        try {
+            const newContent = await ArtefactImportService.importData(projectId, artefact.id, sourceId, contentData, overwrite)
+
+            // Update Content
+            setContentData(newContent)
+
+            // Update Flags
+            setImportPromptShown(true)
+            setShowImportModal(false)
+            setShowManualImport(false)
+
+            // Note: isDirty will naturally become true via useEffect on contentData change
+        } catch (error) {
+            console.error("Import failed", error)
+            alert("Failed to import data.")
+        }
+    }
+
+    const handleDeclineImport = () => {
+        setImportPromptShown(true)
+        setShowImportModal(false)
+
+        // Persist the flag immediately so we don't prompt again even if they don't save content
+        // We create a shallow copy with the flag updated and save it
+        if (onSave) {
+            // We use the raw artefact + flag. We don't want to save "content" if they didn't touch it?
+            // Actually, if we just update the flag, we should probably save the whole state as it is.
+            const updatedArtefact = {
+                ...artefact,
+                importPromptShown: true
+            }
+            onSave(updatedArtefact)
+        }
+    }
 
     // -- Governance Logic --
 
@@ -287,26 +361,10 @@ const GovernedArtefactEditor = ({
                 if (approvedSnapshot.current && currentContentStr !== approvedSnapshot.current) {
                     // It changed!
                     modifiedAfterApproval = true
-                    // Note: We don't change the status string to "Approved - Modified" here
-                    // because the requirement says "Approved — Modified" is a status.
-                    // BUT App.jsx logic handles the display. 
-                    // Let's be explicit and allow App.jsx to just read 'status'.
-                    // WAIT: Requirement 1: "Approved — Modified ... Antigravity may determine how this is stored".
-                    // Simpler approach: Store "Approved" and "modifiedAfterApproval: true"
-                    // And let the UI layer (App.jsx) concatenate them?
-                    // OR: Store status as "Approved - Modified".
-                    // Let's stick to the App.jsx logic I wrote: it checks status='Approved' && modifiedAfterApproval=true.
-                    // So we effectively just set the flag here.
-
-                    // Show banner immediately (optimistic UI update handled by re-render after save or local effect?)
-                    // We set it in state for immediate feedback if needed, but the save refreshes the prop.
-                    // Actually, let's update local banner state right here if we could, but we can't side-effect in render.
                 } else {
                     // It matches the snapshot
                     modifiedAfterApproval = false
                 }
-
-                // Special case: If we are saving a FRESH approval right now (snapshot was just set), it is by definition clean.
             } else {
                 status = hasContent(contentData) ? 'In Progress' : 'Not Started'
                 modifiedAfterApproval = false
@@ -316,7 +374,8 @@ const GovernedArtefactEditor = ({
                 ...artefact,
                 content: fullContent,
                 status,
-                modifiedAfterApproval
+                modifiedAfterApproval,
+                importPromptShown // Persist this flag
             }
         })
     }
@@ -349,6 +408,17 @@ const GovernedArtefactEditor = ({
                 onBack={handleBack}
                 actions={
                     <>
+                        <button
+                            onClick={async () => {
+                                const candidates = await ArtefactImportService.getAvailableImports(projectId, artefact.id)
+                                setImportCandidates(candidates)
+                                setShowManualImport(true)
+                            }}
+                            className="text-gray-500 hover:text-blue-600 transition-colors mr-2 p-2 rounded-full hover:bg-gray-100"
+                            title="Import Data..."
+                        >
+                            <ArrowDownOnSquareIcon className="h-5 w-5" />
+                        </button>
                         {actions}
                         <ArtefactSaveButton
                             onSave={handleSave}
@@ -428,6 +498,92 @@ const GovernedArtefactEditor = ({
                     </div>
                 </div>
             )}
+
+
+            {/* Initial Import Prompt Modal */}
+            {
+                showImportModal && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pre-Fill This Artefact?</h3>
+                            <p className="text-gray-600 mb-6 text-sm">
+                                Governor can pre-fill this artefact using information from earlier lifecycle artefacts (e.g., {importCandidates.map(c => c.name).join(', ')}).
+                                <br /><br />
+                                Would you like to import available information?
+                            </p>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={handleDeclineImport}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                >
+                                    No, Start Blank
+                                </button>
+                                <button
+                                    onClick={() => handleImport(importCandidates[0]?.id)} // Default to first available
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                >
+                                    Yes, Pre-Fill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Manual Import Modal */}
+            {
+                showManualImport && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Import Data</h3>
+                                <button onClick={() => setShowManualImport(false)} className="text-gray-400 hover:text-gray-500">
+                                    <XMarkIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            {importCandidates.length === 0 ? (
+                                <p className="text-gray-500 mb-6">No previous artefacts found to import from.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-600">Select source to import from:</p>
+                                    <select id="importSource" className="w-full border-gray-300 rounded-md shadow-sm">
+                                        {importCandidates.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+
+                                    <div className="mt-4">
+                                        <p className="text-sm text-gray-600 mb-2">Import options:</p>
+                                        <div className="flex space-x-4">
+                                            <button
+                                                onClick={() => {
+                                                    const select = document.getElementById('importSource')
+                                                    handleImport(select.value, false) // Default: Do not overwrite
+                                                }}
+                                                className="flex-1 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                                            >
+                                                Import Missing Only
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm("Are you sure you want to overwrite matching fields? Existing data will be replaced.")) {
+                                                        const select = document.getElementById('importSource')
+                                                        handleImport(select.value, true)
+                                                    }
+                                                }}
+                                                className="flex-1 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
+                                            >
+                                                Overwrite All
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )
+            }
         </>
     )
 }

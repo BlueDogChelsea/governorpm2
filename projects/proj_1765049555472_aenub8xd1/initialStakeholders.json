@@ -1,0 +1,18 @@
+{
+  "projectOwner": {
+    "name": "3 Owner",
+    "organisation": "3",
+    "expectations": ""
+  },
+  "businessManager": {
+    "name": "",
+    "organisation": "",
+    "expectations": ""
+  },
+  "solutionProvider": {
+    "name": "",
+    "organisation": "",
+    "expectations": ""
+  },
+  "additionalStakeholders": []
+}

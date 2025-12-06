@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Stable API",
+    "description": "The third-party API will remain stable throughout development.",
+    "owner": "Tech Lead",
+    "status": "Valid",
+    "dateLogged": "2025-11-01",
+    "notes": "Vendor confirmed version lock."
+  },
+  {
+    "title": "Resource Availability",
+    "description": "All assigned team members will be available 100% of the time.",
+    "owner": "PM",
+    "status": "Pending",
+    "dateLogged": "2025-11-02",
+    "notes": "Holidays to be checked."
+  },
+  {
+    "title": "Hardware Delivery",
+    "description": "Servers will arrive by Dec 1st.",
+    "owner": "Ops Manager",
+    "status": "Valid",
+    "dateLogged": "2025-11-03",
+    "notes": "Shipping confirmed."
+  },
+  {
+    "title": "Budget Approval",
+    "description": "Q1 budget will be approved without cuts.",
+    "owner": "Sponsor",
+    "status": "Valid",
+    "dateLogged": "2025-11-04",
+    "notes": "Finance committee meeting next week."
+  },
+  {
+    "title": "Legacy System Access",
+    "description": "We will have read access to the legacy DB for migration.",
+    "owner": "Data Team",
+    "status": "Valid",
+    "dateLogged": "2025-11-05",
+    "notes": "Credentials received."
+  },
+  {
+    "title": "No Scope Changes",
+    "description": "Scope is frozen after sign-off.",
+    "owner": "SteerCo",
+    "status": "Pending",
+    "dateLogged": "2025-11-06",
+    "notes": "Sign-off pending."
+  },
+  {
+    "title": "User Training",
+    "description": "Users will complete online training before rollout.",
+    "owner": "HR",
+    "status": "Valid",
+    "dateLogged": "2025-11-07",
+    "notes": "LMS course ready."
+  },
+  {
+    "title": "Network Bandwidth",
+    "description": "Office network can handle the new video streaming feature.",
+    "owner": "Network Admin",
+    "status": "Invalid",
+    "dateLogged": "2025-11-08",
+    "notes": "Tests showed bottleneck."
+  },
+  {
+    "title": "Regulatory Compliance",
+    "description": "Current design meets GDPR requirements.",
+    "owner": "DPO",
+    "status": "Valid",
+    "dateLogged": "2025-11-09",
+    "notes": "Audit passed."
+  },
+  {
+    "title": "Cloud Costs",
+    "description": "AWS costs will stay within the $5k/month tier.",
+    "owner": "FinOps",
+    "status": "Valid",
+    "dateLogged": "2025-11-10",
+    "notes": "Monitoring set up."
+  }
+]
