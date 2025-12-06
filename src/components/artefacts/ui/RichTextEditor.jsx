@@ -61,6 +61,22 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
         }
     })
 
+    // Sync editor content when value prop changes (e.g. initial load)
+    useEffect(() => {
+        if (!editor || value === undefined) return
+
+        const currentContent = editor.getHTML()
+        const normalizedValue = value === '<p></p>' ? '' : (value || '')
+        const normalizedCurrent = currentContent === '<p></p>' ? '' : currentContent
+
+        // Only update if content is effectively different. 
+        // This prevents cursor jumping when typing (if value update is fast enough) 
+        // but crucially ensures external data loads correctly.
+        if (normalizedValue !== normalizedCurrent) {
+            editor.commands.setContent(normalizedValue)
+        }
+    }, [value, editor])
+
     // Update editable state when disabled prop changes
     useEffect(() => {
         if (editor) {

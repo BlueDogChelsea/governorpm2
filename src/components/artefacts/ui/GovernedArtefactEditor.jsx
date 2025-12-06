@@ -313,6 +313,7 @@ const GovernedArtefactEditor = ({
             }
 
             return {
+                ...artefact,
                 content: fullContent,
                 status,
                 modifiedAfterApproval
