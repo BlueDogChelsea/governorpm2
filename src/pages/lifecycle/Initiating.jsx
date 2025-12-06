@@ -259,7 +259,7 @@ const Initiating = ({ artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance,
                         Artefacts
                     </h3>
                     <div className="space-y-3">
-                        {['project-initiation-request', 'stakeholder-matrix', 'business-case', 'project-charter', 'initiating-phase-exit-checklist'].map(id => {
+                        {['project-initiation-request', 'business-case', 'project-charter', 'initiating-phase-exit-checklist'].map(id => {
                             const art = artefacts.find(a => a.id === id)
                             const name = art ? art.name : id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                             const status = art ? art.status : 'Not Started'
