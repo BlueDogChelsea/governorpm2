@@ -69,10 +69,12 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
         const normalizedValue = value === '<p></p>' ? '' : (value || '')
         const normalizedCurrent = currentContent === '<p></p>' ? '' : currentContent
 
-        // Only update if content is effectively different. 
-        // This prevents cursor jumping when typing (if value update is fast enough) 
-        // but crucially ensures external data loads correctly.
-        if (normalizedValue !== normalizedCurrent) {
+        // Normalize HTML to ignore whitespace between tags for comparison
+        // This prevents infinite loops or false dirty states when loaded content has formatting/newlines (like from imports)
+        // that Tiptap naturally strips out.
+        const stripWhitespace = (str) => str.replace(/>\s+</g, '><').trim()
+
+        if (stripWhitespace(normalizedValue) !== stripWhitespace(normalizedCurrent)) {
             editor.commands.setContent(normalizedValue)
         }
     }, [value, editor])

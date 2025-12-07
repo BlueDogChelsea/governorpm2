@@ -158,8 +158,8 @@ const mapISIToPIR = (isi, target, overwrite) => {
     }
 
     if (pieces.length > 0) {
-        // Wrap in UL with explicit newlines
-        const html = `<ul>\n${pieces.join('\n')}\n</ul>`
+        // Wrap in UL without newlines to match editor behavior
+        const html = `<ul>${pieces.join('')}</ul>`
         mergeField(target, 'stakeholders', html, overwrite)
     }
 
