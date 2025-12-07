@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { CheckCircleIcon, ArrowTopRightOnSquareIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
-import { markdownClean } from '../../utils/markdownClean'
 
-// Import PM2 content
-import initiatingData from '../../data/pm2/initiating_phase.json'
-import rolesData from '../../data/pm2/roles_and_organisation.json'
 
 const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance, onOpenLogs }) => {
     // Activity Persistence State
@@ -55,17 +48,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
         }
     }
 
-    // Helper to get PM2 content
-    const getPM2Content = (source, sectionNumber) => {
-        const data = source === 'roles' ? rolesData : initiatingData
-        const section = data.sections.find(s => s.number === sectionNumber)
-        // If exact number not found, try startsWith for broad sections like "Section 4"
-        if (!section && sectionNumber === '4') {
-            // For Section 4, we want "Project Stakeholders" (4.1) as equivalent to "Section 4" context in this panel.
-            return data.sections.find(s => s.number === '4.1')
-        }
-        return section
-    }
+
 
     // Helper to render Artefact Status Chip
     const renderArtefactStatus = (id) => {
@@ -105,7 +88,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'initiating-meeting',
             title: 'Initiating Meeting',
             summary: 'Hold an initial meeting to align expectations, scope boundaries, roles, and next steps.',
-            pm2Config: { source: 'initiating', section: '5.1', label: 'Show PM² Text from Section 5.1' },
+            description: 'The Initiating Meeting aligns stakeholders on the project’s purpose, expectations, high-level scope, constraints, roles, and next steps. It ensures a shared understanding of the project’s intent before formal initiation activities begin.',
+            pm2Config: { section: '5.1' },
             guidance: { topic: 'Initiating Phase', section: '5.1 Initiating Meeting' },
             hasCheckbox: true,
             buttons: []
@@ -114,7 +98,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'identify-stakeholders',
             title: 'Identify Key Stakeholders',
             summary: 'Identify key stakeholders, governance bodies, and their roles and responsibilities.',
-            pm2Config: { source: 'roles', section: '4', label: 'Show PM² Text from Section 4 (Organisation & Roles)' },
+            description: 'This activity identifies the individuals and groups who have an interest in, influence over, or responsibility within the project. It clarifies their roles, expectations, and involvement, helping shape project governance and ensuring early engagement.',
+            pm2Config: { section: '4' },
             guidance: { topic: 'Roles & Organisation', section: '4.1 Project Stakeholders' },
             hasCheckbox: true,
             buttons: [
@@ -125,7 +110,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'document-idea',
             title: 'Document the Idea / Need',
             summary: 'Capture the problem, need, or opportunity motivating the project.',
-            pm2Config: { source: 'initiating', section: '5.2', label: 'Show PM² Text from Section 5.2' },
+            description: 'The purpose of this activity is to capture the problem, need, or opportunity that motivates the project. It describes the context, the drivers behind the initiative, and why the organisation is considering investment at this stage.',
+            pm2Config: { section: '5.2' },
             guidance: { topic: 'Initiating Phase', section: '5.2 Project Initiation Request' },
             hasCheckbox: false,
             buttons: []
@@ -134,7 +120,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'create-business-justification',
             title: 'Create Business Justification',
             summary: 'Develop the high-level reasoning and expected benefits for the project.',
-            pm2Config: { source: 'initiating', section: '5.3', label: 'Show PM² Text from Section 5.3' },
+            description: 'This activity defines the high-level justification for the project, outlining expected benefits, strategic alignment, and critical success factors. It frames the reasoning that decision-makers will later evaluate in the Business Case.',
+            pm2Config: { section: '5.3' },
             guidance: { topic: 'Initiating Phase', section: '5.3 Business Case' },
             hasCheckbox: false,
             buttons: []
@@ -143,7 +130,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'define-scope',
             title: 'Define Scope & Organisation',
             summary: 'Define high-level scope boundaries, roles, and governance structure.',
-            pm2Config: { source: 'initiating', section: '5.4', label: 'Show PM² Text from Section 5.4' },
+            description: 'This activity establishes the project’s high-level scope boundaries, identifies key deliverables, clarifies governance structures, and outlines initial responsibilities. It provides an early view of how the project will be organised and controlled.',
+            pm2Config: { section: '5.4' },
             guidance: { topic: 'Initiating Phase', section: '5.4 Project Charter' },
             hasCheckbox: false,
             buttons: []
@@ -152,7 +140,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             id: 'stage-gate',
             title: 'Stage Gate — Ready for Planning (RfP)',
             summary: 'Confirm completion of the Initiation Phase and approve continuation into Planning.',
-            pm2Config: { source: 'initiating', section: '5.5', label: 'Show PM² Text from Section 5.5' },
+            description: 'The Stage Gate confirms that Initiation activities are complete and that the project is viable to proceed to Planning. It validates outputs such as the PIR, Business Case, and Charter, and ensures the necessary approvals are obtained.',
+            pm2Config: { section: '5.5' },
             guidance: { topic: 'Initiating Phase', section: '5.5 Phase Gate RfP (Ready for Planning)' },
             hasCheckbox: true,
             buttons: [
@@ -217,7 +206,6 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                     <div className="space-y-4">
                         {activitiesList.map((activity) => {
                             const isExpanded = expandedActivity === activity.id
-                            const pm2Content = getPM2Content(activity.pm2Config.source, activity.pm2Config.section)
                             const isCompleted = activityStatus[activity.id] || false
 
                             return (
@@ -236,38 +224,22 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
 
                                     <p className="text-sm text-gray-600 mb-4">{activity.summary}</p>
 
-                                    {/* Collapsible PM2 Text */}
+                                    {/* Collapsible PM2 Text - NOW Activity Description */}
                                     <div className="mb-4 bg-gray-50 rounded-md border border-gray-100 overflow-hidden">
                                         <button
                                             onClick={() => togglePM2Text(activity.id)}
                                             className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                                         >
                                             <span className="flex items-center">
-                                                {/* Ensure icon exists or fallback */}
                                                 <span className="w-1 h-3 bg-blue-500 rounded-sm mr-2 opacity-50"></span>
-                                                {activity.pm2Config.label}
+                                                Show Activity Description
                                             </span>
                                             {isExpanded ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
                                         </button>
 
-                                        {isExpanded && pm2Content && (
-                                            <div className="p-4 border-t border-gray-100 bg-white text-sm text-gray-800 markdown-content overflow-auto max-h-96">
-                                                <ReactMarkdown
-                                                    remarkPlugins={[remarkGfm]}
-                                                    rehypePlugins={[rehypeRaw]}
-                                                    components={{
-                                                        h1: ({ node, ...props }) => <div className="font-bold text-base mb-2 mt-2" {...props} />,
-                                                        h2: ({ node, ...props }) => <div className="font-bold text-sm mb-2 mt-2" {...props} />,
-                                                        h3: ({ node, ...props }) => <div className="font-bold text-xs mb-1 mt-1" {...props} />,
-                                                        p: ({ node, ...props }) => <p className="mb-2 text-xs leading-relaxed" {...props} />,
-                                                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-xs" {...props} />,
-                                                        li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-                                                        a: ({ node, ...props }) => <span className="text-blue-600 underline cursor-pointer" {...props} />,
-                                                        img: ({ node, ...props }) => <img className="max-w-full h-auto my-2 rounded" {...props} />,
-                                                    }}
-                                                >
-                                                    {markdownClean(pm2Content.markdown)}
-                                                </ReactMarkdown>
+                                        {isExpanded && (
+                                            <div className="p-4 border-t border-gray-100 bg-white text-sm text-gray-800">
+                                                <p className="leading-relaxed">{activity.description}</p>
                                             </div>
                                         )}
                                     </div>
@@ -280,8 +252,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                                                 key={idx}
                                                 onClick={btn.action}
                                                 className={`w-full py-2 px-3 rounded-md text-sm font-medium transition-colors ${btn.primary
-                                                        ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
-                                                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                                    ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {btn.label}
@@ -302,8 +274,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                                             <button
                                                 onClick={() => updateActivityStatus(activity.id, !isCompleted)}
                                                 className={`w-full flex items-center justify-center py-2 px-3 rounded-md text-sm font-medium transition-colors border ${isCompleted
-                                                        ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
-                                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                                    ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                                                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {isCompleted ? (
