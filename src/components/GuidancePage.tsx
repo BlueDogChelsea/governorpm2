@@ -128,19 +128,25 @@ const GuidancePage: React.FC<GuidancePageProps> = ({ initialTopic, targetSection
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                    // Add highlight animation class
-                    // Remove first to reset animation if it was already there (rare case)
-                    element.classList.remove('animate-highlight');
-                    void element.offsetWidth; // trigger reflow
-                    element.classList.add('animate-highlight');
+                    // Add highlight animation class AFTER scroll completes
+                    // Wait 600ms (approx scroll time + buffer) before triggering animation
+                    setTimeout(() => {
+                        element.classList.remove('flash-highlight');
+                        void element.offsetWidth; // trigger reflow
+                        element.classList.add('flash-highlight');
+
+                        // Remove class after animation completes (2s)
+                        setTimeout(() => {
+                            element.classList.remove('flash-highlight');
+                        }, 2000);
+                    }, 600);
 
                     lastHighlightedSection.current = slug;
 
                     // Clear the target so manual navigation doesn't re-trigger it
                     if (onClearTarget) {
-                        // Small delay to ensure the highlight started before we clear the state
-                        // creating a clean "one-off" event
-                        setTimeout(onClearTarget, 500);
+                        // Ensure we don't clear too early
+                        setTimeout(onClearTarget, 1000);
                     }
                 }
             }, 300);

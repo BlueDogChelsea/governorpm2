@@ -3,22 +3,17 @@
 @tailwind utilities;
 
 @layer utilities {
-  @keyframes highlight-pulse {
-    0% {
-      background-color: transparent;
-    }
-    10% {
-      background-color: rgba(59, 130, 246, 0.15); /* blue-50/blue-100 mix */
-    }
-    80% {
-      background-color: rgba(59, 130, 246, 0.15);
-    }
-    100% {
-      background-color: transparent;
-    }
+  @keyframes flash-highlight-anim {
+    0% { background-color: transparent; }
+    16% { background-color: #fef3c7; }
+    33% { background-color: transparent; }
+    50% { background-color: #fef3c7; }
+    66% { background-color: transparent; }
+    83% { background-color: #fef3c7; }
+    100% { background-color: transparent; }
   }
 
-  .animate-highlight {
-    animation: highlight-pulse 2s ease-out forwards;
+  .flash-highlight {
+    animation: flash-highlight-anim 2s ease-in-out forwards;
   }
 }
