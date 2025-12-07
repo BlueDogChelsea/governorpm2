@@ -185,22 +185,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                             </button>
                         </div>
 
-                        {/* B: Document the idea/need */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Document the idea/need</h4>
-                                {renderStatusChip(artefacts.find(a => a.id === 'project-initiation-request'))}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Capture the problem, need, or opportunity.</p>
-                            <button
-                                onClick={() => openArtefact('project-initiation-request')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Create Project Initiation Request
-                            </button>
-                        </div>
-
-                        {/* C: Identify key stakeholders */}
+                        {/* B: Identify key stakeholders */}
                         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                             <div className="flex justify-between items-center mb-2">
                                 <h4 className="font-medium text-gray-900">Identify key stakeholders</h4>
@@ -219,6 +204,21 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                                 className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 bg-blue-50 border-blue-200 text-blue-700"
                             >
                                 Identify Key Stakeholders
+                            </button>
+                        </div>
+
+                        {/* C: Document the idea/need */}
+                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <div className="flex justify-between items-center mb-2">
+                                <h4 className="font-medium text-gray-900">Document the idea/need</h4>
+                                {renderStatusChip(artefacts.find(a => a.id === 'project-initiation-request'))}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-3">Capture the problem, need, or opportunity.</p>
+                            <button
+                                onClick={() => openArtefact('project-initiation-request')}
+                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                            >
+                                Create Project Initiation Request
                             </button>
                         </div>
 

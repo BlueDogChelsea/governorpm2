@@ -746,9 +746,12 @@ function App() {
                     <div className="flex items-center space-x-4">
                         <h2 className="text-lg font-semibold text-gray-800">{activeTab === 'Lifecycle' ? activePhase : activeTab}</h2>
                         {activeProjectId && (
-                            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100">
+                            <button
+                                onClick={() => setActiveTab('Projects')}
+                                className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400"
+                            >
                                 Active Project: {projects.find(p => p.id === activeProjectId)?.name || 'Loading...'}
-                            </span>
+                            </button>
                         )}
                     </div>
                     <div className="flex items-center space-x-4">

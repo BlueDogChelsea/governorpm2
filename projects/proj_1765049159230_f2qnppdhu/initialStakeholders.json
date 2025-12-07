@@ -1,0 +1,18 @@
+{
+  "projectOwner": {
+    "name": "Ian Richmond",
+    "organisation": "HQ",
+    "expectations": "<p>Benefits to be achieved.</p>"
+  },
+  "businessManager": {
+    "name": "",
+    "organisation": "",
+    "expectations": ""
+  },
+  "solutionProvider": {
+    "name": "",
+    "organisation": "",
+    "expectations": ""
+  },
+  "additionalStakeholders": []
+}

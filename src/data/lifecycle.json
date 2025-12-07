@@ -2,8 +2,8 @@
     "initiating": {
         "overview": "The Initiating Phase establishes the project’s foundation by clarifying the need, defining the initial scope, identifying stakeholders, confirming feasibility, and producing the core initiating artefacts. This phase ensures the project is viable, aligned with organisational objectives, and authorised to progress to Planning.",
         "activities": [
-            "Understand and articulate the problem, need or opportunity the project addresses.",
             "Identify key stakeholders and analyse their needs, expectations and interests.",
+            "Understand and articulate the problem, need or opportunity the project addresses.",
             "Define the initial project scope, boundaries, constraints and assumptions.",
             "Define the initial project organisation and governance structure.",
             "Assess preliminary feasibility and viability, including expected benefits.",
