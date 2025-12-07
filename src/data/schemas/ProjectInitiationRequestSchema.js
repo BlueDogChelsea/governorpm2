@@ -3,7 +3,6 @@ export const projectInitiationRequestSchema = [
         id: 'projectInfo',
         title: '1. Project Information',
         fields: [
-            { key: 'Project Name', label: 'Project Name', type: 'text' },
             { key: 'Date', label: 'Date', type: 'date' },
             { key: 'Version', label: 'Version', type: 'text' },
             { key: 'Project Owner', label: 'Project Owner', type: 'text' },

@@ -8,6 +8,7 @@ import DocumentPreviewModal from './ui/DocumentPreviewModal'
 import { businessCaseSchema } from '../../data/schemas/BusinessCaseSchema'
 import DocumentGenerator from '../../services/DocumentGenerator'
 import businessCaseTemplate from '../../templates/BusinessCaseTemplate.json'
+import { ProjectService } from '../../services/ProjectService'
 
 const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // Use imported schema
@@ -37,7 +38,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
 
         if (format === 'html') {
             const html = await DocumentGenerator.generateDocument(
-                content,
+                { ...content, projectName: ProjectService.getActiveProject()?.name },
                 sections,
                 businessCaseTemplate,
                 format,
@@ -46,12 +47,13 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
             setPreviewHtml(html)
             setShowPreview(true)
         } else {
+            const projName = ProjectService.getActiveProject()?.name || 'Project'
             DocumentGenerator.generateDocument(
-                content,
+                { ...content, projectName: projName },
                 sections,
                 businessCaseTemplate,
                 format,
-                `Business_Case_${content['Project Name'] || 'Project'}_v${content['Version'] || '1.0'}`
+                `Business_Case_${projName}_v${content['Version'] || '1.0'}`
             )
         }
     }
@@ -99,6 +101,11 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         }, {})
     }
 
+    const processLoadedContent = (content) => {
+        const { 'Project Name': _, ...rest } = content || {}
+        return rest
+    }
+
     return (
         <>
             <GovernedArtefactEditor
@@ -110,9 +117,11 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                 description="Justify the project investment and strategy"
                 actions={<CustomActions />}
                 initialData={initialData}
+                processLoadedContent={processLoadedContent}
             >
                 {({ data, handleContentChange }) => {
                     dataRef.current = data
+                    const projectName = ProjectService.getActiveProject()?.name || 'Loading...'
 
                     // Render Rich Text Editor for narrative fields
                     const renderTextArea = (key, label, placeholder) => (
@@ -162,6 +171,20 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
 
                     return (
                         <div className="space-y-8">
+                            {/* Auto-Propagated Project Name */}
+                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <BookOpenIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm text-blue-700">
+                                            <span className="font-bold">Project:</span> {projectName}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             {sections.map(section => (
                                 <ArtefactSection
                                     key={section.id}

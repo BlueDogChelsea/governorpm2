@@ -8,6 +8,7 @@ import DocumentPreviewModal from './ui/DocumentPreviewModal'
 import { projectInitiationRequestSchema } from '../../data/schemas/ProjectInitiationRequestSchema'
 import DocumentGenerator from '../../services/DocumentGenerator'
 import pirTemplate from '../../templates/PIRTemplate.json'
+import { ProjectService } from '../../services/ProjectService'
 
 const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // Use imported schema
@@ -37,7 +38,7 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
 
         if (format === 'html') {
             const html = await DocumentGenerator.generateDocument(
-                content,
+                { ...content, projectName: ProjectService.getActiveProject()?.name },
                 sections,
                 pirTemplate,
                 format,
@@ -46,12 +47,13 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
             setPreviewHtml(html)
             setShowPreview(true)
         } else {
+            const projName = ProjectService.getActiveProject()?.name || 'Project'
             DocumentGenerator.generateDocument(
-                content,
+                { ...content, projectName: projName },
                 sections,
                 pirTemplate,
                 format,
-                `PIR_${content['Project Name'] || 'Project'}_v${content['Version'] || '1.0'}`
+                `PIR_${projName}_v${content['Version'] || '1.0'}`
             )
         }
     }
@@ -88,7 +90,6 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
 
     // Calculate initial data
     const initialData = {
-        'Project Name': artefact?.name || '',
         'Date': new Date().toISOString().split('T')[0],
         'Version': '1.0',
         ...sections.reduce((acc, section) => {
@@ -99,6 +100,11 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
             }
             return acc
         }, {})
+    }
+
+    const processLoadedContent = (content) => {
+        const { 'Project Name': _, ...rest } = content || {}
+        return rest
     }
 
     return (
@@ -112,10 +118,12 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                 description="Define the project foundation (PM² Template)"
                 actions={<CustomActions />}
                 initialData={initialData}
+                processLoadedContent={processLoadedContent}
             >
                 {({ data, handleContentChange }) => {
                     // Update ref for export
                     dataRef.current = data
+                    const projectName = ProjectService.getActiveProject()?.name || 'Loading...'
 
                     const renderInput = (key, label, type = "text") => (
                         <ArtefactField key={key} label={label}>
@@ -150,6 +158,20 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
 
                     return (
                         <div className="space-y-8">
+                            {/* Auto-Propagated Project Name */}
+                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <BookOpenIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm text-blue-700">
+                                            <span className="font-bold">Project:</span> {projectName}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             {sections.map(section => (
                                 <ArtefactSection
                                     key={section.id}

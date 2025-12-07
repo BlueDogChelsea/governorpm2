@@ -1,4 +1,14 @@
+let activeProject = null;
+
 export const ProjectService = {
+    getActiveProject() {
+        return activeProject;
+    },
+
+    setActiveProject(project) {
+        activeProject = project;
+    },
+
     async getProjects() {
         if (!window.electronAPI) return [];
 

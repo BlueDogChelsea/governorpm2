@@ -340,6 +340,12 @@ function App() {
         const loadProjectData = async () => {
             if (!activeProjectId || !window.electronAPI) return;
 
+            // Sync with ProjectService
+            const currentProject = projects.find(p => p.id === activeProjectId)
+            if (currentProject) {
+                ProjectService.setActiveProject(currentProject)
+            }
+
             // Load Logs
             const loadedLogs = {}
             for (const tab of logTabs) {

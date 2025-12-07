@@ -3,7 +3,6 @@ export const businessCaseSchema = [
         id: 'project_info',
         title: '1. Project Information',
         fields: [
-            { key: 'Project Name', label: 'Project Name', type: 'text' }
         ]
     },
     {
