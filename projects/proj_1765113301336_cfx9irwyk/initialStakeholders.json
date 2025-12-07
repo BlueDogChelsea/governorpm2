@@ -1,0 +1,26 @@
+{
+  "projectOwner": {
+    "name": "Ian Owner",
+    "organisation": "Intelliquest",
+    "expectations": "<p>Typical Owner Expectations</p>"
+  },
+  "businessManager": {
+    "name": "Ian Manager",
+    "organisation": "Ian Manager Unit",
+    "expectations": "<p>Typical Business Manager Expectations</p>"
+  },
+  "solutionProvider": {
+    "name": "Ian Solution Provider",
+    "organisation": "Ian Provider Unit",
+    "expectations": "<p>Typical Solution Provider Expectations</p>"
+  },
+  "additionalStakeholders": [
+    {
+      "id": 1765113495732,
+      "name": "Ian Additional Stakeholder",
+      "role": "Add'l SH",
+      "organisation": "Ian Add'l SH",
+      "expectations": "<p>Typical Additional Stakeholder Expectations</p><p><strong>Bold </strong>bit.</p>"
+    }
+  ]
+}

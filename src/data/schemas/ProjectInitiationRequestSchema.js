@@ -49,7 +49,7 @@ export const projectInitiationRequestSchema = [
         id: 'stakeholders',
         title: '7. Key Stakeholders',
         fields: [
-            { key: 'stakeholders', label: 'Key Stakeholders', type: 'textarea', placeholder: 'List the key stakeholders...' }
+            { key: 'stakeholders', label: 'Key Stakeholders', type: 'richtext', placeholder: 'List the key stakeholders...' }
         ]
     },
     {

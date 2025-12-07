@@ -2,7 +2,8 @@
 const ARTEFACT_IDS = {
     ISI: 'initial-stakeholder-identification',
     PIR: 'project-initiation-request',
-    BC: 'business-case'
+    BC: 'business-case',
+    CHARTER: 'projectCharter'
 }
 
 /**
@@ -22,29 +23,32 @@ const ArtefactImportService = {
         const available = []
 
         try {
+            // Check for ISI (Source for PIR)
             if (artefactId === ARTEFACT_IDS.PIR) {
-                // Check for ISI
-                // projects/${projectId}/initialStakeholders.json
-                const isiExists = await window.electronAPI.checkFileExists(`projects/${projectId}/initialStakeholders.json`)
-                if (isiExists) {
+                // ISI is stored at project root typically
+                // Use readJSON to check existence since we know it works for this path
+                const data = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
+                if (data) {
                     available.push({ id: ARTEFACT_IDS.ISI, name: 'Initial Stakeholder Identification' })
                 }
-            } else if (artefactId === ARTEFACT_IDS.BC) {
-                // Check for PIR
-                // We need to read artefacts.json to find the PIR and see if it has content
-                const artefacts = await window.electronAPI.readJSON(`projects/${projectId}/artefacts.json`) || []
-                const pir = artefacts.find(a => a.id === ARTEFACT_IDS.PIR)
+            }
 
-                // Check if PIR has meaningful content (not just empty fields)
-                if (pir && pir.content && Object.keys(pir.content).length > 2) {
-                    // Simple heuristic: if it has content keys other than maybe just default empties
-                    // Better check: check specific fields
-                    const hasData = Object.values(pir.content).some(v => v && v !== '' && v !== '<p></p>')
-                    if (hasData) {
-                        available.push({ id: ARTEFACT_IDS.PIR, name: 'Project Initiation Request' })
-                    }
+            // Check for PIR (Source for BC and Charter)
+            if (artefactId === ARTEFACT_IDS.BC || artefactId === ARTEFACT_IDS.CHARTER) {
+                const data = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                if (data) {
+                    available.push({ id: ARTEFACT_IDS.PIR, name: 'Project Initiation Request' })
                 }
             }
+
+            // Check for Business Case (Source for Charter)
+            if (artefactId === ARTEFACT_IDS.CHARTER) {
+                const data = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
+                if (data) {
+                    available.push({ id: ARTEFACT_IDS.BC, name: 'Business Case' })
+                }
+            }
+
         } catch (err) {
             console.error("Error checking for imports:", err)
         }
@@ -67,20 +71,38 @@ const ArtefactImportService = {
         let newContent = { ...currentContent }
 
         try {
+            // Case 1: ISI -> PIR
             if (targetArtefactId === ARTEFACT_IDS.PIR && sourceId === ARTEFACT_IDS.ISI) {
-                // Load ISI Data
-                const isiData = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
-                if (isiData) {
-                    newContent = mapISIToPIR(isiData, newContent, overwrite)
-                }
-            } else if (targetArtefactId === ARTEFACT_IDS.BC && sourceId === ARTEFACT_IDS.PIR) {
-                // Load PIR Data
-                const artefacts = await window.electronAPI.readJSON(`projects/${projectId}/artefacts.json`) || []
-                const pir = artefacts.find(a => a.id === ARTEFACT_IDS.PIR)
-                if (pir && pir.content) {
-                    newContent = mapPIRToBC(pir.content, newContent, overwrite)
+                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
+                if (sourceData) {
+                    newContent = mapISIToPIR(sourceData, newContent, overwrite)
                 }
             }
+
+            // Case 2: PIR -> BC
+            else if (targetArtefactId === ARTEFACT_IDS.BC && sourceId === ARTEFACT_IDS.PIR) {
+                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                if (sourceData && sourceData.content) {
+                    newContent = mapPIRToBC(sourceData.content, newContent, overwrite)
+                }
+            }
+
+            // Case 3: PIR -> Charter
+            else if (targetArtefactId === ARTEFACT_IDS.CHARTER && sourceId === ARTEFACT_IDS.PIR) {
+                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                if (sourceData && sourceData.content) {
+                    newContent = mapPIRToCharter(sourceData.content, newContent, overwrite)
+                }
+            }
+
+            // Case 4: BC -> Charter
+            else if (targetArtefactId === ARTEFACT_IDS.CHARTER && sourceId === ARTEFACT_IDS.BC) {
+                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
+                if (sourceData && sourceData.content) {
+                    newContent = mapBCToCharter(sourceData.content, newContent, overwrite)
+                }
+            }
+
         } catch (err) {
             console.error("Error importing data:", err)
             throw err
@@ -92,13 +114,9 @@ const ArtefactImportService = {
 
 // -- Mapping Logic --
 
-// Helper to safely merge fields
 const mergeField = (target, key, value, overwrite) => {
-    // If value is null/undefined/empty, don't import anything (unless we want to clear it? No, usually we import *data*)
     if (value === null || value === undefined || value === '') return
 
-    // If target is empty, copy.
-    // If target has value, only copy if overwrite is true.
     const targetValue = target[key]
     const isTargetEmpty = targetValue === undefined || targetValue === null || targetValue === '' || targetValue === '<p></p>'
 
@@ -107,91 +125,106 @@ const mergeField = (target, key, value, overwrite) => {
     }
 }
 
+// 4.1 Identify Stakeholders -> PIR
 const mapISIToPIR = (isi, target, overwrite) => {
-    // Destination: Section 7 (Key Stakeholders) -> "Key Stakeholders"
-    // Format as HTML list
+    // 1. Key Stakeholders (Block) -> PIR.stakeholders
+    // Formatted with newlines to ensure editor parsing treats it as block content
+    let pieces = []
 
-    let html = ''
-
-    const addStakeholder = (label, person) => {
-        if (person && person.name) {
-            html += `<p><strong>${label}:</strong> ${person.name}`
-            if (person.organisation) html += ` (${person.organisation})`
-            html += `</p>`
-        }
+    // Add Project Owner
+    if (isi.projectOwner && isi.projectOwner.name) {
+        let label = 'Project Owner'
+        let text = `${label}: ${isi.projectOwner.name}`
+        if (isi.projectOwner.organisation) text += ` (${isi.projectOwner.organisation})`
+        pieces.push(`<li><strong>${text}</strong></li>`)
     }
 
-    addStakeholder('Project Owner', isi.projectOwner)
-    addStakeholder('Business Manager', isi.businessManager)
-    addStakeholder('Solution Provider', isi.solutionProvider)
+    // Add Business Manager
+    if (isi.businessManager && isi.businessManager.name) {
+        let label = 'Business Manager'
+        let text = `${label}: ${isi.businessManager.name}`
+        if (isi.businessManager.organisation) text += ` (${isi.businessManager.organisation})`
+        pieces.push(`<li><strong>${text}</strong></li>`)
+    }
 
+    // Add Additional Stakeholders
     if (isi.additionalStakeholders && isi.additionalStakeholders.length > 0) {
-        html += `<p><strong>Other Stakeholders:</strong></p><ul>`
         isi.additionalStakeholders.forEach(s => {
-            html += `<li>${s.name}`
-            const details = []
-            if (s.role) details.push(s.role)
-            if (s.organisation) details.push(s.organisation)
-            if (details.length > 0) html += ` (${details.join(', ')})`
-            html += `</li>`
+            let label = s.role || 'Stakeholder'
+            let text = `${label}: ${s.name}`
+            if (s.organisation) text += ` (${s.organisation})`
+            pieces.push(`<li>${text}</li>`)
         })
-        html += `</ul>`
     }
 
-    mergeField(target, 'Key Stakeholders', html, overwrite)
+    if (pieces.length > 0) {
+        // Wrap in UL with explicit newlines
+        const html = `<ul>\n${pieces.join('\n')}\n</ul>`
+        mergeField(target, 'stakeholders', html, overwrite)
+    }
+
+    // 2. Project Owner -> PIR.Project Owner
+    if (isi.projectOwner && isi.projectOwner.name) {
+        mergeField(target, 'Project Owner', isi.projectOwner.name, overwrite)
+    }
+
+    // 3. Business Manager -> PIR.Project Manager (if empty)
+    if (isi.businessManager && isi.businessManager.name) {
+        mergeField(target, 'Project Manager', isi.businessManager.name, overwrite)
+    }
+
     return target
 }
 
+// 4.2 PIR → Business Case
 const mapPIRToBC = (pir, target, overwrite) => {
-    // 1. Project Name
-    mergeField(target, 'Project Name', pir['Project Name'], overwrite)
+    // PIR.ProblemNeedOpportunity -> BC.BusinessJustification
+    mergeField(target, 'Business Justification', pir['problem'], overwrite)
 
-    // 2. Sections 2&3 (PIR) -> Current Situation / Problem (BC)
-    // PIR: "Background / Context" -> BC: "Background / Context" (Assuming key matches or mapping needed)
-    // Let's check keys based on Schema implies.
-    // Assuming keys are typically the Label or close to it.
-    // The prompt says: "Section 2 & 3 -> BC: Current Situation / Problem"
+    // PIR.ExpectedBenefits -> BC.ExpectedBenefits
+    mergeField(target, 'Expected Benefits', pir['benefits'], overwrite)
 
-    // PIR Keys (inferred from prompt/usage):
-    // "Background / Context"
-    // "Problem / Need / Opportunity"
+    // PIR.Scope.In / Out -> BC.ScopeOverview (Target key: "High-level Scope")
+    const inScope = pir['In Scope'] || ''
+    const outScope = pir['Out of Scope'] || ''
+    let scopeText = ''
+    if (inScope) scopeText += `<p><strong>In Scope:</strong></p>${inScope}`
+    if (outScope) scopeText += `<p><strong>Out of Scope:</strong></p>${outScope}`
 
-    // BC Keys:
-    // "Background / Context" (?) -> Let's check BC Schema or Component
-    // "Problem / Need / Opportunity" (?) 
+    if (scopeText) {
+        mergeField(target, 'High-level Scope', scopeText, overwrite)
+    }
 
-    // Checking previous file dumps:
-    // PIR has `projectInitiationRequestSchema`.
-    // BC has `businessCaseSchema`.
+    // PIR.KeyStakeholders -> BC.Stakeholders (Target key: "otherStakeholders" in Governance group)
+    mergeField(target, 'otherStakeholders', pir['stakeholders'], overwrite)
 
-    // I will assume keys match the prompt descriptions for now.
-    // If keys defined in schema are slightly different, I might miss them.
-    // However, the rule is "Map by field key". So if the keys match, it works.
-    // Only where keys differ do we need explicit logic.
+    return target
+}
 
-    // Prompt Mappings:
+// 4.3 PIR → Project Charter
+const mapPIRToCharter = (pir, target, overwrite) => {
+    // PIR.ProjectObjectives -> Charter.Objectives (Target key: executiveSummary)
+    mergeField(target, 'executiveSummary', pir['objectives'], overwrite)
 
-    // Direct Key Matches (Ideal):
-    mergeField(target, 'Project Name', pir['Project Name'], overwrite)
-    mergeField(target, 'Background / Context', pir['Background / Context'], overwrite)
-    mergeField(target, 'Problem / Need / Opportunity', pir['Problem / Need / Opportunity'], overwrite)
+    // PIR.Scope.In -> Charter.ProjectScope (Target key: 'scopeIn')
+    mergeField(target, 'scopeIn', pir['In Scope'], overwrite)
 
-    // Section 4 -> BC Expected Benefits
-    // PIR: "Expected Benefits & Success Criteria"
-    // BC: "Expected Benefits & Success Criteria" (Check if splitting needed? Prompt says Section 4 -> BC: Expected Benefits)
-    mergeField(target, 'Expected Benefits & Success Criteria', pir['Expected Benefits & Success Criteria'], overwrite)
+    // PIR.KeyStakeholders -> Charter.ProjectOrganisation (Target key: rolesResponsibilities)
+    mergeField(target, 'rolesResponsibilities', pir['stakeholders'], overwrite)
 
-    // Section 5 -> BC Objectives / Scope
-    // PIR: "Project Objectives", "In Scope", "Out of Scope"
-    // BC: "Project Objectives", "In Scope", "Out of Scope"
-    mergeField(target, 'Project Objectives', pir['Project Objectives'], overwrite)
-    mergeField(target, 'In Scope', pir['In Scope'], overwrite)
-    mergeField(target, 'Out of Scope', pir['Out of Scope'], overwrite)
+    return target
+}
 
-    // Section 14 -> BC Strategic Alignment
-    mergeField(target, 'Strategic Alignment', pir['Strategic Alignment'], overwrite)
+// 4.4 Business Case → Charter
+const mapBCToCharter = (bc, target, overwrite) => {
+    // BC.BusinessJustification -> Charter.Justification (Target key: 'businessCaseConsiderations')
+    mergeField(target, 'businessCaseConsiderations', bc['Business Justification'], overwrite)
 
-    // Silent skipping for others.
+    // BC.MajorMilestones -> Charter.HighLevelRoadmap
+    // Skip complex table mapping for now to avoid breaking UI.
+
+    // BC.SuccessCriteria -> Charter.SuccessCriteria (Target key: 'successCriteria')
+    mergeField(target, 'successCriteria', bc['Critical Success Criteria'], overwrite)
 
     return target
 }

@@ -5,8 +5,8 @@
     "expectations": "<p>Benefits to be achieved.</p>"
   },
   "businessManager": {
-    "name": "",
-    "organisation": "",
+    "name": "Bob Manager",
+    "organisation": "Business Unit",
     "expectations": ""
   },
   "solutionProvider": {

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Debug HTML Generation</title>
+</head>
+
+<body>
+    <h1>Debug HTML Output</h1>
+    <div id="output" style="white-space: pre-wrap; font-family: monospace; border: 1px solid #ccc; padding: 10px;">
+    </div>
+    <div id="render-target" style="border: 1px dashed blue; padding: 10px; margin-top: 10px;"></div>
+
+    <script>
+        // Mock data
+        const mockISI = {
+            projectOwner: { name: 'Alice Owner', organisation: 'Owner Org' },
+            businessManager: { name: 'Bob Manager', organisation: 'Biz Org' },
+            additionalStakeholders: [
+                { name: 'Charlie', role: 'Developer', organisation: 'Tech Corp' }
+            ]
+        };
+
+        // Reimplement mapISIToPIR logic here for isolation testing
+        const generateHTML = (isi) => {
+            let html = '<ul>'
+            const addRow = (label, p) => {
+                if (p && p.name) {
+                    // Replicating exact logic from ArtefactImportService.js
+                    html += `<li><strong>${label}:</strong> ${p.name}`
+                    if (p.organisation) html += ` (${p.organisation})`
+                    html += `</li>`
+                }
+            }
+            addRow('Project Owner', isi.projectOwner)
+            addRow('Business Manager', isi.businessManager)
+
+            if (isi.additionalStakeholders && isi.additionalStakeholders.length > 0) {
+                isi.additionalStakeholders.forEach(s => {
+                    let label = s.role || 'Stakeholder'
+                    html += `<li><strong>${label}:</strong> ${s.name}`
+                    if (s.organisation) html += ` (${s.organisation})`
+                    html += `</li>`
+                })
+            }
+            html += '</ul>'
+            return html;
+        }
+
+        const generated = generateHTML(mockISI);
+
+        // Output raw string
+        document.getElementById('output').textContent = generated;
+
+        // Try to render it
+        document.getElementById('render-target').innerHTML = generated;
+
+        console.log("Generated HTML:", generated);
+    </script>
+</body>
+
+</html>

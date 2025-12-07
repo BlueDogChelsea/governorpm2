@@ -1,0 +1,125 @@
+[
+  {
+    "id": "project-initiation-request",
+    "name": "Project Initiation Request",
+    "phase": "Initiating",
+    "status": "In Progress",
+    "content": {
+      "Date": "",
+      "Version": "",
+      "Project Owner": "Ian Owner",
+      "Project Manager": "Ian Manager",
+      "background": "",
+      "problem": "",
+      "benefits": "",
+      "objectives": "",
+      "In Scope": "",
+      "Out of Scope": "",
+      "stakeholders": "<ul>\n<li><strong>Project Owner: Ian Owner (Intelliquest)</strong></li>\n<li><strong>Business Manager: Ian Manager (Ian Manager Unit)</strong></li>\n<li>Add'l SH: Ian Additional Stakeholder (Ian Add'l SH)</li>\n</ul>",
+      "assumptions": "",
+      "constraints": "",
+      "risks": "",
+      "Estimated Effort (Man-days)": "",
+      "Estimated Cost (€)": "",
+      "Target Start Date": "",
+      "Target End Date": "",
+      "approach": "",
+      "dependencies": "",
+      "alignment": "",
+      "approval": {
+        "approverName": "",
+        "approvalDate": "",
+        "signature": "",
+        "isApproved": false,
+        "timestamp": null
+      }
+    },
+    "modifiedAfterApproval": false,
+    "importPromptShown": true,
+    "lastUpdated": "2025-12-07T13:40:06.014Z"
+  },
+  {
+    "id": "business-case",
+    "name": "Business Case",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "projectCharter",
+    "name": "Project Charter",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "initiating-phase-exit-checklist",
+    "name": "Initiating Phase Exit Checklist",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-work-plan",
+    "name": "Project Work Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "requirements-doc",
+    "name": "Requirements Document",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "risk-log",
+    "name": "Risk Log",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "quality-plan",
+    "name": "Quality Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "comm-plan",
+    "name": "Communication Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "procurement-plan",
+    "name": "Procurement Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-handbook",
+    "name": "Project Handbook",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "status-reports",
+    "name": "Status Reports",
+    "phase": "Executing",
+    "status": "Not Started"
+  },
+  {
+    "id": "deliverables",
+    "name": "Deliverables",
+    "phase": "Executing",
+    "status": "Not Started"
+  },
+  {
+    "id": "end-project-report",
+    "name": "End-of-Project Report",
+    "phase": "Closing",
+    "status": "Not Started"
+  },
+  {
+    "id": "lessons-learned",
+    "name": "Lessons Learned",
+    "phase": "Closing",
+    "status": "Not Started"
+  }
+]

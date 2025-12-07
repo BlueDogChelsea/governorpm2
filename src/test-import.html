@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Feature Automated Tests</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .log { margin-bottom: 5px; font-family: monospace; }
+        h2 { margin-top: 20px; border-bottom: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Import Feature Automated Tests</h1>
+    <div id="output"></div>
+
+    <script type="module">
+        import ArtefactImportService from './services/ArtefactImportService.js';
+
+        const output = document.getElementById('output');
+        const log = (msg, type = 'info') => {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = msg;
+            output.appendChild(div);
+        };
+        const assert = (condition, msg) => {
+            if (condition) {
+                log(`[PASS] ${msg}`, 'pass');
+            } else {
+                log(`[FAIL] ${msg}`, 'fail');
+                console.error(`FAIL: ${msg}`);
+            }
+        };
+
+        // Mock Data
+        const PROJECT_ID = 'test-project';
+        const MOCK_ISI = {
+            projectOwner: { name: 'Owner Name', organisation: 'Owner Org' },
+            businessManager: { name: 'Manager Name' },
+            additionalStakeholders: [
+                { name: 'Stakeholder 1', role: 'Role 1', organisation: 'Org 1' }
+            ]
+        };
+        const MOCK_PIR = {
+            'content': {
+                'problem': 'The Problem',
+                'benefits': 'The Benefits',
+                'In Scope': 'Scope In',
+                'Out of Scope': 'Scope Out',
+                'stakeholders': 'Stakeholders Text',
+                'objectives': 'Objectives Text'
+            }
+        };
+        const MOCK_BC = {
+            'content': {
+                'Business Justification': 'Justification Text',
+                'Critical Success Criteria': 'Success Text'
+            }
+        };
+
+        // Mock Electron API
+        window.electronAPI = {
+            checkFileExists: async (path) => {
+                if (path.includes('initialStakeholders.json')) return true;
+                if (path.includes('project-initiation-request.json')) return true;
+                if (path.includes('business-case.json')) return true;
+                return false;
+            },
+            readJSON: async (path) => {
+                if (path.includes('initialStakeholders.json')) return MOCK_ISI;
+                if (path.includes('project-initiation-request.json')) return MOCK_PIR;
+                if (path.includes('business-case.json')) return MOCK_BC;
+                return null;
+            }
+        };
+
+        const runTests = async () => {
+            try {
+                // Test 1: Discovery
+                log('--- Test 1: Import Discovery ---');
+                const importsPIR = await ArtefactImportService.getAvailableImports(PROJECT_ID, 'project-initiation-request');
+                assert(importsPIR.length === 1 && importsPIR[0].id === 'initial-stakeholder-identification', 'PIR detects ISI successfully');
+
+                const importsBC = await ArtefactImportService.getAvailableImports(PROJECT_ID, 'business-case');
+                assert(importsBC.length === 1 && importsBC[0].id === 'project-initiation-request', 'BC detects PIR successfully');
+
+                const importsCharter = await ArtefactImportService.getAvailableImports(PROJECT_ID, 'project-charter');
+                assert(importsCharter.length === 2, 'Charter detects PIR and BC successfully');
+
+
+                // Test 2: ISI -> PIR Mapping
+                log('--- Test 2: ISI -> PIR Mapping ---');
+                // Target has some data to verify merge logic
+                const pirTarget = { 'Project Owner': 'Old Owner' }; 
+                // Overwrite = true
+                const pirResult = await ArtefactImportService.importData(PROJECT_ID, 'project-initiation-request', 'initial-stakeholder-identification', pirTarget, true);
+                
+                assert(pirResult['Project Owner'] === 'Owner Name', 'Project Owner mapped correctly');
+                assert(pirResult['Project Manager'] === 'Manager Name', 'Project Manager mapped correctly');
+                assert(pirResult['stakeholders'].includes('Owner Name') && pirResult['stakeholders'].includes('Stakeholder 1'), 'Key Stakeholders generated correctly');
+
+                // Test "Fill Empty Only" (Overwrite = false)
+                const pirTarget2 = { 'Project Owner': 'Existing Owner' };
+                const pirResult2 = await ArtefactImportService.importData(PROJECT_ID, 'project-initiation-request', 'initial-stakeholder-identification', pirTarget2, false);
+                assert(pirResult2['Project Owner'] === 'Existing Owner', 'Fill Empty Only respects existing content');
+
+
+                // Test 3: PIR -> BC Mapping
+                log('--- Test 3: PIR -> BC Mapping ---');
+                const bcResult = await ArtefactImportService.importData(PROJECT_ID, 'business-case', 'project-initiation-request', {}, true);
+                assert(bcResult['Business Justification'] === 'The Problem', 'Business Justification mapped from PIR Problem');
+                assert(bcResult['Expected Benefits'] === 'The Benefits', 'Expected Benefits mapped from PIR Benefits');
+                assert(bcResult['High-level Scope'].includes('Scope In') && bcResult['High-level Scope'].includes('Scope Out'), 'Scope combined correctly');
+
+
+                // Test 4: PIR -> Charter Mapping
+                log('--- Test 4: PIR -> Charter Mapping ---');
+                const charterResult1 = await ArtefactImportService.importData(PROJECT_ID, 'project-charter', 'project-initiation-request', {}, true);
+                assert(charterResult1['executiveSummary'] === 'Objectives Text', 'Objectives mapped to Executive Summary');
+                assert(charterResult1['scopeIn'] === 'Scope In', 'Scope In mapped correctly');
+
+
+                // Test 5: BC -> Charter Mapping
+                log('--- Test 5: BC -> Charter Mapping ---');
+                const charterResult2 = await ArtefactImportService.importData(PROJECT_ID, 'project-charter', 'business-case', {}, true);
+                assert(charterResult2['businessCaseConsiderations'] === 'Justification Text', 'Business Justification mapped to Considerations');
+                assert(charterResult2['successCriteria'] === 'Success Text', 'Success Criteria mapped correctly');
+
+            } catch (e) {
+                log(`ERROR: ${e.message}`, 'fail');
+                console.error(e);
+            }
+        };
+
+        runTests();
+    </script>
+</body>
+</html>

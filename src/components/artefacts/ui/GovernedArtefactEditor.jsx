@@ -43,8 +43,11 @@ const GovernedArtefactEditor = ({
 
     // Import Logic State
     const [importPromptShown, setImportPromptShown] = useState(false)
-    const [showImportModal, setShowImportModal] = useState(false)
-    const [showManualImport, setShowManualImport] = useState(false)
+    const [showImportModal, setShowImportModal] = useState(false) // For Conflict/Choice (Case C)
+    const [showNoImportsModal, setShowNoImportsModal] = useState(false) // For No Upstream (Case A)
+    const [showApprovedWarningModal, setShowApprovedWarningModal] = useState(false) // For Approved (Case D)
+
+    // Tracks which sources are available
     const [importCandidates, setImportCandidates] = useState([])
 
     // Top-level state for *Approval*
@@ -128,63 +131,92 @@ const GovernedArtefactEditor = ({
     }, [artefact])
 
     // -- Import Logic --
+    // Only fetch candidates when projectId/artefactId matches
     useEffect(() => {
-        const checkImports = async () => {
-            if (!artefact || !artefact.id) return
-            // Wait for projectId to be available
-            if (!projectId && projectId !== 0) return
-
-            // 1. Should we prompt?
-            // Only if NOT prompted before and status is Not Started (clean)
-            // And we verify content is actually empty (apart from maybe initialData structure)
-            if (artefact.importPromptShown) return
-            if (artefact.status !== 'Not Started') return
-
-            // Check if we have candidates
+        const fetchCandidates = async () => {
+            if (!artefact || !projectId) return
             const candidates = await ArtefactImportService.getAvailableImports(projectId, artefact.id)
-            if (candidates.length > 0) {
-                setImportCandidates(candidates)
-                setShowImportModal(true)
+            setImportCandidates(candidates)
+        }
+        fetchCandidates()
+    }, [artefact?.id, projectId])
+
+    const handleImportButtonClick = async () => {
+        const candidates = importCandidates
+
+        // Case A: No upstream artefacts
+        if (candidates.length === 0) {
+            setShowNoImportsModal(true)
+            return
+        }
+
+        // We assume we import from ALL available candidates sequentially 
+        // to support PIR+BC combining into Charter.
+        startImportFlow(candidates)
+    }
+
+    const startImportFlow = (candidates) => {
+        // Check if target has meaningful data
+        const hasExistingData = Object.values(contentData).some(v => v && v !== '' && v !== '<p></p>')
+        const isApproved = approval.isApproved
+
+        if (!hasExistingData) {
+            // Case B: Empty target -> Populate Immediately
+            executeImport(candidates, false) // No overwrite needed (it's empty)
+        } else {
+            // Case C & D: Target has data
+            if (isApproved) {
+                setShowApprovedWarningModal(true)
+            } else {
+                setShowImportModal(true) // Case C generic
             }
         }
-        checkImports()
-    }, [artefact?.id, projectId]) // Run when ID loads or project ID updates
+    }
 
-    const handleImport = async (sourceId, overwrite = false) => {
-        if (!sourceId) return
-
+    const executeImport = async (candidates, overwrite) => {
         try {
-            const newContent = await ArtefactImportService.importData(projectId, artefact.id, sourceId, contentData, overwrite)
+            let newContent = { ...contentData }
+
+            // Iterate all candidates and merge
+            for (const candidate of candidates) {
+                newContent = await ArtefactImportService.importData(projectId, artefact.id, candidate.id, newContent, overwrite)
+            }
 
             // Update Content
             setContentData(newContent)
 
-            // Update Flags
-            setImportPromptShown(true)
-            setShowImportModal(false)
-            setShowManualImport(false)
+            // Post Import Behavior
+            // Autosave is required "Autosave the imported data".
 
-            // Note: isDirty will naturally become true via useEffect on contentData change
+            // Note: We construct dataToSave to bypass stale closure on `contentData`
+            // But we must use the new `newContent` we just created.
+
+            // Calculate Status Logic:
+            // "Mark status as In Progress (if previously Not Started)"
+            // "If Approved → switch to Approved — Modified"
+
+            let newStatus = approval.isApproved ? 'Approved' : 'In Progress'
+            let newModified = approval.isApproved ? true : false
+
+            const dataToSave = {
+                content: { ...newContent, approval },
+                status: newStatus,
+                modifiedAfterApproval: newModified,
+                importPromptShown: true
+            }
+
+            // Use hook's executeSave with forced update function
+            await hookExecuteSave(() => dataToSave, true)
+
+            // Close Modals
+            setShowImportModal(false)
+            setShowApprovedWarningModal(false)
+
+            // Note: Since we saved, saveStatus will eventually show "Saved" / Success icon in the UI.
+
         } catch (error) {
             console.error("Import failed", error)
             alert("Failed to import data.")
-        }
-    }
-
-    const handleDeclineImport = () => {
-        setImportPromptShown(true)
-        setShowImportModal(false)
-
-        // Persist the flag immediately so we don't prompt again even if they don't save content
-        // We create a shallow copy with the flag updated and save it
-        if (onSave) {
-            // We use the raw artefact + flag. We don't want to save "content" if they didn't touch it?
-            // Actually, if we just update the flag, we should probably save the whole state as it is.
-            const updatedArtefact = {
-                ...artefact,
-                importPromptShown: true
-            }
-            onSave(updatedArtefact)
         }
     }
 
@@ -244,48 +276,22 @@ const GovernedArtefactEditor = ({
         if (isReapproval) {
             // RE-APPROVE FLOW
             newApprovalState.timestamp = new Date().toISOString()
-            // Keep existing name/signature/date unless we want to force update?
-            // Requirement: "Update the approval section (approver name, date, signature)" -> implies keeps current input
-            // But usually implies updating the *timestamp* of approval. 
-            // The prompt says "Update the approval section" -> likely means commit the values.
 
             setApproval(newApprovalState)
             approvedSnapshot.current = JSON.stringify(contentData)
             setShowModifiedBanner(false)
 
             // 2. Auto-Save immediately
-            // We need to pass the NEW state to the save function because state updates are async
-            // Hook's executeSave uses `content` from closure, which might be stale if we just set it.
-            // But `handleSave` uses `hookExecuteSave` which uses `fullContent`...
-            // `fullContent` depends on `approval` state.
-            // We need to bypass the stale state issue.
-            // `useArtefactSave` takes `content` as argument.
-            // We can pass the new content to `executeSave`'s `prepareDataFn` but that's for *modification*.
-
-            // Fix: We'll construct the data to save explicitly
             const dataToSave = {
                 content: { ...contentData, approval: newApprovalState },
                 status: 'Approved',
                 modifiedAfterApproval: false
             }
 
-            // Call the raw onSave from props directly?
-            // Or use hook? Hook handles "saving" status.
-            // Hook `executeSave` allows `prepareDataFn`. 
-            // `prepareDataFn` receives `content` (stale). We can just ignore it and return our new data.
-
-            // We need to access `hookExecuteSave`.
             hookExecuteSave(() => dataToSave, true)
 
         } else {
-            // STANDARD TOGGLE FLOW (Mark Approved / Unmark)
-            toggleApproval()
-            // Standard flow doesn't auto-save per requirement (only re-approve does explicitly), 
-            // but usually "Mark as Approved" implies saving? 
-            // Requirement 5: "The same auto-save on approval". 
-            // So YES, we should auto-save on ANY approval.
-
-            // Let's unify.
+            // STANDARD TOGGLE FLOW
             const newIsApproved = !approval.isApproved
             if (newIsApproved) {
                 // APPROVING
@@ -304,12 +310,7 @@ const GovernedArtefactEditor = ({
                 hookExecuteSave(() => dataToSave, true)
 
             } else {
-                // REVOKING (User unchecked)
-                // Just update state, let them click save? Or auto-save?
-                // "Approval action should be a single click" -> implies the positive action.
-                // Unchecking usually requires manual save or auto-save.
-                // Let's stick to state update for unchecking to be safe, or consistency?
-                // Let's just do state update for revocation.
+                // REVOKING
                 toggleApproval()
             }
         }
@@ -408,17 +409,16 @@ const GovernedArtefactEditor = ({
                 onBack={handleBack}
                 actions={
                     <>
+                        {/* Import Button */}
                         <button
-                            onClick={async () => {
-                                const candidates = await ArtefactImportService.getAvailableImports(projectId, artefact.id)
-                                setImportCandidates(candidates)
-                                setShowManualImport(true)
-                            }}
-                            className="text-gray-500 hover:text-blue-600 transition-colors mr-2 p-2 rounded-full hover:bg-gray-100"
-                            title="Import Data..."
+                            onClick={handleImportButtonClick}
+                            className="flex items-center text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2 mr-2 transition-colors shadow-sm"
+                            title="Import data from earlier steps"
                         >
-                            <ArrowDownOnSquareIcon className="h-5 w-5" />
+                            <ArrowDownOnSquareIcon className="h-5 w-5 mr-2 text-gray-500" />
+                            Import data from earlier steps
                         </button>
+
                         {actions}
                         <ArtefactSaveButton
                             onSave={handleSave}
@@ -500,90 +500,100 @@ const GovernedArtefactEditor = ({
             )}
 
 
-            {/* Initial Import Prompt Modal */}
-            {
-                showImportModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pre-Fill This Artefact?</h3>
-                            <p className="text-gray-600 mb-6 text-sm">
-                                Governor can pre-fill this artefact using information from earlier lifecycle artefacts (e.g., {importCandidates.map(c => c.name).join(', ')}).
-                                <br /><br />
-                                Would you like to import available information?
-                            </p>
-                            <div className="flex justify-end space-x-3">
-                                <button
-                                    onClick={handleDeclineImport}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    No, Start Blank
-                                </button>
-                                <button
-                                    onClick={() => handleImport(importCandidates[0]?.id)} // Default to first available
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                                >
-                                    Yes, Pre-Fill
-                                </button>
-                            </div>
+            {/* Case A: No Imports Modal */}
+            {showNoImportsModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Import Data</h3>
+                        <p className="text-gray-600 mb-6">
+                            No earlier artefacts found in this project.
+                        </p>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setShowNoImportsModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
-            {/* Manual Import Modal */}
-            {
-                showManualImport && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">Import Data</h3>
-                                <button onClick={() => setShowManualImport(false)} className="text-gray-400 hover:text-gray-500">
-                                    <XMarkIcon className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            {importCandidates.length === 0 ? (
-                                <p className="text-gray-500 mb-6">No previous artefacts found to import from.</p>
-                            ) : (
-                                <div className="space-y-4">
-                                    <p className="text-sm text-gray-600">Select source to import from:</p>
-                                    <select id="importSource" className="w-full border-gray-300 rounded-md shadow-sm">
-                                        {importCandidates.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))}
-                                    </select>
-
-                                    <div className="mt-4">
-                                        <p className="text-sm text-gray-600 mb-2">Import options:</p>
-                                        <div className="flex space-x-4">
-                                            <button
-                                                onClick={() => {
-                                                    const select = document.getElementById('importSource')
-                                                    handleImport(select.value, false) // Default: Do not overwrite
-                                                }}
-                                                className="flex-1 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
-                                            >
-                                                Import Missing Only
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    if (confirm("Are you sure you want to overwrite matching fields? Existing data will be replaced.")) {
-                                                        const select = document.getElementById('importSource')
-                                                        handleImport(select.value, true)
-                                                    }
-                                                }}
-                                                className="flex-1 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
-                                            >
-                                                Overwrite All
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+            {/* Case C: Import Options Modal */}
+            {showImportModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Import Data</h3>
+                        <p className="text-gray-600 mb-6">
+                            Some fields already contain information. <br />
+                            How would you like to import data?
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowImportModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => executeImport(importCandidates, false)}
+                                className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                            >
+                                Fill Empty Fields Only
+                            </button>
+                            <button
+                                onClick={() => executeImport(importCandidates, true)}
+                                className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
+                            >
+                                Overwrite All Fields
+                            </button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
+
+            {/* Case D: Approved Warning Modal */}
+            {showApprovedWarningModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl border border-gray-300 shadow-2xl w-full max-w-md p-6 border-l-4 border-l-yellow-400">
+                        <div className="flex items-start mb-4">
+                            <div className="flex-shrink-0">
+                                <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500 mr-2" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">Import Data</h3>
+                                <p className="text-gray-600 text-sm">
+                                    This artefact is approved. Importing data will place it into “Approved — Modified”.
+                                    <br /><br />
+                                    Some fields already contain information. How would you like to proceed?
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowApprovedWarningModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => executeImport(importCandidates, false)}
+                                className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                            >
+                                Fill Empty Only
+                            </button>
+                            <button
+                                onClick={() => executeImport(importCandidates, true)}
+                                className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
+                            >
+                                Overwrite All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }
