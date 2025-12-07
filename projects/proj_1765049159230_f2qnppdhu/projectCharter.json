@@ -1,0 +1,45 @@
+{
+  "Version": "1.0",
+  "executiveSummary": "<p>Create the Governor app.</p>",
+  "businessCaseConsiderations": "",
+  "scopeStatement": "",
+  "scopeIn": "",
+  "scopeOut": "",
+  "successCriteria": "",
+  "stakeholderNeeds": [
+    {
+      "id": "1765105034925",
+      "description": "<p>Weekly Reports</p>",
+      "priority": ""
+    },
+    {
+      "id": "1765105064858",
+      "description": "<p>Escalations</p>",
+      "priority": ""
+    }
+  ],
+  "deliverables": [],
+  "features": [],
+  "constraints": "",
+  "assumptions": "",
+  "risks": [],
+  "costSummary": "",
+  "costTable": [],
+  "milestones": [],
+  "resources": [],
+  "methodology": "",
+  "projectChange": "",
+  "configurationManagement": "",
+  "organisationalChange": "",
+  "governanceStructure": "",
+  "rolesResponsibilities": "",
+  "otherStakeholders": "",
+  "references": [],
+  "approval": {
+    "approverName": "",
+    "approvalDate": "",
+    "signature": "",
+    "isApproved": false,
+    "timestamp": null
+  }
+}

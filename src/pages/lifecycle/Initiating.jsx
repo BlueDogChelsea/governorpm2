@@ -241,11 +241,11 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                             <div className="flex justify-between items-center mb-2">
                                 <h4 className="font-medium text-gray-900">Define scope & organisation</h4>
-                                {renderStatusChip(artefacts.find(a => a.id === 'project-charter'))}
+                                {renderStatusChip(artefacts.find(a => a.id === 'projectCharter'))}
                             </div>
                             <p className="text-sm text-gray-600 mb-3">Establish high-level scope, governance roles, milestones.</p>
                             <button
-                                onClick={() => openArtefact('project-charter')}
+                                onClick={() => openArtefact('projectCharter')}
                                 className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
                                 Open Project Charter
@@ -261,7 +261,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                         Artefacts
                     </h3>
                     <div className="space-y-3">
-                        {['project-initiation-request', 'business-case', 'project-charter', 'initiating-phase-exit-checklist'].map(id => {
+                        {['project-initiation-request', 'business-case', 'projectCharter', 'initiating-phase-exit-checklist'].map(id => {
                             const art = artefacts.find(a => a.id === id)
                             const name = art ? art.name : id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                             const status = art ? art.status : 'Not Started'

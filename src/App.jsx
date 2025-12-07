@@ -25,6 +25,7 @@ import MonitorControl from './pages/lifecycle/MonitorControl'
 import InitiatingPhaseExitChecklist from './components/artefacts/InitiatingPhaseExitChecklist'
 import ProjectInitiationRequest from './components/artefacts/ProjectInitiationRequest'
 import BusinessCase from './components/artefacts/BusinessCase'
+import ProjectCharter from './components/artefacts/ProjectCharter'
 import InitialStakeholderIdentification from './components/activities/InitialStakeholderIdentification'
 import ErrorBoundary from './components/ErrorBoundary'
 
@@ -287,7 +288,7 @@ function App() {
     const defaultArtefacts = [
         { id: 'project-initiation-request', name: 'Project Initiation Request', phase: 'Initiating', status: 'Not Started' },
         { id: 'business-case', name: 'Business Case', phase: 'Initiating', status: 'Not Started' },
-        { id: 'project-charter', name: 'Project Charter', phase: 'Initiating', status: 'Not Started' },
+        { id: 'projectCharter', name: 'Project Charter', phase: 'Initiating', status: 'Not Started' },
         { id: 'initiating-phase-exit-checklist', name: 'Initiating Phase Exit Checklist', phase: 'Initiating', status: 'Not Started' },
         { id: 'project-work-plan', name: 'Project Work Plan', phase: 'Planning', status: 'Not Started' },
         { id: 'requirements-doc', name: 'Requirements Document', phase: 'Planning', status: 'Not Started' },
@@ -865,6 +866,25 @@ function App() {
                                             />
                                         ) : activeArtefact.id === 'business-case' ? (
                                             <BusinessCase
+                                                projectId={activeProjectId}
+                                                artefact={activeArtefact}
+                                                onSave={handleSaveArtefactContent}
+                                                onBack={() => {
+                                                    setActiveArtefact(null)
+                                                    if (artefactReturnTab) {
+                                                        setActiveTab(artefactReturnTab)
+                                                        setArtefactReturnTab(null)
+                                                    }
+                                                }}
+                                                onOpenGuidance={(topic, section, returnInfo) => {
+                                                    setActiveTab('Guidance')
+                                                    setActiveGuidanceTopic(topic || 'Initiating Phase')
+                                                    if (section) setActiveGuidanceSection(section)
+                                                    if (returnInfo) setGuidanceReturnPath(returnInfo)
+                                                }}
+                                            />
+                                        ) : activeArtefact.id === 'projectCharter' ? (
+                                            <ProjectCharter
                                                 projectId={activeProjectId}
                                                 artefact={activeArtefact}
                                                 onSave={handleSaveArtefactContent}
