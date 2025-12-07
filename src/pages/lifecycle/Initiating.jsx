@@ -1,89 +1,84 @@
 import React, { useState, useEffect } from 'react'
 import { CheckCircleIcon, ArrowTopRightOnSquareIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
+import { markdownClean } from '../../utils/markdownClean'
+
+// Import PM2 content
+import initiatingData from '../../data/pm2/initiating_phase.json'
+import rolesData from '../../data/pm2/roles_and_organisation.json'
 
 const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOpenGuidance, onOpenLogs }) => {
-    const [meetingCompleted, setMeetingCompleted] = useState(false)
-    const [showDiagram, setShowDiagram] = useState(false)
+    // Activity Persistence State
+    const [activityStatus, setActivityStatus] = useState({})
+    const [expandedActivity, setExpandedActivity] = useState(null)
+    const [showProcessDiagram, setShowProcessDiagram] = useState(false)
 
-    // Helper to get artefact status
-    const getStatus = (id) => {
-        const art = artefacts.find(a => a.id === id)
-        return art ? art.status : 'Not Started'
-    }
-
-    // Helper to check if artefact is complete
-    const isComplete = (id) => getStatus(id) === 'Complete'
-
-    const checklistArtefact = artefacts.find(a => a.id === 'initiating-phase-exit-checklist')
-    const checklistContent = (checklistArtefact && checklistArtefact.content) || {}
-    const checklistStatus = checklistArtefact ? checklistArtefact.status : 'Not Started'
-
-    let isSignedOff = false
-
-    // Check Formal Approval
-    if (checklistContent.approval && checklistContent.approval.isApproved) {
-        isSignedOff = true
-    }
-
-    // Load Stakeholder Data for Activity Status
-    const [stakeholderStatus, setStakeholderStatus] = useState('Not Started')
-
+    // Load activity status on mount/project change
     useEffect(() => {
-        const checkStakeholderStatus = async () => {
+        const loadActivityStatus = async () => {
             if (window.electronAPI && projectId) {
                 try {
-                    const filePath = `projects/${projectId}/initialStakeholders.json`
-                    const data = await window.electronAPI.readJSON(filePath)
-
-                    if (data) {
-                        const hasProjectOwner = data.projectOwner && (data.projectOwner.name || data.projectOwner.organisation || data.projectOwner.expectations)
-                        const hasBusinessManager = data.businessManager && (data.businessManager.name || data.businessManager.organisation || data.businessManager.expectations)
-                        const hasSolutionProvider = data.solutionProvider && (data.solutionProvider.name || data.solutionProvider.organisation || data.solutionProvider.expectations)
-                        const hasAdditional = data.additionalStakeholders && data.additionalStakeholders.length > 0
-
-                        const isCompleted = data.projectOwner?.name && data.projectOwner.name.trim() !== '' &&
-                            data.businessManager?.name && data.businessManager.name.trim() !== ''
-
-                        if (isCompleted) {
-                            setStakeholderStatus('Completed')
-                        } else if (hasProjectOwner || hasBusinessManager || hasSolutionProvider || hasAdditional) {
-                            setStakeholderStatus('In Progress')
-                        } else {
-                            setStakeholderStatus('Not Started')
-                        }
-                    } else {
-                        setStakeholderStatus('Not Started')
-                    }
+                    const status = await window.electronAPI.readJSON(`projects/${projectId}/activities_status.json`)
+                    setActivityStatus(status || {})
                 } catch (err) {
-                    console.warn("Could not check stakeholder status", err)
+                    // Ignore error if file doesn't exist
+                    setActivityStatus({})
                 }
             }
         }
+        loadActivityStatus()
+    }, [projectId])
 
-        // Check on mount and every time we might return to this view (interval or re-render)
-        // Since we don't have a reliable "onFocus" for the tab switch in this component easily without props, 
-        // we can check it when the component mounts (which happens when we switch back to 'Lifecycle' tab from activity).
-        checkStakeholderStatus()
-    }, [projectId]) // Check on mount and specific project
+    // Save activity status helper
+    const updateActivityStatus = async (activityId, isCompleted) => {
+        const newStatus = { ...activityStatus, [activityId]: isCompleted }
+        setActivityStatus(newStatus)
 
-    const renderStatusChip = (artefact) => {
-        if (!artefact) {
-            return (
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                    Not Started
-                </span>
-            )
+        if (window.electronAPI && projectId) {
+            try {
+                await window.electronAPI.writeJSON(`projects/${projectId}/activities_status.json`, newStatus)
+            } catch (err) {
+                console.warn("Failed to save activity status", err)
+            }
         }
+    }
 
-        const { status, modifiedAfterApproval } = artefact
+    // Toggle PM2 Text
+    const togglePM2Text = (id) => {
+        if (expandedActivity === id) {
+            setExpandedActivity(null)
+        } else {
+            setExpandedActivity(id)
+        }
+    }
 
+    // Helper to get PM2 content
+    const getPM2Content = (source, sectionNumber) => {
+        const data = source === 'roles' ? rolesData : initiatingData
+        const section = data.sections.find(s => s.number === sectionNumber)
+        // If exact number not found, try startsWith for broad sections like "Section 4"
+        if (!section && sectionNumber === '4') {
+            // For Section 4, we want "Project Stakeholders" (4.1) as equivalent to "Section 4" context in this panel.
+            return data.sections.find(s => s.number === '4.1')
+        }
+        return section
+    }
+
+    // Helper to render Artefact Status Chip
+    const renderArtefactStatus = (id) => {
+        const art = artefacts.find(a => a.id === id)
+        if (!art) {
+            return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Not Started</span>
+        }
+        const { status, modifiedAfterApproval } = art
         let displayStatus = status
-        let colorClass = 'bg-gray-100 text-gray-600' // Default / Not Started
+        let colorClass = 'bg-gray-100 text-gray-600'
 
-        if (status === 'In Progress') {
-            colorClass = 'bg-blue-100 text-blue-700'
-        } else if (status === 'Approved' || status === 'Completed') {
+        if (status === 'In Progress') colorClass = 'bg-blue-100 text-blue-700'
+        else if (status === 'Approved' || status === 'Completed') {
             if (modifiedAfterApproval) {
                 displayStatus = 'Approved — Modified'
                 colorClass = 'bg-yellow-100 text-yellow-800'
@@ -93,21 +88,78 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             }
         }
 
-        return (
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
-                {displayStatus}
-            </span>
-        )
+        return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>{displayStatus}</span>
     }
 
-    const openArtefact = (id) => {
-        const art = artefacts.find(a => a.id === id)
-        if (art) {
-            onOpenArtefact(art)
-        } else {
-            console.warn(`Artefact ${id} not found`)
-        }
+    // Phase Gate Logic
+    const checklistArtefact = artefacts.find(a => a.id === 'initiating-phase-exit-checklist')
+    const checklistContent = (checklistArtefact && checklistArtefact.content) || {}
+    let isGateSignedOff = false
+    if (checklistContent.approval && checklistContent.approval.isApproved) {
+        isGateSignedOff = true
     }
+
+    // Define Activities
+    const activitiesList = [
+        {
+            id: 'initiating-meeting',
+            title: 'Initiating Meeting',
+            summary: 'Hold an initial meeting to align expectations, scope boundaries, roles, and next steps.',
+            pm2Config: { source: 'initiating', section: '5.1', label: 'Show PM² Text from Section 5.1' },
+            guidance: { topic: 'Initiating Phase', section: '5.1 Initiating Meeting' },
+            hasCheckbox: true,
+            buttons: []
+        },
+        {
+            id: 'identify-stakeholders',
+            title: 'Identify Key Stakeholders',
+            summary: 'Identify key stakeholders, governance bodies, and their roles and responsibilities.',
+            pm2Config: { source: 'roles', section: '4', label: 'Show PM² Text from Section 4 (Organisation & Roles)' },
+            guidance: { topic: 'Roles & Organisation', section: '4.1 Project Stakeholders' },
+            hasCheckbox: true,
+            buttons: [
+                { label: 'Open Initial Stakeholder Identification', action: () => onOpenActivity('stakeholder-identification'), primary: true }
+            ]
+        },
+        {
+            id: 'document-idea',
+            title: 'Document the Idea / Need',
+            summary: 'Capture the problem, need, or opportunity motivating the project.',
+            pm2Config: { source: 'initiating', section: '5.2', label: 'Show PM² Text from Section 5.2' },
+            guidance: { topic: 'Initiating Phase', section: '5.2 Project Initiation Request' },
+            hasCheckbox: false,
+            buttons: []
+        },
+        {
+            id: 'create-business-justification',
+            title: 'Create Business Justification',
+            summary: 'Develop the high-level reasoning and expected benefits for the project.',
+            pm2Config: { source: 'initiating', section: '5.3', label: 'Show PM² Text from Section 5.3' },
+            guidance: { topic: 'Initiating Phase', section: '5.3 Business Case' },
+            hasCheckbox: false,
+            buttons: []
+        },
+        {
+            id: 'define-scope',
+            title: 'Define Scope & Organisation',
+            summary: 'Define high-level scope boundaries, roles, and governance structure.',
+            pm2Config: { source: 'initiating', section: '5.4', label: 'Show PM² Text from Section 5.4' },
+            guidance: { topic: 'Initiating Phase', section: '5.4 Project Charter' },
+            hasCheckbox: false,
+            buttons: []
+        },
+        {
+            id: 'stage-gate',
+            title: 'Stage Gate — Ready for Planning (RfP)',
+            summary: 'Confirm completion of the Initiation Phase and approve continuation into Planning.',
+            pm2Config: { source: 'initiating', section: '5.5', label: 'Show PM² Text from Section 5.5' },
+            guidance: { topic: 'Initiating Phase', section: '5.5 Phase Gate RfP (Ready for Planning)' },
+            hasCheckbox: true,
+            buttons: [
+                { label: 'Open Initiating Phase Exit Checklist', action: () => onOpenArtefact(artefacts.find(a => a.id === 'initiating-phase-exit-checklist')), primary: true }
+            ]
+        }
+    ]
 
     return (
         <div className="flex flex-col h-full space-y-6">
@@ -118,7 +170,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                     <p className="text-gray-500 mt-1">Establish the foundation of the project by capturing the need, defining objectives, identifying stakeholders, and producing the initial PM² artefacts.</p>
                 </div>
                 <button
-                    onClick={() => onOpenGuidance('Initiating Phase')}
+                    onClick={() => onOpenGuidance('Initiating Phase', null, { tab: 'Lifecycle', label: 'Initiating Phase' })}
                     className="flex items-center text-sm text-blue-600 hover:text-blue-800"
                 >
                     <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1" />
@@ -129,13 +181,13 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
             {/* Figure 5.1 - Collapsible */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <button
-                    onClick={() => setShowDiagram(!showDiagram)}
+                    onClick={() => setShowProcessDiagram(!showProcessDiagram)}
                     className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                     <span className="font-medium text-gray-900">Process Diagram (Figure 5.1)</span>
                     <div className="flex items-center text-sm text-blue-600">
-                        {showDiagram ? 'Hide workflow diagram' : 'Show workflow diagram'}
-                        {showDiagram ? (
+                        {showProcessDiagram ? 'Hide workflow diagram' : 'Show workflow diagram'}
+                        {showProcessDiagram ? (
                             <ChevronUpIcon className="h-4 w-4 ml-1" />
                         ) : (
                             <ChevronDownIcon className="h-4 w-4 ml-1" />
@@ -143,7 +195,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                     </div>
                 </button>
 
-                {showDiagram && (
+                {showProcessDiagram && (
                     <div className="p-6 border-t border-gray-200 flex justify-center items-center bg-white">
                         <img
                             src="/pm2/figures/fig-5-1.png"
@@ -156,105 +208,125 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
 
-                {/* Activities Panel */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 flex flex-col gap-4">
-                    <h3 className="font-semibold text-gray-900 flex items-center">
+                {/* ACTIVITIES COLUMN */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 flex flex-col gap-4 overflow-y-auto">
+                    <h3 className="font-semibold text-gray-900 flex items-center sticky top-0 bg-gray-50 z-10 pb-2">
                         <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded mr-2">1</span>
                         Activities
                     </h3>
                     <div className="space-y-4">
-                        {/* A: Initiating Meeting */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Initiating Meeting</h4>
-                                {meetingCompleted ? (
-                                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Completed</span>
-                                ) : (
-                                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Not Started</span>
-                                )}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Discuss pre-project information and agree next steps leading into PIR creation.</p>
-                            <button
-                                onClick={() => setMeetingCompleted(!meetingCompleted)}
-                                className={`w-full py-2 px-3 rounded-md text-sm font-medium transition-colors ${meetingCompleted
-                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                                    }`}
-                            >
-                                {meetingCompleted ? 'Mark as Not Started' : 'Mark Meeting Completed'}
-                            </button>
-                        </div>
+                        {activitiesList.map((activity) => {
+                            const isExpanded = expandedActivity === activity.id
+                            const pm2Content = getPM2Content(activity.pm2Config.source, activity.pm2Config.section)
+                            const isCompleted = activityStatus[activity.id] || false
 
-                        {/* B: Identify key stakeholders */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Identify key stakeholders</h4>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stakeholderStatus === 'In Progress'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : stakeholderStatus === 'Completed'
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-gray-100 text-gray-600'
-                                    }`}>
-                                    {stakeholderStatus}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Identify stakeholders and their expectations.</p>
-                            <button
-                                onClick={() => onOpenActivity('stakeholder-identification')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 bg-blue-50 border-blue-200 text-blue-700"
-                            >
-                                Identify Key Stakeholders
-                            </button>
-                        </div>
+                            return (
+                                <div key={activity.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm transition-all">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-medium text-gray-900">{activity.title}</h4>
+                                        {activity.hasCheckbox && (
+                                            isCompleted ? (
+                                                <span className="flex items-center text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                                                    <CheckCircleIconSolid className="h-3 w-3 mr-1" />
+                                                    Completed
+                                                </span>
+                                            ) : null
+                                        )}
+                                    </div>
 
-                        {/* C: Document the idea/need */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Document the idea/need</h4>
-                                {renderStatusChip(artefacts.find(a => a.id === 'project-initiation-request'))}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Capture the problem, need, or opportunity.</p>
-                            <button
-                                onClick={() => openArtefact('project-initiation-request')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Create Project Initiation Request
-                            </button>
-                        </div>
+                                    <p className="text-sm text-gray-600 mb-4">{activity.summary}</p>
 
-                        {/* D: Create a business justification */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Create business justification</h4>
-                                {renderStatusChip(artefacts.find(a => a.id === 'business-case'))}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Develop justification and alignment — foundation of Business Case.</p>
-                            <button
-                                onClick={() => openArtefact('business-case')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Open Business Case
-                            </button>
-                        </div>
+                                    {/* Collapsible PM2 Text */}
+                                    <div className="mb-4 bg-gray-50 rounded-md border border-gray-100 overflow-hidden">
+                                        <button
+                                            onClick={() => togglePM2Text(activity.id)}
+                                            className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                                        >
+                                            <span className="flex items-center">
+                                                {/* Ensure icon exists or fallback */}
+                                                <span className="w-1 h-3 bg-blue-500 rounded-sm mr-2 opacity-50"></span>
+                                                {activity.pm2Config.label}
+                                            </span>
+                                            {isExpanded ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
+                                        </button>
 
-                        {/* E: Define project scope & organisation */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-medium text-gray-900">Define scope & organisation</h4>
-                                {renderStatusChip(artefacts.find(a => a.id === 'projectCharter'))}
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">Establish high-level scope, governance roles, milestones.</p>
-                            <button
-                                onClick={() => openArtefact('projectCharter')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Open Project Charter
-                            </button>
-                        </div>
+                                        {isExpanded && pm2Content && (
+                                            <div className="p-4 border-t border-gray-100 bg-white text-sm text-gray-800 markdown-content overflow-auto max-h-96">
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    rehypePlugins={[rehypeRaw]}
+                                                    components={{
+                                                        h1: ({ node, ...props }) => <div className="font-bold text-base mb-2 mt-2" {...props} />,
+                                                        h2: ({ node, ...props }) => <div className="font-bold text-sm mb-2 mt-2" {...props} />,
+                                                        h3: ({ node, ...props }) => <div className="font-bold text-xs mb-1 mt-1" {...props} />,
+                                                        p: ({ node, ...props }) => <p className="mb-2 text-xs leading-relaxed" {...props} />,
+                                                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-xs" {...props} />,
+                                                        li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                                                        a: ({ node, ...props }) => <span className="text-blue-600 underline cursor-pointer" {...props} />,
+                                                        img: ({ node, ...props }) => <img className="max-w-full h-auto my-2 rounded" {...props} />,
+                                                    }}
+                                                >
+                                                    {markdownClean(pm2Content.markdown)}
+                                                </ReactMarkdown>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="space-y-2">
+                                        {/* Supporting Tools / Artefact Buttons (Select Few) */}
+                                        {activity.buttons.map((btn, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={btn.action}
+                                                className={`w-full py-2 px-3 rounded-md text-sm font-medium transition-colors ${btn.primary
+                                                        ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                                                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {btn.label}
+                                            </button>
+                                        ))}
+
+                                        {/* Guidance Button */}
+                                        <button
+                                            onClick={() => onOpenGuidance(activity.guidance.topic, activity.guidance.section, { tab: 'Lifecycle', label: 'Initiating Phase' })}
+                                            className="w-full flex items-center justify-center py-2 px-3 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                                        >
+                                            <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1.5" />
+                                            Open PM² Guidance → {activity.pm2Config.section}
+                                        </button>
+
+                                        {/* Checkbox Button */}
+                                        {activity.hasCheckbox && (
+                                            <button
+                                                onClick={() => updateActivityStatus(activity.id, !isCompleted)}
+                                                className={`w-full flex items-center justify-center py-2 px-3 rounded-md text-sm font-medium transition-colors border ${isCompleted
+                                                        ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {isCompleted ? (
+                                                    <>
+                                                        <CheckCircleIconSolid className="h-4 w-4 mr-1.5" />
+                                                        Mark Activity Completed
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CheckCircleIcon className="h-4 w-4 mr-1.5" />
+                                                        Mark Activity Completed
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
 
-                {/* Artefacts Panel */}
+                {/* ARTEFACTS COLUMN */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 flex flex-col gap-4">
                     <h3 className="font-semibold text-gray-900 flex items-center">
                         <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded mr-2">2</span>
@@ -263,18 +335,17 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                     <div className="space-y-3">
                         {['project-initiation-request', 'business-case', 'projectCharter', 'initiating-phase-exit-checklist'].map(id => {
                             const art = artefacts.find(a => a.id === id)
-                            const name = art ? art.name : id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-                            const status = art ? art.status : 'Not Started'
+                            const name = art ? art.name : id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 
                             return (
-                                <div key={id} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm">
+                                <div key={id} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                                     <div>
-                                        <p className="font-medium text-sm text-gray-900">{name}</p>
-                                        <div className="mt-1">{renderStatusChip(art)}</div>
+                                        <p className="font-medium text-sm text-gray-900 mb-1">{name}</p>
+                                        {renderArtefactStatus(id)}
                                     </div>
                                     <button
-                                        onClick={() => openArtefact(id)}
-                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded hover:bg-blue-50 transition-colors"
+                                        onClick={() => onOpenArtefact(art)}
+                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100"
                                     >
                                         Open
                                     </button>
@@ -282,9 +353,8 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                             )
                         })}
 
-                        {/* Initial Logs Placeholder */}
                         {/* Initial Logs (Risk, Issue...) */}
-                        <div className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm">
+                        <div className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                             <div>
                                 <p className="font-medium text-sm text-gray-900">Initial Logs (Risk, Issue...)</p>
                                 <div className="mt-1"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Optional</span></div>
@@ -299,7 +369,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                     </div>
                 </div>
 
-                {/* Phase Gate Panel */}
+                {/* PHASE GATE PANEL (Summary) */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 flex flex-col gap-4">
                     <h3 className="font-semibold text-gray-900 flex items-center">
                         <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-0.5 rounded mr-2">3</span>
@@ -312,27 +382,27 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Checklist Status:</span>
-                                {renderStatusChip(checklistArtefact)}
+                                {renderArtefactStatus('initiating-phase-exit-checklist')}
                             </div>
 
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Gate Status:</span>
-                                <span className={`text-sm font-bold ${isSignedOff ? 'text-green-600' : 'text-orange-600'}`}>
-                                    {isSignedOff ? 'Ready (Signed Off)' : 'Pending'}
+                                <span className={`text-sm font-bold ${isGateSignedOff ? 'text-green-600' : 'text-orange-600'}`}>
+                                    {isGateSignedOff ? 'Ready (Signed Off)' : 'Pending'}
                                 </span>
                             </div>
 
                             <button
-                                onClick={() => openArtefact('initiating-phase-exit-checklist')}
-                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                onClick={() => onOpenArtefact(artefacts.find(a => a.id === 'initiating-phase-exit-checklist'))}
+                                className="w-full py-2 px-3 rounded-md text-sm font-medium bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition-colors"
                             >
-                                Open Initiating Phase Exit Checklist
+                                Review Exit Checklist
                             </button>
                         </div>
                     </div>
 
-                    <div className={`rounded-lg p-4 text-center border transition-colors ${isSignedOff ? 'bg-green-50 border-green-200' : 'bg-gray-100 border-gray-200'}`}>
-                        {isSignedOff ? (
+                    <div className={`rounded-lg p-4 text-center border transition-colors ${isGateSignedOff ? 'bg-green-50 border-green-200' : 'bg-gray-100 border-gray-200'}`}>
+                        {isGateSignedOff ? (
                             <>
                                 <CheckCircleIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
                                 <h4 className="text-green-800 font-bold mb-1">Ready to Proceed</h4>
@@ -342,11 +412,9 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
                             <>
                                 <div className="h-8 w-8 rounded-full border-2 border-gray-300 mx-auto mb-2" />
                                 <h4 className="text-gray-800 font-bold mb-1">Not Yet Signed Off</h4>
-                                <p className="text-gray-500 text-sm mb-3">Gate not yet approved — complete approval section in the checklist.</p>
+                                <p className="text-gray-500 text-sm mb-3">Complete approval in the Checklist.</p>
                             </>
                         )}
-
-
                     </div>
                 </div>
 
