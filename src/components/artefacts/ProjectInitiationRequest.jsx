@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowDownTrayIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, BookOpenIcon, CheckIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import ArtefactSection from './ui/ArtefactSection'
 import { ArtefactField, ArtefactInput, ArtefactTextarea } from './ui/ArtefactFields'
@@ -9,26 +9,43 @@ import { projectInitiationRequestSchema } from '../../data/schemas/ProjectInitia
 import DocumentGenerator from '../../services/DocumentGenerator'
 import pirTemplate from '../../templates/PIRTemplate.json'
 import { ProjectService } from '../../services/ProjectService'
+import WizardStepper from '../ui/WizardStepper'
+import ArtefactApprovalSection from './ui/ArtefactApprovalSection'
+
+// Map schema sections effectively 1-to-1 to wizard steps + Approval
+const wizardSteps = [
+    // 1-14 match schema sections by index approximately
+    ...projectInitiationRequestSchema.map((item, index) => ({
+        id: index,
+        name: item.title.replace(/^\d+\.\s*/, ''), // Remove numbering for cleaner tabs
+        schemaId: item.id
+    })),
+    // 15th step
+    { id: 14, name: 'Approval', schemaId: 'approval' }
+]
 
 const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
-    // Use imported schema
+    // Schema is ordered array
     const sections = projectInitiationRequestSchema
 
-    const [expandedSections, setExpandedSections] = useState({})
     const [showExportMenu, setShowExportMenu] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
     const [showPreview, setShowPreview] = useState(false)
 
-    useEffect(() => {
-        // Expand all by default
-        const initialExpanded = {}
-        sections.forEach(s => initialExpanded[s.id] = true)
-        setExpandedSections(initialExpanded)
-    }, [])
+    // Wizard State
+    // Persist position in sessionStorage
+    const [currentStep, setCurrentStep] = useState(() => {
+        if (!projectId) return 0
+        const savedStep = sessionStorage.getItem(`pir_wizard_step_${projectId}`)
+        return savedStep ? parseInt(savedStep, 10) : 0
+    })
 
-    const toggleSection = (id) => {
-        setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }))
-    }
+    // Persist current step
+    useEffect(() => {
+        if (projectId) {
+            sessionStorage.setItem(`pir_wizard_step_${projectId}`, currentStep)
+        }
+    }, [currentStep, projectId])
 
     const dataRef = React.useRef({})
 
@@ -107,6 +124,13 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
         return rest
     }
 
+    // Scroll top on step change
+    useEffect(() => {
+        // const mainContainer = document.querySelector('main > div') // Helper to find scroll container if needed
+        // if (mainContainer) mainContainer.scrollTo(0, 0)
+    }, [currentStep])
+
+
     return (
         <>
             <GovernedArtefactEditor
@@ -119,8 +143,17 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                 actions={<CustomActions />}
                 initialData={initialData}
                 processLoadedContent={processLoadedContent}
+                customApproval={true} // Enable custom approval rendering
             >
-                {({ data, handleContentChange }) => {
+                {({
+                    data,
+                    handleContentChange,
+                    approval,
+                    onUpdateApproval,
+                    onToggleApproval,
+                    isApprovalOpen,
+                    setIsApprovalOpen
+                }) => {
                     // Update ref for export
                     dataRef.current = data
                     const projectName = ProjectService.getActiveProject()?.name || 'Loading...'
@@ -156,48 +189,100 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                         </ArtefactField>
                     )
 
+                    // Get current Schema Section
+                    const isApprovalStep = currentStep === 14
+                    const currentSchemaSection = !isApprovalStep ? sections[currentStep] : null
+
                     return (
-                        <div className="space-y-8">
-                            {/* Auto-Propagated Project Name */}
-                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                                <div className="flex">
-                                    <div className="flex-shrink-0">
-                                        <BookOpenIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                                    </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm text-blue-700">
-                                            <span className="font-bold">Project:</span> {projectName}
-                                        </p>
-                                    </div>
-                                </div>
+                        <div className="flex flex-col min-h-[600px]">
+                            {/* Sticky Stepper */}
+                            <div className="sticky top-0 bg-white z-20 pb-4 mb-4 border-b border-gray-100 -mx-4 px-4">
+                                <WizardStepper
+                                    steps={wizardSteps}
+                                    currentStep={currentStep}
+                                    onStepClick={setCurrentStep}
+                                />
                             </div>
 
-                            {sections.map(section => (
-                                <ArtefactSection
-                                    key={section.id}
-                                    id={section.id}
-                                    title={section.title}
-                                    isOpen={expandedSections[section.id]}
-                                    onToggle={toggleSection}
-                                >
-                                    <div className={section.type === 'multi-richtext' ? "space-y-6" : section.type === 'mixed' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
-                                        {section.fields.map(fieldObj => {
-                                            // Determine type based on fieldObj.type
-                                            const { key, label, type, placeholder } = fieldObj
+                            {/* Main Content Area */}
+                            <div className="space-y-8 flex-1">
 
-                                            if (type === 'richtext') {
-                                                return renderRichText(key, label || null, placeholder)
-                                            } else if (type === 'textarea') {
-                                                return renderTextArea(key, label, placeholder)
-                                            } else if (type === 'date') {
-                                                return renderInput(key, label || 'Date', 'date')
-                                            } else {
-                                                return renderInput(key, label || key, 'text')
-                                            }
-                                        })}
+                                {/* Always show Project Name on Step 0 or globally? Let's show globally for context or Step 0 only? 
+                                    User said "similar ui to that implemented for Initial Stakeholder Identification".
+                                    ISI doesn't show Project Name in form body, but PIR used to. 
+                                    Let's keep it in Step 0 (Project Information).
+                                */}
+                                {currentStep === 0 && (
+                                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                                        <div className="flex">
+                                            <div className="flex-shrink-0">
+                                                <BookOpenIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                            </div>
+                                            <div className="ml-3">
+                                                <p className="text-sm text-blue-700">
+                                                    <span className="font-bold">Project:</span> {projectName}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </ArtefactSection>
-                            ))}
+                                )}
+
+                                {isApprovalStep ? (
+                                    <div className="max-w-4xl mx-auto pt-6">
+                                        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-6">Artefact Approval</h3>
+                                        <ArtefactApprovalSection
+                                            approvalState={approval}
+                                            onUpdate={onUpdateApproval}
+                                            onToggleApproval={onToggleApproval}
+                                            isOpen={true} // Always open in this step
+                                            onToggle={() => { }} // Disable toggle
+                                            isModified={false} // Banner is handled globally
+                                        />
+                                    </div>
+                                ) : (
+                                    /* Render Standard Schema Section */
+                                    <div className="max-w-4xl mx-auto">
+                                        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-2">{currentSchemaSection.title}</h3>
+                                        {currentSchemaSection.fields && currentSchemaSection.fields[0].placeholder ? (
+                                            <p className="text-sm text-gray-500 mb-6">{currentSchemaSection.fields[0].placeholder.split('...')[0]}...</p>
+                                        ) : null}
+
+                                        <div className="space-y-6 bg-white rounded-lg p-1">
+                                            {currentSchemaSection.fields.map(fieldObj => {
+                                                const { key, label, type, placeholder } = fieldObj
+                                                if (type === 'richtext') return renderRichText(key, label || null, placeholder)
+                                                if (type === 'textarea') return renderTextArea(key, label, placeholder)
+                                                if (type === 'date') return renderInput(key, label || 'Date', 'date')
+                                                return renderInput(key, label || key, 'text')
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer Navigation */}
+                            <div className="mt-8 pt-6 border-t border-gray-200 flex justify-between">
+                                <button
+                                    onClick={() => {
+                                        if (currentStep > 0) setCurrentStep(prev => prev - 1)
+                                        else onBack()
+                                    }}
+                                    className="px-6 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
+                                >
+                                    <ChevronLeftIcon className="h-4 w-4 mr-2" />
+                                    {currentStep === 0 ? 'Back to Menu' : 'Back'}
+                                </button>
+
+                                {currentStep < wizardSteps.length - 1 ? (
+                                    <button
+                                        onClick={() => setCurrentStep(prev => prev + 1)}
+                                        className="px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
+                                    >
+                                        Next
+                                        <ChevronRightIcon className="h-4 w-4 ml-2" />
+                                    </button>
+                                ) : null}
+                            </div>
                         </div>
                     )
                 }}

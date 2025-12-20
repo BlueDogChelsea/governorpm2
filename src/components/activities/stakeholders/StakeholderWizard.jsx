@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeftIcon, BookOpenIcon, ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronRightIcon, ChevronLeftIcon, CheckIcon } from '@heroicons/react/24/outline'
-import WizardStepper from './WizardStepper'
+import WizardStepper from '../../ui/WizardStepper'
 import StepProjectOwner from './StepProjectOwner'
 import StepBusinessManager from './StepBusinessManager'
 import StepSolutionProvider from './StepSolutionProvider'
 import StepAdditionalStakeholders from './StepAdditionalStakeholders'
 import StepReview from './StepReview'
+
+const steps = [
+    { id: 0, name: 'Project Owner' },
+    { id: 1, name: 'Business Manager' },
+    { id: 2, name: 'Solution Provider' },
+    { id: 3, name: 'Additional' },
+    { id: 4, name: 'Review' },
+]
 
 const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
     // Data State
@@ -232,9 +240,8 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
                 </div>
             </div>
 
-            {/* Wizard Stepper */}
             <div className="bg-white border-b border-gray-200 py-4 flex justify-center sticky top-0 z-10">
-                <WizardStepper currentStep={currentStep} onStepClick={setCurrentStep} />
+                <WizardStepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
             </div>
 
             {/* Content Area */}

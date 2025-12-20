@@ -35,7 +35,9 @@ const GovernedArtefactEditor = ({
     actions,
     children,
     initialData = {},
-    processLoadedContent
+
+    processLoadedContent,
+    customApproval = false // New prop to control approval section placement
 
 }) => {
     // Top-level state for the *Content* of the artefact (excluding approval)
@@ -482,19 +484,31 @@ const GovernedArtefactEditor = ({
                 <div className="space-y-8">
                     {/* Content Injection */}
                     {children && (typeof children === 'function'
-                        ? children({ data: contentData, onDataChange: updateContent, handleContentChange })
+                        ? children({
+                            data: contentData,
+                            onDataChange: updateContent,
+                            handleContentChange,
+                            // Pass approval props for custom placement
+                            approval,
+                            onUpdateApproval: handleApprovalChange,
+                            onToggleApproval: handleApprovalToggle,
+                            isApprovalOpen,
+                            setIsApprovalOpen: (val) => setIsApprovalOpen(val)
+                        })
                         : React.cloneElement(children, { data: contentData, onDataChange: updateContent, handleContentChange })
                     )}
 
-                    {/* Standard Approval Section */}
-                    <ArtefactApprovalSection
-                        approvalState={approval}
-                        onUpdate={handleApprovalChange}
-                        onToggleApproval={handleApprovalToggle}
-                        isOpen={isApprovalOpen}
-                        onToggle={() => setIsApprovalOpen(!isApprovalOpen)}
-                        isModified={showModifiedBanner}
-                    />
+                    {/* Standard Approval Section (only if not handled by child) */}
+                    {!customApproval && (
+                        <ArtefactApprovalSection
+                            approvalState={approval}
+                            onUpdate={handleApprovalChange}
+                            onToggleApproval={handleApprovalToggle}
+                            isOpen={isApprovalOpen}
+                            onToggle={() => setIsApprovalOpen(!isApprovalOpen)}
+                            isModified={showModifiedBanner}
+                        />
+                    )}
                 </div>
             </ArtefactPage>
 
