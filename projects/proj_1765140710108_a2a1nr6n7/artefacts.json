@@ -1,0 +1,179 @@
+[
+  {
+    "id": "project-initiation-request",
+    "name": "Project Initiation Request",
+    "phase": "Initiating",
+    "status": "In Progress",
+    "content": {
+      "Date": "",
+      "Version": "",
+      "Project Owner": "",
+      "Project Manager": "",
+      "background": "<p><strong>Background / Context</strong></p>",
+      "problem": "<p><strong>Problem / Need / Opportunity</strong></p>",
+      "benefits": "<p><strong>Expected Benefits &amp; Success Criteria</strong><br></p>",
+      "objectives": "<p><strong>Project Objectives</strong></p>",
+      "In Scope": "<p><strong>In Scope</strong></p><p><br></p>",
+      "Out of Scope": "<p><strong>Out of Scope</strong></p>",
+      "stakeholders": "<p><strong>Key Stakeholders</strong></p><p><br></p>",
+      "assumptions": "<p><strong>Key Stakeholders</strong></p><p><br></p>",
+      "constraints": "<p><strong>Constraints</strong></p>",
+      "risks": "<p><strong>Initial Risks</strong></p>",
+      "Estimated Effort (Man-days)": "Estimated Effort (Man-days)",
+      "Estimated Cost (€)": "Estimated Cost (€)",
+      "Target Start Date": "2025-12-07",
+      "Target End Date": "2025-12-09",
+      "approach": "<p><strong>Delivery Approach</strong></p>",
+      "dependencies": "<p><strong>Dependencies and Interfaces</strong></p>",
+      "alignment": "<p><strong>Strategic Alignment</strong></p>",
+      "approval": {
+        "approverName": "",
+        "approvalDate": "",
+        "signature": "",
+        "isApproved": false,
+        "timestamp": null
+      }
+    },
+    "modifiedAfterApproval": false,
+    "importPromptShown": false,
+    "lastUpdated": "2025-12-07T20:54:31.400Z"
+  },
+  {
+    "id": "business-case",
+    "name": "Business Case",
+    "phase": "Initiating",
+    "status": "In Progress",
+    "content": {
+      "Version": "1.0",
+      "Business Justification": "",
+      "Current Situation / Problem": "",
+      "Impact of Doing Nothing": "",
+      "Strategic Alignment": "",
+      "Regulatory / Compliance Drivers": "",
+      "AltA_Description": "",
+      "AltA_Strengths": "",
+      "AltA_Weaknesses": "",
+      "AltA_Opportunities": "",
+      "AltA_Threats": "",
+      "AltA_Qualitative": "",
+      "AltB_Description": "",
+      "AltB_Strengths": "",
+      "AltB_Weaknesses": "",
+      "AltB_Opportunities": "",
+      "AltB_Threats": "",
+      "AltB_Qualitative": "",
+      "AltC_Description": "",
+      "AltC_Strengths": "",
+      "AltC_Weaknesses": "",
+      "AltC_Opportunities": "",
+      "AltC_Threats": "",
+      "AltC_Qualitative": "",
+      "Chosen_Alternative": "",
+      "Chosen_Rationale": "",
+      "Chosen_Summary": "",
+      "Solution Overview": "",
+      "High-level Scope": "",
+      "Key Deliverables": "",
+      "Expected Benefits": "",
+      "Critical Success Criteria": "",
+      "General Success Criteria": "",
+      "Cost Summary": "",
+      "Benefit Summary": "",
+      "Justification (Optional)": "",
+      "Dependencies": "",
+      "Synergies": "",
+      "Interdependencies": "",
+      "Start Date": "",
+      "Target Delivery Date": "",
+      "Major Milestones": "",
+      "approval": {
+        "approverName": "",
+        "approvalDate": "",
+        "signature": "",
+        "isApproved": false,
+        "timestamp": null
+      }
+    },
+    "modifiedAfterApproval": false,
+    "importPromptShown": true,
+    "lastUpdated": "2025-12-07T23:04:08.604Z"
+  },
+  {
+    "id": "projectCharter",
+    "name": "Project Charter",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "initiating-phase-exit-checklist",
+    "name": "Initiating Phase Exit Checklist",
+    "phase": "Initiating",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-work-plan",
+    "name": "Project Work Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "requirements-doc",
+    "name": "Requirements Document",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "risk-log",
+    "name": "Risk Log",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "quality-plan",
+    "name": "Quality Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "comm-plan",
+    "name": "Communication Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "procurement-plan",
+    "name": "Procurement Plan",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "project-handbook",
+    "name": "Project Handbook",
+    "phase": "Planning",
+    "status": "Not Started"
+  },
+  {
+    "id": "status-reports",
+    "name": "Status Reports",
+    "phase": "Executing",
+    "status": "Not Started"
+  },
+  {
+    "id": "deliverables",
+    "name": "Deliverables",
+    "phase": "Executing",
+    "status": "Not Started"
+  },
+  {
+    "id": "end-project-report",
+    "name": "End-of-Project Report",
+    "phase": "Closing",
+    "status": "Not Started"
+  },
+  {
+    "id": "lessons-learned",
+    "name": "Lessons Learned",
+    "phase": "Closing",
+    "status": "Not Started"
+  }
+]

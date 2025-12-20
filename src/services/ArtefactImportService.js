@@ -25,9 +25,7 @@ const ArtefactImportService = {
         try {
             // Check for ISI (Source for PIR)
             if (artefactId === ARTEFACT_IDS.PIR) {
-                // ISI is stored at project root typically
-                // Use readJSON to check existence since we know it works for this path
-                const data = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
+                const data = await readSourceArtefact(projectId, ARTEFACT_IDS.ISI, `projects/${projectId}/initialStakeholders.json`)
                 if (data) {
                     available.push({ id: ARTEFACT_IDS.ISI, name: 'Initial Stakeholder Identification' })
                 }
@@ -35,7 +33,7 @@ const ArtefactImportService = {
 
             // Check for PIR (Source for BC and Charter)
             if (artefactId === ARTEFACT_IDS.BC || artefactId === ARTEFACT_IDS.CHARTER) {
-                const data = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                const data = await readSourceArtefact(projectId, ARTEFACT_IDS.PIR, `projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
                 if (data) {
                     available.push({ id: ARTEFACT_IDS.PIR, name: 'Project Initiation Request' })
                 }
@@ -43,7 +41,7 @@ const ArtefactImportService = {
 
             // Check for Business Case (Source for Charter)
             if (artefactId === ARTEFACT_IDS.CHARTER) {
-                const data = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
+                const data = await readSourceArtefact(projectId, ARTEFACT_IDS.BC, `projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
                 if (data) {
                     available.push({ id: ARTEFACT_IDS.BC, name: 'Business Case' })
                 }
@@ -73,7 +71,7 @@ const ArtefactImportService = {
         try {
             // Case 1: ISI -> PIR
             if (targetArtefactId === ARTEFACT_IDS.PIR && sourceId === ARTEFACT_IDS.ISI) {
-                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
+                const sourceData = await readSourceArtefact(projectId, ARTEFACT_IDS.ISI, `projects/${projectId}/initialStakeholders.json`)
                 if (sourceData) {
                     newContent = mapISIToPIR(sourceData, newContent, overwrite)
                 }
@@ -81,7 +79,7 @@ const ArtefactImportService = {
 
             // Case 2: PIR -> BC
             else if (targetArtefactId === ARTEFACT_IDS.BC && sourceId === ARTEFACT_IDS.PIR) {
-                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                const sourceData = await readSourceArtefact(projectId, ARTEFACT_IDS.PIR, `projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
                 if (sourceData && sourceData.content) {
                     newContent = mapPIRToBC(sourceData.content, newContent, overwrite)
                 }
@@ -89,7 +87,7 @@ const ArtefactImportService = {
 
             // Case 3: PIR -> Charter
             else if (targetArtefactId === ARTEFACT_IDS.CHARTER && sourceId === ARTEFACT_IDS.PIR) {
-                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
+                const sourceData = await readSourceArtefact(projectId, ARTEFACT_IDS.PIR, `projects/${projectId}/artefacts/${ARTEFACT_IDS.PIR}.json`)
                 if (sourceData && sourceData.content) {
                     newContent = mapPIRToCharter(sourceData.content, newContent, overwrite)
                 }
@@ -97,7 +95,7 @@ const ArtefactImportService = {
 
             // Case 4: BC -> Charter
             else if (targetArtefactId === ARTEFACT_IDS.CHARTER && sourceId === ARTEFACT_IDS.BC) {
-                const sourceData = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
+                const sourceData = await readSourceArtefact(projectId, ARTEFACT_IDS.BC, `projects/${projectId}/artefacts/${ARTEFACT_IDS.BC}.json`)
                 if (sourceData && sourceData.content) {
                     newContent = mapBCToCharter(sourceData.content, newContent, overwrite)
                 }
@@ -112,13 +110,61 @@ const ArtefactImportService = {
     }
 }
 
+// -- Helpers --
+
+/**
+ * Reads artefact data from either a direct file (legacy/split) or the central artefacts.json (modern/monolithic)
+ */
+const readSourceArtefact = async (projectId, artefactId, legacyPath) => {
+    if (!window.electronAPI) return null
+
+    // 1. Try legacy/direct path
+    try {
+        const data = await window.electronAPI.readJSON(legacyPath)
+        if (data) return data
+    } catch (e) {
+        // Continue to fallback
+    }
+
+    // 2. Try artefacts.json
+    try {
+        const artefacts = await window.electronAPI.readJSON(`projects/${projectId}/artefacts.json`)
+        if (artefacts && Array.isArray(artefacts)) {
+            // Special handling for ISI: ISI is NOT typically in artefacts.json, but check just in case specific ID matches?
+            // Actually, for ISI, the ID is 'initial-stakeholder-identification'. 
+            // If it's not there, find returns undefined.
+            const art = artefacts.find(a => a.id === artefactId)
+            if (art) return art
+        }
+    } catch (e) {
+        console.warn(`Failed to read artefacts.json for project ${projectId}`, e)
+    }
+
+    return null
+}
+
 // -- Mapping Logic --
 
 const mergeField = (target, key, value, overwrite) => {
-    if (value === null || value === undefined || value === '') return
+    // Helper for robust empty check
+    const isFieldContentEmpty = (val) => {
+        if (val === null || val === undefined) return true
+        if (typeof val === 'object') return Object.keys(val).length === 0
+        const str = String(val)
+        if (!str) return true
+
+        if (typeof document !== 'undefined') {
+            const div = document.createElement('div')
+            div.innerHTML = str
+            return div.textContent.trim().length === 0
+        }
+        return str.replace(/<[^>]*>/g, '').trim().length === 0
+    }
+
+    if (isFieldContentEmpty(value)) return
 
     const targetValue = target[key]
-    const isTargetEmpty = targetValue === undefined || targetValue === null || targetValue === '' || targetValue === '<p></p>'
+    const isTargetEmpty = isFieldContentEmpty(targetValue)
 
     if (isTargetEmpty || overwrite) {
         target[key] = value
@@ -178,25 +224,35 @@ const mapISIToPIR = (isi, target, overwrite) => {
 
 // 4.2 PIR → Business Case
 const mapPIRToBC = (pir, target, overwrite) => {
-    // PIR.ProblemNeedOpportunity -> BC.BusinessJustification
-    mergeField(target, 'Business Justification', pir['problem'], overwrite)
+    // 1. PIR.Problem -> BC "Current Situation / Problem"
+    mergeField(target, 'Current Situation / Problem', pir['problem'], overwrite)
 
-    // PIR.ExpectedBenefits -> BC.ExpectedBenefits
+    // 2. PIR.ExpectedBenefits -> BC "Expected Benefits"
     mergeField(target, 'Expected Benefits', pir['benefits'], overwrite)
 
-    // PIR.Scope.In / Out -> BC.ScopeOverview (Target key: "High-level Scope")
+    // 3. PIR.Background -> BC "Business Justification"
+    mergeField(target, 'Business Justification', pir['background'], overwrite)
+
+    // 4. PIR.StrategicAlignment -> BC "Strategic Alignment"
+    mergeField(target, 'Strategic Alignment', pir['alignment'], overwrite)
+
+    // 5. PIR.Dependencies -> BC "Dependencies"
+    mergeField(target, 'Dependencies', pir['dependencies'], overwrite)
+
+    // 6. PIR.Scope (In + Out) -> BC "High-level Scope"
     const inScope = pir['In Scope'] || ''
     const outScope = pir['Out of Scope'] || ''
+
     let scopeText = ''
-    if (inScope) scopeText += `<p><strong>In Scope:</strong></p>${inScope}`
-    if (outScope) scopeText += `<p><strong>Out of Scope:</strong></p>${outScope}`
+    if (inScope) scopeText += `<h3>In Scope</h3>${inScope}`
+    if (outScope) scopeText += `<h3>Out of Scope</h3>${outScope}`
 
     if (scopeText) {
         mergeField(target, 'High-level Scope', scopeText, overwrite)
     }
 
-    // PIR.KeyStakeholders -> BC.Stakeholders (Target key: "otherStakeholders" in Governance group)
-    mergeField(target, 'otherStakeholders', pir['stakeholders'], overwrite)
+    // Explicitly do NOT import other fields (Project Owner, Manager, Dates, etc)
+    // The previous mapping for 'otherStakeholders' is removed as requested.
 
     return target
 }

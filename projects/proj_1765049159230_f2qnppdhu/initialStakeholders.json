@@ -7,12 +7,27 @@
   "businessManager": {
     "name": "Bob Manager",
     "organisation": "Business Unit",
-    "expectations": ""
+    "expectations": "<p>The earth</p>"
   },
   "solutionProvider": {
-    "name": "",
-    "organisation": "",
-    "expectations": ""
+    "name": "Tech Solutions Inc.",
+    "organisation": "External Vendor",
+    "expectations": "<p>Per SOW</p>"
   },
-  "additionalStakeholders": []
+  "additionalStakeholders": [
+    {
+      "id": 1766259937230,
+      "name": "Dave",
+      "role": "Additional Stakeholder",
+      "organisation": "AS INC.",
+      "expectations": "<p>Additional things</p>"
+    },
+    {
+      "id": 1766259996082,
+      "name": "AN Other",
+      "role": "AN Other",
+      "organisation": "AN Other",
+      "expectations": "<p>Others</p>"
+    }
+  ]
 }

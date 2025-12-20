@@ -156,8 +156,28 @@ const GovernedArtefactEditor = ({
     }
 
     const startImportFlow = (candidates) => {
-        // Check if target has meaningful data
-        const hasExistingData = Object.values(contentData).some(v => v && v !== '' && v !== '<p></p>')
+        // Exclude system fields (Version is the main culprit for false positives)
+        const ignoredKeys = ['Version', 'Date', 'Project Owner', 'Project Manager', 'Project Name', 'approval']
+
+        // Robust check for meaningful content
+        const hasExistingData = Object.entries(contentData).some(([key, value]) => {
+            if (ignoredKeys.includes(key)) return false
+            if (value === null || value === undefined) return false
+
+            if (typeof value === 'object') return Object.keys(value).length > 0
+
+            const str = String(value)
+            if (!str) return false
+
+            // DOM-based comparison to ignore HTML tags and entities
+            if (typeof document !== 'undefined') {
+                const temp = document.createElement('div')
+                temp.innerHTML = str
+                return temp.textContent.trim().length > 0
+            }
+            return str.replace(/<[^>]*>/g, '').trim().length > 0
+        })
+
         const isApproved = approval.isApproved
 
         if (!hasExistingData) {
@@ -339,12 +359,15 @@ const GovernedArtefactEditor = ({
                 if (Object.keys(data).length === 0) return false
                 // Check if values are non-empty
                 const hasValues = Object.values(data).some(v => {
+                    if (v === null || v === undefined) return false
                     if (typeof v === 'object' && v !== null) {
                         // For nested like answers
                         if (v.answer && v.answer !== 'No') return true // Example for checklist
                         return Object.keys(v).length > 0
                     }
-                    return v && v !== ''
+                    // For strings (including rich text), strip HTML and whitespace
+                    const stripped = String(v).replace(/<[^>]*>/g, '').trim()
+                    return stripped.length > 0
                 })
                 return hasValues
             }
