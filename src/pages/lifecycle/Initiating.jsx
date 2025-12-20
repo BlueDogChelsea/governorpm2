@@ -108,7 +108,7 @@ const Initiating = ({ projectId, artefacts, onOpenArtefact, onOpenActivity, onOp
         },
         {
             id: 'document-idea',
-            title: 'Document the Idea / Need',
+            title: 'Document the Idea / Need (Project Initiation Request)',
             summary: 'Capture the problem, need, or opportunity motivating the project.',
             description: 'The purpose of this activity is to capture the problem, need, or opportunity that motivates the project. It describes the context, the drivers behind the initiative, and why the organisation is considering investment at this stage.',
             pm2Config: { section: '5.2' },
