@@ -8,7 +8,7 @@ const StepBusinessManager = ({ data, onChange }) => {
             <div className="text-center mb-8">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">Business Manager</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                    Who represents the business side and ensures business value?
+                    Acts day-to-day for the PO, defines business objectives, ensures deliverables meet business and user needs.
                 </p>
             </div>
 

@@ -8,7 +8,7 @@ const StepProjectOwner = ({ data, onChange }) => {
             <div className="text-center mb-8">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">Project Owner</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                    Who is the person accountable for the project's success?
+                    Sets business objectives, accountable for success, owns outputs.
                 </p>
             </div>
 

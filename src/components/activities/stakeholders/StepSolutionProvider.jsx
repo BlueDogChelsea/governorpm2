@@ -8,7 +8,7 @@ const StepSolutionProvider = ({ data, onChange }) => {
             <div className="text-center mb-8">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">Solution Provider</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                    (Optional) Who is responsible for providing the technical solution?
+                    Accountable for deliverables, represents delivery capability, partners with PO on objectives.
                 </p>
             </div>
 
