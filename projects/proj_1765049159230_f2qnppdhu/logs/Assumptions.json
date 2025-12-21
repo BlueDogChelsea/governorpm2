@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "title": "Budget Approval",
+        "description": "Budget for Q1 2025 will be approved by Dec 31st.",
+        "status": "Valid",
+        "owner": "Sponsor",
+        "dateLogged": "2024-11-30",
+        "notes": "Discussed with Finance."
+    },
+    {
+        "title": "API Availability",
+        "description": "Third-party payment gateway API will be available 99.9% of the time.",
+        "status": "Pending",
+        "owner": "Tech Lead",
+        "dateLogged": "2024-12-01",
+        "notes": "Awaiting SLA confirmation."
+    },
+    {
+        "title": "Legacy System Support",
+        "description": "The legacy CRM will support the new export format.",
+        "status": "Invalid",
+        "owner": "IT Manager",
+        "dateLogged": "2024-12-05",
+        "notes": "Confirmed it requires a patch."
+    }
+]

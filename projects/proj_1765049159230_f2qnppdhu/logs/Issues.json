@@ -1,1 +1,29 @@
-[]
+[
+    {
+        "title": "Production Server Crash",
+        "description": "The main production API server crashed during load testing.",
+        "severity": "Critical",
+        "owner": "DevOps Lead",
+        "status": "Open",
+        "notes": "Investigating memory leak.",
+        "dateLogged": "2024-12-20"
+    },
+    {
+        "title": "Database Query Latency",
+        "description": "Search queries are taking longer than 2 seconds.",
+        "severity": "Major",
+        "owner": "DBA",
+        "status": "In Progress",
+        "notes": "Index optimization required.",
+        "dateLogged": "2024-12-18"
+    },
+    {
+        "title": "Login Page Typos",
+        "description": "Spelling error in the 'Forgot Password' tooltip.",
+        "severity": "Minor",
+        "owner": "Frontend Dev",
+        "status": "Closed",
+        "notes": "Fixed in build v1.0.2.",
+        "dateLogged": "2024-12-15"
+    }
+]

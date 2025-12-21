@@ -1,1 +1,29 @@
-[]
+[
+    {
+        "title": "Hardware Procurement",
+        "description": "Server racks must be delivered before installation starts.",
+        "type": "Upstream",
+        "owner": "Procurement",
+        "status": "Open",
+        "dateLogged": "2024-11-20",
+        "notes": "Order placed."
+    },
+    {
+        "title": "User Training",
+        "description": "End-user training cannot start until UAT is complete.",
+        "type": "Downstream",
+        "owner": "Training Lead",
+        "status": "Open",
+        "dateLogged": "2024-12-10",
+        "notes": "Materials prep in progress."
+    },
+    {
+        "title": "Legal Review",
+        "description": "Terms of Service must be finalized by Legal department.",
+        "type": "Upstream",
+        "owner": "Legal",
+        "status": "Complete",
+        "dateLogged": "2024-12-01",
+        "notes": "Signed off."
+    }
+]
