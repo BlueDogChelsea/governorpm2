@@ -241,7 +241,7 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
             </div>
 
             <div className="bg-white border-b border-gray-200 py-4 flex justify-center sticky top-0 z-10">
-                <WizardStepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
+                <WizardStepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} center={true} />
             </div>
 
             {/* Content Area */}

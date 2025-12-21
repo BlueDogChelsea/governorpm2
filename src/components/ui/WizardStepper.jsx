@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { CheckIcon } from '@heroicons/react/24/solid'
 
-const WizardStepper = ({ steps, currentStep, onStepClick }) => {
+const WizardStepper = ({ steps, currentStep, onStepClick, center = false }) => {
     const scrollRef = useRef(null)
 
     // Auto-scroll to active step
@@ -16,7 +16,7 @@ const WizardStepper = ({ steps, currentStep, onStepClick }) => {
 
     return (
         <nav aria-label="Progress" className="w-full overflow-x-auto pb-4 no-scrollbar">
-            <ol role="list" ref={scrollRef} className="flex items-center min-w-max px-4">
+            <ol role="list" ref={scrollRef} className={`flex items-center min-w-max px-4 ${center ? 'justify-center w-full' : ''}`}>
                 {steps.map((step, stepIdx) => {
                     const isCompleted = stepIdx < currentStep
                     const isCurrent = stepIdx === currentStep
