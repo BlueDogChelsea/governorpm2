@@ -1,13 +1,7 @@
 export const businessCaseSchema = [
     {
-        id: 'project_info',
-        title: '1. Project Information',
-        fields: [
-        ]
-    },
-    {
         id: 'justification',
-        title: '2. Project Justification & Impact',
+        title: '1. Project Justification & Impact',
         fields: [
             { key: 'Business Justification', label: 'Business Justification', type: 'textarea', placeholder: 'Describe the business justification...' },
             { key: 'Current Situation / Problem', label: 'Current Situation / Problem', type: 'textarea', placeholder: 'Describe the current situation...' },
@@ -16,7 +10,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'alignment',
-        title: '3. Strategic Alignment',
+        title: '2. Strategic Alignment',
         fields: [
             { key: 'Strategic Alignment', label: 'Strategic Alignment', type: 'textarea', placeholder: 'Describe how the project aligns...' },
             { key: 'Regulatory / Compliance Drivers', label: 'Regulatory / Compliance Drivers', type: 'textarea', placeholder: 'Describe any relevant drivers...' }
@@ -24,7 +18,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'alternatives',
-        title: '4. Alternatives Considered',
+        title: '3. Alternatives Considered',
         // The UI performs custom rendering, but we list all fields here for the template engine.
         // We us 'group' metadata to help structure the output.
         fields: [
@@ -57,7 +51,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'solution',
-        title: '5. Proposed Solution Overview',
+        title: '4. Proposed Solution Overview',
         fields: [
             { key: 'Solution Overview', label: 'Solution Overview', type: 'textarea', placeholder: 'Overview of the chosen solution.' },
             { key: 'High-level Scope', label: 'High-level Scope', type: 'textarea', placeholder: 'Describe the high-level scope.' },
@@ -67,7 +61,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'success_criteria',
-        title: '6. Success Criteria',
+        title: '5. Success Criteria',
         fields: [
             { key: 'Critical Success Criteria', label: 'Critical Success Criteria', type: 'textarea', placeholder: 'List measurable criteria...' },
             { key: 'General Success Criteria', label: 'General Success Criteria', type: 'textarea', placeholder: 'List other general success criteria.' }
@@ -75,7 +69,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'costs_benefits',
-        title: '7. Costs & Benefits (High-Level)',
+        title: '6. Costs & Benefits (High-Level)',
         fields: [
             { key: 'Cost Summary', label: 'Cost Summary', type: 'textarea', placeholder: 'High-level cost summary.' },
             { key: 'Benefit Summary', label: 'Benefit Summary', type: 'textarea', placeholder: 'High-level benefit summary.' },
@@ -84,7 +78,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'synergies',
-        title: '8. Synergies and Interdependencies',
+        title: '7. Synergies and Interdependencies',
         fields: [
             { key: 'Dependencies', label: 'Dependencies', type: 'textarea', placeholder: 'Dependencies with other initiatives...' },
             { key: 'Synergies', label: 'Synergies', type: 'textarea', placeholder: 'Identified synergies.' },
@@ -93,7 +87,7 @@ export const businessCaseSchema = [
     },
     {
         id: 'roadmap',
-        title: '9. High-Level Roadmap',
+        title: '8. High-Level Roadmap',
         fields: [
             { key: 'Start Date', label: 'Start Date', type: 'date' },
             { key: 'Target Delivery Date', label: 'Target Delivery Date', type: 'date' },
