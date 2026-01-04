@@ -10,12 +10,18 @@ import {
     ChevronDownIcon,
     ArrowLeftIcon,
     TrashIcon,
-    Squares2X2Icon
+    Squares2X2Icon,
+    ArrowDownTrayIcon,
+    CheckCircleIcon,
+    ExclamationCircleIcon,
+    InformationCircleIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline'
 import Lifecycle from './components/Lifecycle'
 import GuidancePage from './components/GuidancePage'
 import ProjectsPage from './pages/ProjectsPage' // Import ProjectsPage
 import { ProjectService } from './services/ProjectService' // Import ProjectService
+import { promoteCharterRisks } from './services/RiskService'
 import Home from './pages/Home'
 import Initiating from './pages/lifecycle/Initiating'
 import Planning from './pages/lifecycle/Planning'
@@ -234,6 +240,41 @@ function LogModal({ isOpen, onClose, type, onSave, initialData }) {
     )
 }
 
+
+function Toast({ toast, onClose }) {
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(onClose, 3000)
+            return () => clearTimeout(timer)
+        }
+    }, [toast, onClose])
+
+    if (!toast) return null
+
+    const icons = {
+        success: CheckCircleIcon,
+        error: ExclamationCircleIcon,
+        info: InformationCircleIcon
+    }
+    const colors = {
+        success: 'bg-green-50 text-green-800 border-green-200',
+        error: 'bg-red-50 text-red-800 border-red-200',
+        info: 'bg-blue-50 text-blue-800 border-blue-200'
+    }
+    const Icon = icons[toast.type] || InformationCircleIcon
+    const style = colors[toast.type] || colors.info
+
+    return (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center p-4 rounded-lg border shadow-lg transition-all transform duration-500 ease-in-out ${style}`}>
+            <Icon className="h-6 w-6 mr-3" />
+            <span className="font-medium mr-8">{toast.message}</span>
+            <button onClick={onClose} className="ml-auto p-1 rounded-full hover:bg-black/5">
+                <XMarkIcon className="h-4 w-4" />
+            </button>
+        </div>
+    )
+}
+
 function App() {
     const [activeTab, setActiveTab] = useState('Home')
     const [activePhase, setActivePhase] = useState('Initiating')
@@ -257,6 +298,7 @@ function App() {
     const [guidanceReturnPath, setGuidanceReturnPath] = useState(null)
     const [artefactReturnTab, setArtefactReturnTab] = useState(null)
     const [activeActivity, setActiveActivity] = useState(null)
+    const [toast, setToast] = useState(null)
 
     // Project State
     const [projects, setProjects] = useState([])
@@ -417,6 +459,44 @@ function App() {
             }
         }
     };
+
+    const handleImportRisks = async () => {
+        if (!activeProjectId || !window.electronAPI) return
+
+        // 1. Check if Charter data exists
+        let charterData = null
+        try {
+            charterData = await window.electronAPI.readJSON(`projects/${activeProjectId}/projectCharter.json`)
+        } catch (e) {
+            console.error(e)
+        }
+
+        if (!charterData) {
+            setToast({ message: "Project Charter not found. Please create it first.", type: 'error' })
+            return
+        }
+
+        // 2. Filter and Promote
+        const currentRisks = logs.Risks || []
+        const newRisks = promoteCharterRisks(charterData, currentRisks)
+
+        if (newRisks.length === 0) {
+            setToast({ message: "No new risks found to import from Charter.", type: 'info' })
+            return
+        }
+
+        // 3. Append and Save
+        const updatedRisks = [...currentRisks, ...newRisks]
+
+        setLogs(prev => ({
+            ...prev,
+            Risks: updatedRisks
+        }))
+
+        await window.electronAPI.writeJSON(`projects/${activeProjectId}/logs/Risks.json`, updatedRisks)
+
+        setToast({ message: `${newRisks.length} Risks imported from Charter successfully.`, type: 'success' })
+    }
 
     const handleSaveLog = async (entry) => {
         let updatedList = [...logs[activeLogTab]]
@@ -1019,15 +1099,26 @@ function App() {
                                                 </button>
                                             ))}
                                         </div>
-                                        <button
-                                            onClick={handleAddNew}
-                                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-sm flex items-center"
-                                        >
-                                            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                            </svg>
-                                            Add New
-                                        </button>
+                                        <div className="flex space-x-3">
+                                            {activeLogTab === 'Risks' && (
+                                                <button
+                                                    onClick={handleImportRisks}
+                                                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm flex items-center"
+                                                >
+                                                    <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                                                    Import from Charter
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={handleAddNew}
+                                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-sm flex items-center"
+                                            >
+                                                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Add New
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Logs Content - Table View */}
@@ -1139,6 +1230,8 @@ function App() {
                     onClose={() => setDeleteConfirmation(null)}
                     onConfirm={confirmDelete}
                 />
+
+                <Toast toast={toast} onClose={() => setToast(null)} />
             </main>
         </div>
     )

@@ -107,10 +107,10 @@
       "Version": "1.0",
       "executiveSummary": "<p>Create the Governor app.</p>",
       "businessCaseConsiderations": "",
+      "successCriteria": "",
       "scopeStatement": "",
       "scopeIn": "",
       "scopeOut": "",
-      "successCriteria": "",
       "stakeholderNeeds": [
         {
           "id": "1765105034925",
@@ -123,11 +123,29 @@
           "priority": ""
         }
       ],
-      "deliverables": [],
+      "deliverables": [
+        {
+          "id": "1767538480275",
+          "name": "D1",
+          "description": "A deliverable 1"
+        }
+      ],
       "features": [],
       "constraints": "",
       "assumptions": "",
-      "risks": [],
+      "risks": [
+        {
+          "id": "1767539143033",
+          "description": "The demand for the product is not proven. There may be no benefits to completing the project.",
+          "status": "Open",
+          "likelihood": "High",
+          "impact": "High",
+          "riskLevel": "High",
+          "owner": "Ian Richmond",
+          "responseStrategy": "Abandon project quickly",
+          "actionDetails": "Gauge demand."
+        }
+      ],
       "costSummary": "",
       "costTable": [],
       "milestones": [],
@@ -136,10 +154,37 @@
       "projectChange": "",
       "configurationManagement": "",
       "organisationalChange": "",
+      "psc": {
+        "requestorSide": {
+          "po": {
+            "role": "Project Owner",
+            "name": "",
+            "responsibilities": "Sets objectives, owns the Business Case"
+          },
+          "bm": {
+            "role": "Business Manager",
+            "name": "",
+            "responsibilities": "Represents the users, ensures benefits realization"
+          }
+        },
+        "providerSide": {
+          "sp": {
+            "role": "Solution Provider",
+            "name": "",
+            "responsibilities": "Assumes overall accountability for IT/Deliverables"
+          },
+          "pm": {
+            "role": "Project Manager",
+            "name": "",
+            "responsibilities": "Manages the project day-to-day"
+          }
+        }
+      },
+      "extendedGovernance": [],
+      "references": [],
       "governanceStructure": "",
       "rolesResponsibilities": "",
       "otherStakeholders": "",
-      "references": [],
       "approval": {
         "approverName": "",
         "approvalDate": "",
@@ -150,7 +195,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": false,
-    "lastUpdated": "2025-12-07T10:58:28.623Z"
+    "lastUpdated": "2026-01-04T15:07:35.545Z"
   },
   {
     "id": "initiating-phase-exit-checklist",
