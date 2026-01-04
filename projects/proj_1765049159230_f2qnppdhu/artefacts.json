@@ -144,6 +144,14 @@
           "owner": "Ian Richmond",
           "responseStrategy": "Abandon project quickly",
           "actionDetails": "Gauge demand."
+        },
+        {
+          "id": "1767540668336",
+          "description": "Ian is building this alone. That may be too big an ask.  There is a high risk of burnout.",
+          "likelihood": "High",
+          "impact": "High",
+          "riskLevel": "High",
+          "status": "Open"
         }
       ],
       "costSummary": "",
@@ -184,14 +192,7 @@
       "references": [],
       "governanceStructure": "",
       "rolesResponsibilities": "",
-      "otherStakeholders": "",
-      "approval": {
-        "approverName": "",
-        "approvalDate": "",
-        "signature": "",
-        "isApproved": false,
-        "timestamp": null
-      }
+      "otherStakeholders": ""
     },
     "modifiedAfterApproval": false,
     "importPromptShown": false,

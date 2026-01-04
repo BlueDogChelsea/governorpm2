@@ -47,5 +47,18 @@
     "owner": "Ian Richmond",
     "notes": "Imported from Project Charter during initiation.",
     "dateLogged": "2026-01-04"
+  },
+  {
+    "id": "d4b91dba-936a-47fb-b150-1301d253254b",
+    "type": "RISK",
+    "title": "Ian is building this alone. That may be too big an...",
+    "description": "Ian is building this alone. That may be too big an ask.  There is a high risk of burnout.",
+    "likelihood": "High",
+    "impact": "High",
+    "level": "High",
+    "status": "Open",
+    "owner": "Unassigned",
+    "notes": "Imported from Project Charter during initiation.",
+    "dateLogged": "2026-01-04"
   }
 ]
