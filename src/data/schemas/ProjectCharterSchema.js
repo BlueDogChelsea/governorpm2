@@ -75,17 +75,45 @@ export const projectCharterSchema = [
                 group: '5.2 Features',
                 type: 'table',
                 columns: [
-                    { key: 'featureText', label: 'Feature', type: 'text' },
-                    { key: 'relatedNeedId', label: 'Related Need ID', type: 'text' },
-                    { key: 'deliverablesText', label: 'Related Deliverables', type: 'text' }
+                    { key: 'name', label: 'Feature Name', type: 'text' },
+                    { key: 'description', label: 'Description', type: 'textarea' },
+                    { key: 'relatedDeliverable', label: 'Related Deliverable', type: 'select', options: [] } // Options populated dynamically in UI
                 ]
             },
 
             // 5.3 Constraints
-            { key: 'constraints', label: 'Constraints', group: '5.3 Constraints', type: 'richtext', placeholder: 'List project constraints...' },
+            {
+                key: 'constraints',
+                label: 'Constraints',
+                group: '5.3 Constraints',
+                type: 'table',
+                columns: [
+                    { key: 'description', label: 'Constraint Description', type: 'textarea' },
+                    {
+                        key: 'type',
+                        label: 'Type',
+                        type: 'select',
+                        options: ['Budget', 'Schedule', 'Technical', 'Legal', 'Resource', 'Other']
+                    }
+                ]
+            },
 
             // 5.4 Assumptions
-            { key: 'assumptions', label: 'Assumptions', group: '5.4 Assumptions', type: 'richtext', placeholder: 'List project assumptions...' },
+            {
+                key: 'assumptions',
+                label: 'Assumptions',
+                group: '5.4 Assumptions',
+                type: 'table',
+                columns: [
+                    { key: 'description', label: 'Assumption Description', type: 'textarea' },
+                    {
+                        key: 'impact',
+                        label: 'Impact if False',
+                        type: 'select',
+                        options: ['High', 'Medium', 'Low']
+                    }
+                ]
+            },
 
             // 5.5 Risks (Repeating)
             {

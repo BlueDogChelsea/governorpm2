@@ -29,13 +29,49 @@
   "deliverables": [
     {
       "id": "1767538480275",
-      "name": "D1",
-      "description": "A deliverable 1"
+      "name": "Governor",
+      "description": "Full featured pm governance system compliant with pm2 standard",
+      "type": "Software",
+      "dueDate": "2026-01-30"
     }
   ],
-  "features": [],
-  "constraints": "",
-  "assumptions": "",
+  "features": [
+    {
+      "id": "1767542642972",
+      "name": "Guidance",
+      "description": "Context-aware guidance that shows the user \"official\" guidance from the pm2 guide.",
+      "relatedDeliverable": "Governor"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "1767542669295",
+      "description": "Only allowed spend for now is AI tool subscriptions.",
+      "type": "Budget"
+    },
+    {
+      "id": "1767542690129",
+      "description": "Would like to complete during 2026",
+      "type": "Schedule"
+    },
+    {
+      "id": "1767542709667",
+      "description": "Ian Richmond to be sole resource.",
+      "type": "Resource"
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "1767542729059",
+      "description": "Market is there for this product.",
+      "impact": "High"
+    },
+    {
+      "id": "1767542751493",
+      "description": "AntiGravity is suitable for all dev requirements",
+      "impact": "High"
+    }
+  ],
   "risks": [
     {
       "id": "1767539143033",

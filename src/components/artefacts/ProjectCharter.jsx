@@ -223,6 +223,161 @@ const DeliverableModal = ({ isOpen, onClose, onSave, initialData }) => {
     )
 }
 
+// -- Feature Modal Component --
+const FeatureModal = ({ isOpen, onClose, onSave, initialData, availableDeliverables = [] }) => {
+    const [formData, setFormData] = useState({ name: '', description: '', relatedDeliverable: '' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                name: initialData.name || '',
+                description: initialData.description || '',
+                relatedDeliverable: initialData.relatedDeliverable || ''
+            } : { name: '', description: '', relatedDeliverable: '' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Feature' : 'Add Feature'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Feature Name</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Related Deliverable</label>
+                                <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.relatedDeliverable} onChange={(e) => handleChange('relatedDeliverable', e.target.value)}>
+                                    <option value="">-- Select Deliverable (Optional) --</option>
+                                    {availableDeliverables.map((d, i) => (
+                                        <option key={d.id || i} value={d.name}>{d.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Constraint Modal Component --
+const ConstraintModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ description: '', type: 'Budget' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                description: initialData.description || '',
+                type: initialData.type || 'Budget'
+            } : { description: '', type: 'Budget' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Constraint' : 'Add Constraint'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Constraint Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Type</label>
+                                <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.type} onChange={(e) => handleChange('type', e.target.value)}>
+                                    <option>Budget</option><option>Schedule</option><option>Technical</option><option>Legal</option><option>Resource</option><option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Assumption Modal Component --
+const AssumptionModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ description: '', impact: 'Medium' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                description: initialData.description || '',
+                impact: initialData.impact || 'Medium'
+            } : { description: '', impact: 'Medium' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Assumption' : 'Add Assumption'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Assumption Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Impact if False</label>
+                                <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.impact} onChange={(e) => handleChange('impact', e.target.value)}>
+                                    <option>High</option><option>Medium</option><option>Low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // Define the Sidebar Structure
 const SIDEBAR_STRUCTURE = [
     {
@@ -234,11 +389,14 @@ const SIDEBAR_STRUCTURE = [
     {
         title: '3. Project Description',
         items: [
-            { id: 'scope', name: 'Scope', fields: ['scopeStatement', 'scopeIn', 'scopeOut'] },
-            { id: 'success', name: 'Success Criteria', fields: ['successCriteria'] },
-            { id: 'needs', name: 'Stakeholder Needs', fields: ['stakeholderNeeds'] },
-            { id: 'deliverables', name: 'Deliverables & Specs', fields: ['deliverables', 'features', 'constraints', 'assumptions'] },
-            { id: 'risks', name: 'Risks', fields: ['risks'] }
+            { id: 'scope', name: '3.1 Scope', fields: ['scopeStatement', 'scopeIn', 'scopeOut'] },
+            { id: 'success', name: '3.2 Success Criteria', fields: ['successCriteria'] },
+            { id: 'needs', name: '3.3 Stakeholder Needs', fields: ['stakeholderNeeds'] },
+            { id: 'deliverables', name: '3.4 Deliverables', fields: ['deliverables'] },
+            { id: 'features', name: '3.5 Features', fields: ['features'] },
+            { id: 'constraints', name: '3.6 Constraints', fields: ['constraints'] },
+            { id: 'assumptions', name: '3.7 Assumptions', fields: ['assumptions'] },
+            { id: 'risks', name: '3.8 Risks', fields: ['risks'] }
         ]
     },
     {
@@ -296,6 +454,21 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
     const [isDeliverableModalOpen, setIsDeliverableModalOpen] = useState(false)
     const [editingDeliverableIndex, setEditingDeliverableIndex] = useState(null)
     const [currentDeliverableData, setCurrentDeliverableData] = useState(null)
+
+    // Feature Modal State
+    const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(false)
+    const [editingFeatureIndex, setEditingFeatureIndex] = useState(null)
+    const [currentFeatureData, setCurrentFeatureData] = useState(null)
+
+    // Constraint Modal State
+    const [isConstraintModalOpen, setIsConstraintModalOpen] = useState(false)
+    const [editingConstraintIndex, setEditingConstraintIndex] = useState(null)
+    const [currentConstraintData, setCurrentConstraintData] = useState(null)
+
+    // Assumption Modal State
+    const [isAssumptionModalOpen, setIsAssumptionModalOpen] = useState(false)
+    const [editingAssumptionIndex, setEditingAssumptionIndex] = useState(null)
+    const [currentAssumptionData, setCurrentAssumptionData] = useState(null)
 
     const dataRef = React.useRef({})
 
@@ -803,6 +976,163 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                         )
                     }
 
+                    // -- Feature Logic --
+                    const handleOpenAddFeature = () => { setEditingFeatureIndex(null); setCurrentFeatureData(null); setIsFeatureModalOpen(true) }
+                    const handleOpenEditFeature = (index, item) => { setEditingFeatureIndex(index); setCurrentFeatureData(item); setIsFeatureModalOpen(true) }
+                    const handleSaveFeature = (formData) => {
+                        const list = Array.isArray(data.features) ? data.features : []
+                        const newList = [...list]
+                        if (editingFeatureIndex !== null) newList[editingFeatureIndex] = { ...newList[editingFeatureIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('features', newList)
+                        setIsFeatureModalOpen(false)
+                    }
+                    const handleDeleteFeature = (index) => {
+                        const list = Array.isArray(data.features) ? data.features : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('features', newList)
+                    }
+
+                    const renderFeaturesList = (fieldDef) => {
+                        const rows = Array.isArray(data.features) ? data.features : []
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddFeature} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Feature
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No features added.</p></div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {rows.map((item, idx) => (
+                                            <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 pr-6">
+                                                    <h4 className="font-bold text-gray-900 text-sm mb-1">{item.name || 'Untitled Feature'}</h4>
+                                                    <p className="text-gray-600 text-sm line-clamp-2 mb-2">{item.description}</p>
+                                                    {item.relatedDeliverable && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                                            Relates to: {item.relatedDeliverable}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                                    <button onClick={() => handleOpenEditFeature(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                    <button onClick={() => handleDeleteFeature(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
+                    // -- Constraint Logic --
+                    const handleOpenAddConstraint = () => { setEditingConstraintIndex(null); setCurrentConstraintData(null); setIsConstraintModalOpen(true) }
+                    const handleOpenEditConstraint = (index, item) => { setEditingConstraintIndex(index); setCurrentConstraintData(item); setIsConstraintModalOpen(true) }
+                    const handleSaveConstraint = (formData) => {
+                        const list = Array.isArray(data.constraints) ? data.constraints : []
+                        const newList = [...list]
+                        if (editingConstraintIndex !== null) newList[editingConstraintIndex] = { ...newList[editingConstraintIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('constraints', newList)
+                        setIsConstraintModalOpen(false)
+                    }
+                    const handleDeleteConstraint = (index) => {
+                        const list = Array.isArray(data.constraints) ? data.constraints : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('constraints', newList)
+                    }
+
+                    const renderConstraintsList = (fieldDef) => {
+                        const rows = Array.isArray(data.constraints) ? data.constraints : []
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddConstraint} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Constraint
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No constraints defined.</p></div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {rows.map((item, idx) => (
+                                            <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 pr-6">
+                                                    <div className="flex items-center space-x-2 mb-2">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">{item.type || 'Constraint'}</span>
+                                                    </div>
+                                                    <p className="text-gray-900 text-sm">{item.description}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                                    <button onClick={() => handleOpenEditConstraint(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                    <button onClick={() => handleDeleteConstraint(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
+                    // -- Assumption Logic --
+                    const handleOpenAddAssumption = () => { setEditingAssumptionIndex(null); setCurrentAssumptionData(null); setIsAssumptionModalOpen(true) }
+                    const handleOpenEditAssumption = (index, item) => { setEditingAssumptionIndex(index); setCurrentAssumptionData(item); setIsAssumptionModalOpen(true) }
+                    const handleSaveAssumption = (formData) => {
+                        const list = Array.isArray(data.assumptions) ? data.assumptions : []
+                        const newList = [...list]
+                        if (editingAssumptionIndex !== null) newList[editingAssumptionIndex] = { ...newList[editingAssumptionIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('assumptions', newList)
+                        setIsAssumptionModalOpen(false)
+                    }
+                    const handleDeleteAssumption = (index) => {
+                        const list = Array.isArray(data.assumptions) ? data.assumptions : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('assumptions', newList)
+                    }
+
+                    const renderAssumptionsList = (fieldDef) => {
+                        const rows = Array.isArray(data.assumptions) ? data.assumptions : []
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddAssumption} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Assumption
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No assumptions defined.</p></div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {rows.map((item, idx) => (
+                                            <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 pr-6">
+                                                    <div className="flex items-center space-x-2 mb-2">
+                                                        <span className="font-bold text-gray-500 text-xs uppercase tracking-wide">Impact:</span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${item.impact === 'High' ? 'bg-red-100 text-red-800' : item.impact === 'Low' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{item.impact || 'Medium'}</span>
+                                                    </div>
+                                                    <p className="text-gray-900 text-sm">{item.description}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                                    <button onClick={() => handleOpenEditAssumption(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                    <button onClick={() => handleDeleteAssumption(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
                     const renderPSCMatrix = (key, label, structure) => {
                         const pscData = data[key] || structure
                         const updatePscRole = (side, roleKey, value) => {
@@ -899,6 +1229,9 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                         if (fieldKey === 'risks') return renderRisksList(fieldDef)
                                         if (fieldKey === 'stakeholderNeeds') return renderNeedsList(fieldDef)
                                         if (fieldKey === 'deliverables') return renderDeliverablesList(fieldDef)
+                                        if (fieldKey === 'features') return renderFeaturesList(fieldDef)
+                                        if (fieldKey === 'constraints') return renderConstraintsList(fieldDef)
+                                        if (fieldKey === 'assumptions') return renderAssumptionsList(fieldDef)
 
                                         if (fieldDef.type === 'table') return renderTable(fieldDef.key, fieldDef.label, fieldDef.columns)
                                         if (fieldDef.type === 'richtext' || fieldDef.type === 'textarea') return renderTextArea(fieldDef.key, fieldDef.label, fieldDef.placeholder)
@@ -965,6 +1298,25 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                 onClose={() => setIsDeliverableModalOpen(false)}
                                 onSave={handleSaveDeliverable}
                                 initialData={currentDeliverableData}
+                            />
+                            <FeatureModal
+                                isOpen={isFeatureModalOpen}
+                                onClose={() => setIsFeatureModalOpen(false)}
+                                onSave={handleSaveFeature}
+                                initialData={currentFeatureData}
+                                availableDeliverables={Array.isArray(data.deliverables) ? data.deliverables : []}
+                            />
+                            <ConstraintModal
+                                isOpen={isConstraintModalOpen}
+                                onClose={() => setIsConstraintModalOpen(false)}
+                                onSave={handleSaveConstraint}
+                                initialData={currentConstraintData}
+                            />
+                            <AssumptionModal
+                                isOpen={isAssumptionModalOpen}
+                                onClose={() => setIsAssumptionModalOpen(false)}
+                                onSave={handleSaveAssumption}
+                                initialData={currentAssumptionData}
                             />
                         </div>
                     )
