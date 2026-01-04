@@ -9,13 +9,21 @@
   "stakeholderNeeds": [
     {
       "id": "1765105034925",
-      "description": "<p>Weekly Reports</p>",
-      "priority": ""
+      "description": "Weekly status reports",
+      "priority": "High (Critical)",
+      "stakeholder": "Project Owner"
     },
     {
       "id": "1765105064858",
-      "description": "<p>Escalations</p>",
-      "priority": ""
+      "description": "Escalations",
+      "priority": "High (Critical)",
+      "stakeholder": "Project Owner"
+    },
+    {
+      "id": "1767541587780",
+      "stakeholder": "Finance Team",
+      "description": "Require timesheets to keep track of project spend.",
+      "priority": "Medium (Important)"
     }
   ],
   "deliverables": [

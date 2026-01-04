@@ -57,7 +57,14 @@ export const projectCharterSchema = [
                 type: 'table',
                 columns: [
                     { key: 'name', label: 'Deliverable Name', type: 'text' },
-                    { key: 'description', label: 'Description', type: 'text' }
+                    { key: 'description', label: 'Description', type: 'textarea' },
+                    {
+                        key: 'type',
+                        label: 'Type',
+                        type: 'select',
+                        options: ['Report', 'Software', 'Service', 'Hardware', 'Other']
+                    },
+                    { key: 'dueDate', label: 'Due Date', type: 'date' }
                 ]
             },
 

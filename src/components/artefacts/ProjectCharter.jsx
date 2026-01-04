@@ -22,154 +22,200 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
 
     useEffect(() => {
         if (isOpen) {
-            if (initialData) {
-                setFormData({
-                    description: initialData.description || '',
-                    likelihood: initialData.likelihood || 'Medium',
-                    impact: initialData.impact || 'Medium',
-                    riskLevel: initialData.riskLevel || 'Medium',
-                    status: initialData.status || 'Open'
-                })
-            } else {
-                setFormData({
-                    description: '',
-                    likelihood: 'Medium',
-                    impact: 'Medium',
-                    riskLevel: 'Medium',
-                    status: 'Open'
-                })
-            }
+            setFormData(initialData ? {
+                description: initialData.description || '',
+                likelihood: initialData.likelihood || 'Medium',
+                impact: initialData.impact || 'Medium',
+                riskLevel: initialData.riskLevel || 'Medium',
+                status: initialData.status || 'Open'
+            } : {
+                description: '',
+                likelihood: 'Medium',
+                impact: 'Medium',
+                riskLevel: 'Medium',
+                status: 'Open'
+            })
         }
     }, [isOpen, initialData])
 
-    // Auto-calculate Level based on Likelihood/Impact (Simple Matrix)
+    // Auto-calculate Level
     useEffect(() => {
         if (!isOpen) return
-
-        // High=3, Medium=2, Low=1
         const val = (v) => v === 'High' ? 3 : v === 'Medium' ? 2 : 1
         const score = val(formData.likelihood) * val(formData.impact)
-
         let newLevel = 'Medium'
-        if (score >= 6) newLevel = 'High' // 3*3=9, 3*2=6
-        else if (score >= 3) newLevel = 'Medium' // 3*1=3, 2*2=4
+        if (score >= 6) newLevel = 'High'
+        else if (score >= 3) newLevel = 'Medium'
         else newLevel = 'Low'
-
-        // Override specific matrix logic if needed, but heuristic is good for now.
-        // We only auto-set if the user hasn't manually locked it? 
-        // For simplicity, we just update it. User can override it manually after.
-
         setFormData(prev => ({ ...prev, riskLevel: newLevel }))
-
     }, [formData.likelihood, formData.impact, isOpen])
 
-    const handleChange = (key, val) => {
-        setFormData(prev => ({ ...prev, [key]: val }))
-    }
-
-    // Manual override wrapper to prevent useEffect loop if we wanted (not needed with current dep array)
-    // Actually, the useEffect depends on L/I. If we change L, it updates Level.
-    // If user changes Level manually, it just sets state. 
-    // BUT if user changes L later, it will overwrite Level. This is acceptable for "Auto-calc".
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
 
     if (!isOpen) return null
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity" onClick={onClose}>
-                    <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-                </div>
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
                 <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
                 <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900">
-                                {initialData ? 'Edit High-Level Risk' : 'Add High-Level Risk'}
-                            </h3>
-                            <button onClick={onClose} className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Risk' : 'Add New Risk'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
                         </div>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Risk Description</label>
-                                <textarea
-                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-                                    rows={4}
-                                    value={formData.description}
-                                    onChange={(e) => handleChange('description', e.target.value)}
-                                    placeholder="Describe the risk..."
-                                />
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Likelihood</label>
-                                    <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                                        value={formData.likelihood}
-                                        onChange={(e) => handleChange('likelihood', e.target.value)}
-                                    >
-                                        <option>High</option>
-                                        <option>Medium</option>
-                                        <option>Low</option>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.likelihood} onChange={(e) => handleChange('likelihood', e.target.value)}>
+                                        <option>High</option><option>Medium</option><option>Low</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Impact</label>
-                                    <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                                        value={formData.impact}
-                                        onChange={(e) => handleChange('impact', e.target.value)}
-                                    >
-                                        <option>High</option>
-                                        <option>Medium</option>
-                                        <option>Low</option>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.impact} onChange={(e) => handleChange('impact', e.target.value)}>
+                                        <option>High</option><option>Medium</option><option>Low</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Level (Auto)</label>
-                                    <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-gray-50"
-                                        value={formData.riskLevel}
-                                        onChange={(e) => handleChange('riskLevel', e.target.value)}
-                                    >
-                                        <option>High</option>
-                                        <option>Medium</option>
-                                        <option>Low</option>
-                                    </select>
+                                    <input type="text" disabled className="mt-1 block w-full bg-gray-100 border-gray-300 rounded-md shadow-sm sm:text-sm p-2 text-gray-500" value={formData.riskLevel} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Status</label>
-                                    <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                                        value={formData.status}
-                                        onChange={(e) => handleChange('status', e.target.value)}
-                                    >
-                                        <option>Open</option>
-                                        <option>Closed</option>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.status} onChange={(e) => handleChange('status', e.target.value)}>
+                                        <option>Open</option><option>Closed</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button
-                            type="button"
-                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
-                            onClick={() => onSave(formData)}
-                        >
-                            Save
-                        </button>
-                        <button
-                            type="button"
-                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                            onClick={onClose}
-                        >
-                            Cancel
-                        </button>
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Need Modal Component --
+const NeedModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ stakeholder: '', description: '', priority: 'Medium (Important)' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                stakeholder: initialData.stakeholder || '',
+                description: initialData.description || '',
+                priority: initialData.priority || 'Medium (Important)'
+            } : { stakeholder: '', description: '', priority: 'Medium (Important)' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Stakeholder Need' : 'Add Stakeholder Need'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Stakeholder / Group</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.stakeholder} onChange={(e) => handleChange('stakeholder', e.target.value)} placeholder="e.g. Finance Team" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Need Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={4} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="Describe the need..." />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Priority</label>
+                                <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)}>
+                                    <option>High (Critical)</option><option>Medium (Important)</option><option>Low (Desirable)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Deliverable Modal Component --
+const DeliverableModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ name: '', description: '', type: 'Report', dueDate: '' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                name: initialData.name || '',
+                description: initialData.description || '',
+                type: initialData.type || 'Report',
+                dueDate: initialData.dueDate || ''
+            } : { name: '', description: '', type: 'Report', dueDate: '' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Deliverable' : 'Add Deliverable'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Deliverable Name</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Type</label>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.type} onChange={(e) => handleChange('type', e.target.value)}>
+                                        <option>Report</option><option>Software</option><option>Service</option><option>Hardware</option><option>Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Due Date</label>
+                                    <input type="date" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.dueDate} onChange={(e) => handleChange('dueDate', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
                     </div>
                 </div>
             </div>
@@ -205,8 +251,7 @@ const SIDEBAR_STRUCTURE = [
     {
         title: '6. Governance',
         items: [
-            { id: 'governance', name: 'Roles & Responsibilities', fields: ['psc', 'extendedGovernance'] },
-            { id: 'approval', name: 'Sign-Off / Approval', fields: ['approval'] }
+            { id: 'governance', name: 'Roles & Responsibilities', fields: ['psc', 'extendedGovernance'] }
         ]
     },
     {
@@ -219,6 +264,12 @@ const SIDEBAR_STRUCTURE = [
         title: 'Appendix',
         items: [
             { id: 'refs', name: 'References', fields: ['references'] }
+        ]
+    },
+    {
+        title: 'Authorization',
+        items: [
+            { id: 'approval', name: 'Sign-Off / Approval', fields: ['approval'] }
         ]
     }
 ]
@@ -235,6 +286,16 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
     const [isRiskModalOpen, setIsRiskModalOpen] = useState(false)
     const [editingRiskIndex, setEditingRiskIndex] = useState(null)
     const [currentRiskData, setCurrentRiskData] = useState(null)
+
+    // Need Modal State
+    const [isNeedModalOpen, setIsNeedModalOpen] = useState(false)
+    const [editingNeedIndex, setEditingNeedIndex] = useState(null)
+    const [currentNeedData, setCurrentNeedData] = useState(null)
+
+    // Deliverable Modal State
+    const [isDeliverableModalOpen, setIsDeliverableModalOpen] = useState(false)
+    const [editingDeliverableIndex, setEditingDeliverableIndex] = useState(null)
+    const [currentDeliverableData, setCurrentDeliverableData] = useState(null)
 
     const dataRef = React.useRef({})
 
@@ -631,6 +692,117 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                         )
                     }
 
+                    // -- Need Logic --
+                    const handleOpenAddNeed = () => { setEditingNeedIndex(null); setCurrentNeedData(null); setIsNeedModalOpen(true) }
+                    const handleOpenEditNeed = (index, item) => { setEditingNeedIndex(index); setCurrentNeedData(item); setIsNeedModalOpen(true) }
+                    const handleSaveNeed = (formData) => {
+                        const list = Array.isArray(data.stakeholderNeeds) ? data.stakeholderNeeds : []
+                        const newList = [...list]
+                        if (editingNeedIndex !== null) newList[editingNeedIndex] = { ...newList[editingNeedIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('stakeholderNeeds', newList)
+                        setIsNeedModalOpen(false)
+                    }
+                    const handleDeleteNeed = (index) => {
+                        const list = Array.isArray(data.stakeholderNeeds) ? data.stakeholderNeeds : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('stakeholderNeeds', newList)
+                    }
+
+                    const renderNeedsList = (fieldDef) => {
+                        const rows = Array.isArray(data.stakeholderNeeds) ? data.stakeholderNeeds : []
+                        const getPriorityBadge = (p) => {
+                            if (p?.includes('High')) return 'bg-red-100 text-red-800'
+                            if (p?.includes('Medium')) return 'bg-yellow-100 text-yellow-800'
+                            if (p?.includes('Low')) return 'bg-green-100 text-green-800'
+                            return 'bg-gray-100 text-gray-800'
+                        }
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddNeed} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Need
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No stakeholder needs added.</p></div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {rows.map((item, idx) => (
+                                            <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 pr-6">
+                                                    <div className="flex items-center space-x-2 mb-2">
+                                                        <span className="font-bold text-sm text-gray-900">{item.stakeholder || 'Unknown Stakeholder'}</span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityBadge(item.priority)}`}>{item.priority}</span>
+                                                    </div>
+                                                    <p className="text-gray-700 text-sm line-clamp-3">{item.description}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                                    <button onClick={() => handleOpenEditNeed(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                    <button onClick={() => handleDeleteNeed(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
+                    // -- Deliverables Logic --
+                    const handleOpenAddDeliverable = () => { setEditingDeliverableIndex(null); setCurrentDeliverableData(null); setIsDeliverableModalOpen(true) }
+                    const handleOpenEditDeliverable = (index, item) => { setEditingDeliverableIndex(index); setCurrentDeliverableData(item); setIsDeliverableModalOpen(true) }
+                    const handleSaveDeliverable = (formData) => {
+                        const list = Array.isArray(data.deliverables) ? data.deliverables : []
+                        const newList = [...list]
+                        if (editingDeliverableIndex !== null) newList[editingDeliverableIndex] = { ...newList[editingDeliverableIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('deliverables', newList)
+                        setIsDeliverableModalOpen(false)
+                    }
+                    const handleDeleteDeliverable = (index) => {
+                        const list = Array.isArray(data.deliverables) ? data.deliverables : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('deliverables', newList)
+                    }
+
+                    const renderDeliverablesList = (fieldDef) => {
+                        const rows = Array.isArray(data.deliverables) ? data.deliverables : []
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddDeliverable} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Deliverable
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No deliverables added.</p></div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {rows.map((item, idx) => (
+                                            <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 pr-6">
+                                                    <div className="flex items-center space-x-2 mb-2">
+                                                        <h4 className="font-bold text-gray-900 text-sm">{item.name || 'Untitled'}</h4>
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">{item.type || 'Report'}</span>
+                                                        {item.dueDate && <span className="text-xs text-gray-500 ml-2">Due: {item.dueDate}</span>}
+                                                    </div>
+                                                    <p className="text-gray-600 text-sm line-clamp-2">{item.description}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                                    <button onClick={() => handleOpenEditDeliverable(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                    <button onClick={() => handleDeleteDeliverable(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
                     const renderPSCMatrix = (key, label, structure) => {
                         const pscData = data[key] || structure
                         const updatePscRole = (side, roleKey, value) => {
@@ -725,6 +897,8 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
 
                                         // CUSTOM RENDERERS
                                         if (fieldKey === 'risks') return renderRisksList(fieldDef)
+                                        if (fieldKey === 'stakeholderNeeds') return renderNeedsList(fieldDef)
+                                        if (fieldKey === 'deliverables') return renderDeliverablesList(fieldDef)
 
                                         if (fieldDef.type === 'table') return renderTable(fieldDef.key, fieldDef.label, fieldDef.columns)
                                         if (fieldDef.type === 'richtext' || fieldDef.type === 'textarea') return renderTextArea(fieldDef.key, fieldDef.label, fieldDef.placeholder)
@@ -754,8 +928,8 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                                             key={item.id}
                                                             onClick={() => setActiveSectionId(item.id)}
                                                             className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${isActive
-                                                                    ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
-                                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                                ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
+                                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                                                 }`}
                                                         >
                                                             <span className={`w-2 h-2 mr-3 rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-gray-300 group-hover:bg-gray-400'}`}></span>
@@ -779,6 +953,18 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                 onClose={() => setIsRiskModalOpen(false)}
                                 onSave={handleSaveRisk}
                                 initialData={currentRiskData}
+                            />
+                            <NeedModal
+                                isOpen={isNeedModalOpen}
+                                onClose={() => setIsNeedModalOpen(false)}
+                                onSave={handleSaveNeed}
+                                initialData={currentNeedData}
+                            />
+                            <DeliverableModal
+                                isOpen={isDeliverableModalOpen}
+                                onClose={() => setIsDeliverableModalOpen(false)}
+                                onSave={handleSaveDeliverable}
+                                initialData={currentDeliverableData}
                             />
                         </div>
                     )
