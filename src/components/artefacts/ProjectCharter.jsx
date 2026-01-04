@@ -378,6 +378,178 @@ const AssumptionModal = ({ isOpen, onClose, onSave, initialData }) => {
     )
 }
 
+// -- Cost Modal Component --
+const CostModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ category: 'Solution Development', year: 'Year 1', amount: '', description: '' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                category: initialData.category || 'Solution Development',
+                year: initialData.year || 'Year 1',
+                amount: initialData.amount || '',
+                description: initialData.description || ''
+            } : { category: 'Solution Development', year: 'Year 1', amount: '', description: '' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Cost Item' : 'Add Cost Item'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.category} onChange={(e) => handleChange('category', e.target.value)}>
+                                        <option>Solution Development</option><option>Maintenance</option><option>Support</option><option>Training</option><option>Infrastructure</option><option>Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Year</label>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.year} onChange={(e) => handleChange('year', e.target.value)}>
+                                        <option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Year 5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Amount</label>
+                                <input type="number" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.amount} onChange={(e) => handleChange('amount', e.target.value)} placeholder="0.00" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Milestone Modal Component --
+const MilestoneModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ id: '', description: '', targetDeliveryDate: '' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                id: initialData.id || '',
+                description: initialData.description || '',
+                targetDeliveryDate: initialData.targetDeliveryDate || ''
+            } : { id: '', description: '', targetDeliveryDate: '' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Milestone' : 'Add Milestone'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Milestone ID</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.id} onChange={(e) => handleChange('id', e.target.value)} placeholder="e.g. M1" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Milestone Description</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Target Delivery Date</label>
+                                <input type="date" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.targetDeliveryDate} onChange={(e) => handleChange('targetDeliveryDate', e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// -- Resource Modal Component --
+const ResourceModal = ({ isOpen, onClose, onSave, initialData }) => {
+    const [formData, setFormData] = useState({ id: '', role: '', description: '', quantity: '' })
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialData ? {
+                id: initialData.id || '',
+                role: initialData.role || '',
+                description: initialData.description || '',
+                quantity: initialData.quantity || ''
+            } : { id: '', role: '', description: '', quantity: '' })
+        }
+    }, [isOpen, initialData])
+
+    const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }))
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" onClick={onClose}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{initialData ? 'Edit Resource' : 'Add Resource'}</h3>
+                            <button onClick={onClose}><XMarkIcon className="h-6 w-6 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Resource ID</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.id} onChange={(e) => handleChange('id', e.target.value)} placeholder="e.g. R1" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Role / Profile</label>
+                                <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.role} onChange={(e) => handleChange('role', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Description / Skills</label>
+                                <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Quantity / FTE</label>
+                                <input type="number" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.quantity} onChange={(e) => handleChange('quantity', e.target.value)} step="0.1" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onClick={() => onSave(formData)}>Save</button>
+                        <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // Define the Sidebar Structure
 const SIDEBAR_STRUCTURE = [
     {
@@ -402,8 +574,9 @@ const SIDEBAR_STRUCTURE = [
     {
         title: '4. Cost & Timing',
         items: [
-            { id: 'budget', name: 'Budget & Resources', fields: ['costSummary', 'costTable', 'resources'] },
-            { id: 'milestones', name: 'Milestones', fields: ['milestones'] }
+            { id: 'budget', name: '4.1 Cost & Budget', fields: ['costs'] },
+            { id: 'milestones', name: '4.2 Milestones', fields: ['milestones'] },
+            { id: 'resources', name: '4.3 Planned Resources', fields: ['resources'] }
         ]
     },
     {
@@ -469,6 +642,21 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
     const [isAssumptionModalOpen, setIsAssumptionModalOpen] = useState(false)
     const [editingAssumptionIndex, setEditingAssumptionIndex] = useState(null)
     const [currentAssumptionData, setCurrentAssumptionData] = useState(null)
+
+    // Cost Modal State
+    const [isCostModalOpen, setIsCostModalOpen] = useState(false)
+    const [editingCostIndex, setEditingCostIndex] = useState(null)
+    const [currentCostData, setCurrentCostData] = useState(null)
+
+    // Milestone Modal State
+    const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false)
+    const [editingMilestoneIndex, setEditingMilestoneIndex] = useState(null)
+    const [currentMilestoneData, setCurrentMilestoneData] = useState(null)
+
+    // Resource Modal State
+    const [isResourceModalOpen, setIsResourceModalOpen] = useState(false)
+    const [editingResourceIndex, setEditingResourceIndex] = useState(null)
+    const [currentResourceData, setCurrentResourceData] = useState(null)
 
     const dataRef = React.useRef({})
 
@@ -1133,6 +1321,260 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                         )
                     }
 
+                    // -- Cost & Budget Logic --
+                    const handleOpenAddCost = () => { setEditingCostIndex(null); setCurrentCostData(null); setIsCostModalOpen(true) }
+                    const handleOpenEditCost = (index, item) => { setEditingCostIndex(index); setCurrentCostData(item); setIsCostModalOpen(true) }
+                    const handleSaveCost = (formData) => {
+                        const list = Array.isArray(data.costs) ? data.costs : []
+                        const newList = [...list]
+                        if (editingCostIndex !== null) newList[editingCostIndex] = { ...newList[editingCostIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('costs', newList)
+                        setIsCostModalOpen(false)
+                    }
+                    const handleDeleteCost = (index) => {
+                        const list = Array.isArray(data.costs) ? data.costs : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('costs', newList)
+                    }
+
+                    const renderCostsSection = (fieldDef) => {
+                        const rows = Array.isArray(data.costs) ? data.costs : []
+
+                        // Calculate Matrix (TCO)
+                        const years = ['Year 1', 'Year 2', 'Year 3']
+                        const categories = ['Solution Development', 'Maintenance', 'Support', 'Training', 'Infrastructure', 'Other']
+                        const matrix = {}
+
+                        // Initialize
+                        categories.forEach(cat => {
+                            matrix[cat] = { total: 0 }
+                            years.forEach(y => matrix[cat][y] = 0)
+                        })
+
+                        // Aggregate
+                        rows.forEach(item => {
+                            const amt = parseFloat(item.amount) || 0
+                            if (matrix[item.category] && item.year) {
+                                if (matrix[item.category][item.year] !== undefined) {
+                                    matrix[item.category][item.year] += amt
+                                    matrix[item.category].total += amt
+                                }
+                            }
+                        })
+
+                        return (
+                            <div className="space-y-8" key={fieldDef.key}>
+                                {/* 4.1.1 Projected Costs Matrix */}
+                                <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-bold text-gray-900">Projected Costs Matrix</h3>
+                                        <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">Calculated TCO Matrix (Auto-generated from Breakdown)</p>
+                                    </div>
+                                    <div className="overflow-x-auto bg-white rounded-md border border-gray-200">
+                                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                                    {years.map(y => <th key={y} className="px-4 py-2 text-right font-medium text-gray-500 uppercase tracking-wider">{y}</th>)}
+                                                    <th className="px-4 py-2 text-right font-bold text-gray-700 uppercase tracking-wider">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {categories.map(cat => (
+                                                    <tr key={cat}>
+                                                        <td className="px-4 py-2 font-medium text-gray-900">{cat}</td>
+                                                        {years.map(y => (
+                                                            <td key={y} className="px-4 py-2 text-right text-gray-600">
+                                                                {matrix[cat][y] > 0 ? matrix[cat][y].toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
+                                                            </td>
+                                                        ))}
+                                                        <td className="px-4 py-2 text-right font-bold text-gray-900">
+                                                            {matrix[cat].total > 0 ? matrix[cat].total.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {/* Grand Total Row */}
+                                                <tr className="bg-gray-50 font-bold">
+                                                    <td className="px-4 py-2 text-gray-900">GRAND TOTAL</td>
+                                                    {years.map(y => {
+                                                        const yTotal = categories.reduce((sum, cat) => sum + matrix[cat][y], 0)
+                                                        return <td key={y} className="px-4 py-2 text-right text-gray-900">{yTotal > 0 ? yTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '-'}</td>
+                                                    })}
+                                                    <td className="px-4 py-2 text-right text-gray-900">
+                                                        {categories.reduce((sum, cat) => sum + matrix[cat].total, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* 4.1.2 Cost Breakdown (List) */}
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <label className="block text-lg font-medium text-gray-900">Cost Breakdown</label>
+                                        <button type="button" onClick={handleOpenAddCost} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                            <PlusIcon className="h-5 w-5 mr-1.5" /> Add Cost Item
+                                        </button>
+                                    </div>
+                                    {rows.length === 0 ? (
+                                        <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No cost items added.</p></div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {rows.map((item, idx) => (
+                                                <div key={item.id || idx} className="flex items-start justify-between bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex-1 pr-6">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div className="flex items-center space-x-2">
+                                                                <span className="font-bold text-gray-900 text-sm">{item.category}</span>
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{item.year}</span>
+                                                            </div>
+                                                            <span className="font-mono font-bold text-gray-900">
+                                                                {parseFloat(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-gray-600 text-sm text-left">{item.description}</p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2 flex-shrink-0 ml-4">
+                                                        <button onClick={() => handleOpenEditCost(idx, item)} className="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"><PencilSquareIcon className="h-5 w-5" /></button>
+                                                        <button onClick={() => handleDeleteCost(idx)} className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"><TrashIcon className="h-5 w-5" /></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    // -- Milestone Logic --
+                    const handleOpenAddMilestone = () => { setEditingMilestoneIndex(null); setCurrentMilestoneData(null); setIsMilestoneModalOpen(true) }
+                    const handleOpenEditMilestone = (index, item) => { setEditingMilestoneIndex(index); setCurrentMilestoneData(item); setIsMilestoneModalOpen(true) }
+                    const handleSaveMilestone = (formData) => {
+                        const list = Array.isArray(data.milestones) ? data.milestones : []
+                        const newList = [...list]
+                        if (editingMilestoneIndex !== null) newList[editingMilestoneIndex] = { ...newList[editingMilestoneIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('milestones', newList)
+                        setIsMilestoneModalOpen(false)
+                    }
+                    const handleDeleteMilestone = (index) => {
+                        const list = Array.isArray(data.milestones) ? data.milestones : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('milestones', newList)
+                    }
+
+                    const renderMilestonesList = (fieldDef) => {
+                        const rawRows = Array.isArray(data.milestones) ? data.milestones : []
+                        const rows = [...rawRows].sort((a, b) => {
+                            if (!a.targetDeliveryDate) return 1
+                            if (!b.targetDeliveryDate) return -1
+                            return new Date(a.targetDeliveryDate) - new Date(b.targetDeliveryDate)
+                        })
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddMilestone} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Milestone
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No milestones defined.</p></div>
+                                ) : (
+                                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-20">ID</th>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Milestone</th>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-40">Target Date</th>
+                                                    <th className="px-6 py-3 text-right"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {rows.map((item, idx) => (
+                                                    <tr key={item.id || idx} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 font-bold text-gray-900">{item.id}</td>
+                                                        <td className="px-6 py-4 text-gray-900">{item.description}</td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{item.targetDeliveryDate}</td>
+                                                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                            <button onClick={() => handleOpenEditMilestone(idx, item)} className="text-blue-600 hover:text-blue-900 mr-3"><PencilSquareIcon className="h-5 w-5 inline" /></button>
+                                                            <button onClick={() => handleDeleteMilestone(idx)} className="text-red-600 hover:text-red-900"><TrashIcon className="h-5 w-5 inline" /></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
+
+                    // -- Resources Logic --
+                    const handleOpenAddResource = () => { setEditingResourceIndex(null); setCurrentResourceData(null); setIsResourceModalOpen(true) }
+                    const handleOpenEditResource = (index, item) => { setEditingResourceIndex(index); setCurrentResourceData(item); setIsResourceModalOpen(true) }
+                    const handleSaveResource = (formData) => {
+                        const list = Array.isArray(data.resources) ? data.resources : []
+                        const newList = [...list]
+                        if (editingResourceIndex !== null) newList[editingResourceIndex] = { ...newList[editingResourceIndex], ...formData }
+                        else newList.push({ id: Date.now().toString(), ...formData })
+                        handleContentChange('resources', newList)
+                        setIsResourceModalOpen(false)
+                    }
+                    const handleDeleteResource = (index) => {
+                        const list = Array.isArray(data.resources) ? data.resources : []
+                        const newList = list.filter((_, i) => i !== index)
+                        handleContentChange('resources', newList)
+                    }
+
+                    const renderResourcesList = (fieldDef) => {
+                        const rows = Array.isArray(data.resources) ? data.resources : []
+                        return (
+                            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={fieldDef.key}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <label className="block text-lg font-medium text-gray-900">{fieldDef.label}</label>
+                                    <button type="button" onClick={handleOpenAddResource} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                        <PlusIcon className="h-5 w-5 mr-1.5" /> Add Resource
+                                    </button>
+                                </div>
+                                {rows.length === 0 ? (
+                                    <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No resources defined.</p></div>
+                                ) : (
+                                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-20">ID</th>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Role / Profile</th>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Description / Skills</th>
+                                                    <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-20">Qty/FTE</th>
+                                                    <th className="px-6 py-3 text-right"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {rows.map((item, idx) => (
+                                                    <tr key={item.id || idx} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 font-bold text-gray-900">{item.id}</td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900">{item.role}</td>
+                                                        <td className="px-6 py-4 text-gray-600">{item.description}</td>
+                                                        <td className="px-6 py-4 text-gray-900">{item.quantity}</td>
+                                                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                            <button onClick={() => handleOpenEditResource(idx, item)} className="text-blue-600 hover:text-blue-900 mr-3"><PencilSquareIcon className="h-5 w-5 inline" /></button>
+                                                            <button onClick={() => handleDeleteResource(idx)} className="text-red-600 hover:text-red-900"><TrashIcon className="h-5 w-5 inline" /></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
                     const renderPSCMatrix = (key, label, structure) => {
                         const pscData = data[key] || structure
                         const updatePscRole = (side, roleKey, value) => {
@@ -1231,6 +1673,9 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                         if (fieldKey === 'deliverables') return renderDeliverablesList(fieldDef)
                                         if (fieldKey === 'features') return renderFeaturesList(fieldDef)
                                         if (fieldKey === 'constraints') return renderConstraintsList(fieldDef)
+                                        if (fieldKey === 'costs') return renderCostsSection(fieldDef)
+                                        if (fieldKey === 'milestones') return renderMilestonesList(fieldDef)
+                                        if (fieldKey === 'resources') return renderResourcesList(fieldDef)
                                         if (fieldKey === 'assumptions') return renderAssumptionsList(fieldDef)
 
                                         if (fieldDef.type === 'table') return renderTable(fieldDef.key, fieldDef.label, fieldDef.columns)
@@ -1317,6 +1762,24 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                 onClose={() => setIsAssumptionModalOpen(false)}
                                 onSave={handleSaveAssumption}
                                 initialData={currentAssumptionData}
+                            />
+                            <CostModal
+                                isOpen={isCostModalOpen}
+                                onClose={() => setIsCostModalOpen(false)}
+                                onSave={handleSaveCost}
+                                initialData={currentCostData}
+                            />
+                            <MilestoneModal
+                                isOpen={isMilestoneModalOpen}
+                                onClose={() => setIsMilestoneModalOpen(false)}
+                                onSave={handleSaveMilestone}
+                                initialData={currentMilestoneData}
+                            />
+                            <ResourceModal
+                                isOpen={isResourceModalOpen}
+                                onClose={() => setIsResourceModalOpen(false)}
+                                onSave={handleSaveResource}
+                                initialData={currentResourceData}
                             />
                         </div>
                     )

@@ -138,17 +138,17 @@ export const projectCharterSchema = [
         id: 'cost_timing_resources',
         title: '6. Cost, Timing, Resources',
         fields: [
-            // 6.1 Cost Summary
-            { key: 'costSummary', label: 'Cost Summary', group: '6.1 Cost Summary', type: 'richtext', placeholder: 'Summarise the costs...' },
+            // 6.1 Cost & Budget
             {
-                key: 'costTable',
+                key: 'costs',
                 label: 'Cost Breakdown',
-                group: '6.1 Cost Summary',
+                group: '6.1 Cost & Budget',
                 type: 'table',
                 columns: [
-                    { key: 'year', label: 'Year/Period', type: 'text' },
-                    { key: 'budgetLine', label: 'Budget Line', type: 'text' },
-                    { key: 'amount', label: 'Amount', type: 'text' }
+                    { key: 'category', label: 'Category', type: 'select', options: ['Solution Development', 'Maintenance', 'Support', 'Training', 'Infrastructure', 'Other'] },
+                    { key: 'year', label: 'Year', type: 'select', options: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'] },
+                    { key: 'amount', label: 'Amount', type: 'number' },
+                    { key: 'description', label: 'Description', type: 'text' }
                 ]
             },
 
@@ -159,8 +159,9 @@ export const projectCharterSchema = [
                 group: '6.2 Timing & Milestones',
                 type: 'table',
                 columns: [
-                    { key: 'description', label: 'Milestone', type: 'text' },
-                    { key: 'targetDate', label: 'Target Date', type: 'date' }
+                    { key: 'id', label: 'ID', type: 'text' },
+                    { key: 'description', label: 'Milestone Description', type: 'text' },
+                    { key: 'targetDeliveryDate', label: 'Target Delivery Date', type: 'date' }
                 ]
             },
 
@@ -171,8 +172,10 @@ export const projectCharterSchema = [
                 group: '6.3 Planned Resources',
                 type: 'table',
                 columns: [
-                    { key: 'requirement', label: 'Resource Requirement', type: 'text' },
-                    { key: 'description', label: 'Description', type: 'text' }
+                    { key: 'id', label: 'ID', type: 'text' },
+                    { key: 'role', label: 'Role / Profile', type: 'text' },
+                    { key: 'description', label: 'Description / Skills', type: 'textarea' },
+                    { key: 'quantity', label: 'Quantity / FTE', type: 'number' }
                 ]
             }
         ]

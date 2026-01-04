@@ -1,135 +1,212 @@
 {
-  "Version": "1.0",
-  "executiveSummary": "<p>Create the Governor app.</p>",
-  "businessCaseConsiderations": "",
-  "successCriteria": "",
-  "scopeStatement": "",
-  "scopeIn": "",
-  "scopeOut": "",
-  "stakeholderNeeds": [
-    {
-      "id": "1765105034925",
-      "description": "Weekly status reports",
-      "priority": "High (Critical)",
-      "stakeholder": "Project Owner"
-    },
-    {
-      "id": "1765105064858",
-      "description": "Escalations",
-      "priority": "High (Critical)",
-      "stakeholder": "Project Owner"
-    },
-    {
-      "id": "1767541587780",
-      "stakeholder": "Finance Team",
-      "description": "Require timesheets to keep track of project spend.",
-      "priority": "Medium (Important)"
-    }
-  ],
-  "deliverables": [
-    {
-      "id": "1767538480275",
-      "name": "Governor",
-      "description": "Full featured pm governance system compliant with pm2 standard",
-      "type": "Software",
-      "dueDate": "2026-01-30"
-    }
-  ],
-  "features": [
-    {
-      "id": "1767542642972",
-      "name": "Guidance",
-      "description": "Context-aware guidance that shows the user \"official\" guidance from the pm2 guide.",
-      "relatedDeliverable": "Governor"
-    }
-  ],
-  "constraints": [
-    {
-      "id": "1767542669295",
-      "description": "Only allowed spend for now is AI tool subscriptions.",
-      "type": "Budget"
-    },
-    {
-      "id": "1767542690129",
-      "description": "Would like to complete during 2026",
-      "type": "Schedule"
-    },
-    {
-      "id": "1767542709667",
-      "description": "Ian Richmond to be sole resource.",
-      "type": "Resource"
-    }
-  ],
-  "assumptions": [
-    {
-      "id": "1767542729059",
-      "description": "Market is there for this product.",
-      "impact": "High"
-    },
-    {
-      "id": "1767542751493",
-      "description": "AntiGravity is suitable for all dev requirements",
-      "impact": "High"
-    }
-  ],
-  "risks": [
-    {
-      "id": "1767539143033",
-      "description": "The demand for the product is not proven. There may be no benefits to completing the project.",
-      "status": "Open",
-      "likelihood": "High",
-      "impact": "High",
-      "riskLevel": "High",
-      "owner": "Ian Richmond",
-      "responseStrategy": "Abandon project quickly",
-      "actionDetails": "Gauge demand."
-    },
-    {
-      "id": "1767540668336",
-      "description": "Ian is building this alone. That may be too big an ask.  There is a high risk of burnout.",
-      "likelihood": "High",
-      "impact": "High",
-      "riskLevel": "High",
-      "status": "Open"
-    }
-  ],
-  "costSummary": "",
-  "costTable": [],
-  "milestones": [],
-  "resources": [],
-  "methodology": "",
-  "projectChange": "",
-  "configurationManagement": "",
-  "organisationalChange": "",
-  "psc": {
-    "requestorSide": {
-      "po": {
-        "role": "Project Owner",
-        "name": "",
-        "responsibilities": "Sets objectives, owns the Business Case"
+  "id": "projectCharter",
+  "name": "Project Charter",
+  "phase": "Initiating",
+  "status": "In Progress",
+  "content": {
+    "Version": "1.0",
+    "executiveSummary": "<p>Create the Governor app.</p>",
+    "businessCaseConsiderations": "",
+    "successCriteria": "",
+    "scopeStatement": "",
+    "scopeIn": "",
+    "scopeOut": "",
+    "stakeholderNeeds": [
+      {
+        "id": "1765105034925",
+        "description": "Weekly status reports",
+        "priority": "High (Critical)",
+        "stakeholder": "Project Owner"
       },
-      "bm": {
-        "role": "Business Manager",
-        "name": "",
-        "responsibilities": "Represents the users, ensures benefits realization"
+      {
+        "id": "1765105064858",
+        "description": "Escalations",
+        "priority": "High (Critical)",
+        "stakeholder": "Project Owner"
+      },
+      {
+        "id": "1767541587780",
+        "stakeholder": "Finance Team",
+        "description": "Require timesheets to keep track of project spend.",
+        "priority": "Medium (Important)"
+      }
+    ],
+    "deliverables": [
+      {
+        "id": "1767538480275",
+        "name": "Governor",
+        "description": "Full featured pm governance system compliant with pm2 standard",
+        "type": "Software",
+        "dueDate": "2026-01-30"
+      }
+    ],
+    "features": [
+      {
+        "id": "1767542642972",
+        "name": "Guidance",
+        "description": "Context-aware guidance that shows the user \"official\" guidance from the pm2 guide.",
+        "relatedDeliverable": "Governor"
+      }
+    ],
+    "constraints": [
+      {
+        "id": "1767542669295",
+        "description": "Only allowed spend for now is AI tool subscriptions.",
+        "type": "Budget"
+      },
+      {
+        "id": "1767542690129",
+        "description": "Would like to complete during 2026",
+        "type": "Schedule"
+      },
+      {
+        "id": "1767542709667",
+        "description": "Ian Richmond to be sole resource.",
+        "type": "Resource"
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "1767542729059",
+        "description": "Market is there for this product.",
+        "impact": "High"
+      },
+      {
+        "id": "1767542751493",
+        "description": "AntiGravity is suitable for all dev requirements",
+        "impact": "High"
+      }
+    ],
+    "risks": [
+      {
+        "id": "1767539143033",
+        "description": "The demand for the product is not proven. There may be no benefits to completing the project.",
+        "status": "Open",
+        "likelihood": "High",
+        "impact": "High",
+        "riskLevel": "High",
+        "owner": "Ian Richmond",
+        "responseStrategy": "Abandon project quickly",
+        "actionDetails": "Gauge demand."
+      },
+      {
+        "id": "1767540668336",
+        "description": "Ian is building this alone. That may be too big an ask.  There is a high risk of burnout.",
+        "likelihood": "High",
+        "impact": "High",
+        "riskLevel": "High",
+        "status": "Open"
+      }
+    ],
+    "costs": [
+      {
+        "id": "1767543601432",
+        "category": "Other",
+        "year": "Year 1",
+        "amount": "500",
+        "description": "Subscription charges"
+      },
+      {
+        "id": "1767543633058",
+        "category": "Infrastructure",
+        "year": "Year 1",
+        "amount": "100",
+        "description": "Hosting"
+      },
+      {
+        "id": "1767543653257",
+        "category": "Solution Development",
+        "year": "Year 2",
+        "amount": "100",
+        "description": "Hosting"
+      }
+    ],
+    "milestones": [
+      {
+        "id": "100",
+        "description": "Project Close",
+        "targetDate": "2026-12-31",
+        "targetDeliveryDate": "2026-12-31"
+      },
+      {
+        "id": "010",
+        "description": "Complete build of initiation phase",
+        "targetDeliveryDate": "2026-01-31"
+      }
+    ],
+    "resources": [
+      {
+        "id": "R1",
+        "role": "Everything",
+        "description": "Everything",
+        "quantity": "1"
+      },
+      {
+        "id": "R2",
+        "role": "AI assistant",
+        "description": "Product design, development, assistance with testing.  Marketing and promotions coaching.",
+        "quantity": "1"
+      }
+    ],
+    "methodology": "",
+    "projectChange": "",
+    "configurationManagement": "",
+    "organisationalChange": "",
+    "psc": {
+      "requestorSide": {
+        "po": {
+          "role": "Project Owner",
+          "name": "Owen Owner",
+          "responsibilities": "Sets objectives, owns the Business Case"
+        },
+        "bm": {
+          "role": "Business Manager",
+          "name": "Bob Manager",
+          "responsibilities": "Represents the users, ensures benefits realization"
+        }
+      },
+      "providerSide": {
+        "sp": {
+          "role": "Solution Provider",
+          "name": "",
+          "responsibilities": "Assumes overall accountability for IT/Deliverables"
+        },
+        "pm": {
+          "role": "Project Manager",
+          "name": "",
+          "responsibilities": "Manages the project day-to-day"
+        }
       }
     },
-    "providerSide": {
-      "sp": {
-        "role": "Solution Provider",
-        "name": "",
-        "responsibilities": "Assumes overall accountability for IT/Deliverables"
+    "extendedGovernance": [
+      {
+        "id": "17675427650840.30526637998479256",
+        "role": "Additional Stakeholder",
+        "name": "Dave",
+        "organisation": "AS INC."
       },
-      "pm": {
-        "role": "Project Manager",
-        "name": "",
-        "responsibilities": "Manages the project day-to-day"
+      {
+        "id": "17675427650840.07708508554528204",
+        "role": "AN Other",
+        "name": "AN Other",
+        "organisation": "AN Other"
       }
+    ],
+    "references": [],
+    "costSummary": "",
+    "costTable": [],
+    "governanceStructure": "",
+    "rolesResponsibilities": "",
+    "otherStakeholders": "",
+    "approval": {
+      "approverName": "",
+      "approvalDate": "",
+      "signature": "",
+      "isApproved": false,
+      "timestamp": null
     }
   },
-  "extendedGovernance": [],
-  "references": [],
-  "governanceStructure": "",
-  "rolesResponsibilities": "",
-  "otherStakeholders": ""
+  "modifiedAfterApproval": false,
+  "importPromptShown": false,
+  "lastUpdated": "2026-01-04T16:30:37.356Z"
 }
