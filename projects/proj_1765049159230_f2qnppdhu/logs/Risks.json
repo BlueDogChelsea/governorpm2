@@ -1,38 +1,51 @@
 [
-    {
-        "title": "Vendor Delivery Delay",
-        "description": "The external vendor may fail to deliver the hardware by the agreed deadline due to global supply chain shortages.",
-        "likelihood": "High",
-        "impact": "High",
-        "level": "High",
-        "mitigation": "Identify alternative suppliers and place a backup order.",
-        "owner": "John Doe",
-        "status": "Open",
-        "notes": "Contract review pending.",
-        "dateLogged": "2024-12-01"
-    },
-    {
-        "title": "Key Resource Unavailability",
-        "description": "Lead developer might be unavailable in January due to planned leave.",
-        "likelihood": "Medium",
-        "impact": "Medium",
-        "level": "Medium",
-        "mitigation": "Cross-train junior developers.",
-        "owner": "Jane Smith",
-        "status": "Open",
-        "notes": "Training scheduled.",
-        "dateLogged": "2024-12-05"
-    },
-    {
-        "title": "Minor Scope Creep",
-        "description": "Stakeholders may request small UI changes during UAT.",
-        "likelihood": "High",
-        "impact": "Low",
-        "level": "Low",
-        "mitigation": "Strict change control process.",
-        "owner": "Project Manager",
-        "status": "Open",
-        "notes": "Buffer added to schedule.",
-        "dateLogged": "2024-12-10"
-    }
+  {
+    "title": "Vendor Delivery Delay",
+    "description": "The external vendor may fail to deliver the hardware by the agreed deadline due to global supply chain shortages.",
+    "likelihood": "High",
+    "impact": "High",
+    "level": "High",
+    "mitigation": "Identify alternative suppliers and place a backup order.",
+    "owner": "John Doe",
+    "status": "Open",
+    "notes": "Contract review pending.",
+    "dateLogged": "2024-12-01"
+  },
+  {
+    "title": "Key Resource Unavailability",
+    "description": "Lead developer might be unavailable in January due to planned leave.",
+    "likelihood": "Medium",
+    "impact": "Medium",
+    "level": "Medium",
+    "mitigation": "Cross-train junior developers.",
+    "owner": "Jane Smith",
+    "status": "Open",
+    "notes": "Training scheduled.",
+    "dateLogged": "2024-12-05"
+  },
+  {
+    "title": "Minor Scope Creep",
+    "description": "Stakeholders may request small UI changes during UAT.",
+    "likelihood": "High",
+    "impact": "Low",
+    "level": "Low",
+    "mitigation": "Strict change control process.",
+    "owner": "Project Manager",
+    "status": "Open",
+    "notes": "Buffer added to schedule.",
+    "dateLogged": "2024-12-10"
+  },
+  {
+    "id": "d824934d-c326-41e1-ab23-f989e09f0ae6",
+    "type": "RISK",
+    "title": "The demand for the product is not proven. There ma...",
+    "description": "The demand for the product is not proven. There may be no benefits to completing the project.",
+    "likelihood": "High",
+    "impact": "High",
+    "level": "High",
+    "status": "Open",
+    "owner": "Ian Richmond",
+    "notes": "Imported from Project Charter during initiation.",
+    "dateLogged": "2026-01-04"
+  }
 ]
