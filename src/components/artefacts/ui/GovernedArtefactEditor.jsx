@@ -499,7 +499,11 @@ const GovernedArtefactEditor = ({
                             onUpdateApproval: handleApprovalChange,
                             onToggleApproval: handleApprovalToggle,
                             isApprovalOpen,
-                            setIsApprovalOpen: (val) => setIsApprovalOpen(val)
+                            setIsApprovalOpen: (val) => setIsApprovalOpen(val),
+                            // Expose Save Logic to children (for custom save buttons)
+                            isDirty,
+                            saveStatus,
+                            triggerSave: handleSave
                         })
                         : React.cloneElement(children, { data: contentData, onDataChange: updateContent, handleContentChange })
                     )}

@@ -896,8 +896,48 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                 hideGlobalSave={true}
                 fullWidth={true}
             >
-                {({ data, handleContentChange, approval, onUpdateApproval, onToggleApproval }) => {
+                {({ data, handleContentChange, approval, onUpdateApproval, onToggleApproval, isDirty, saveStatus, triggerSave }) => {
                     dataRef.current = data
+
+                    const SaveButton = () => {
+                        const isSaving = saveStatus === 'saving'
+                        const isSuccess = saveStatus === 'success' && !isDirty
+
+                        let btnClass = "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+
+                        if (isSaving) {
+                            btnClass += " border-gray-300 text-gray-500 bg-gray-100 cursor-wait"
+                            return (
+                                <button disabled className={btnClass}>
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Saving...
+                                </button>
+                            )
+                        }
+
+                        if (isDirty) {
+                            // Dirty State
+                            btnClass += " border-transparent text-white bg-green-600 hover:bg-green-700 shadow-md transform hover:scale-105"
+                            return (
+                                <button onClick={triggerSave} className={btnClass}>
+                                    <CheckCircleIcon className="h-5 w-5 mr-2" />
+                                    Save Changes
+                                </button>
+                            )
+                        }
+
+                        // Clean / Saved State
+                        btnClass += " border-gray-200 text-gray-400 bg-white hover:bg-gray-50 hover:text-gray-600"
+                        return (
+                            <button onClick={triggerSave} className={btnClass} title="No unsaved changes">
+                                <CheckCircleIcon className="h-5 w-5 mr-2 text-green-500" />
+                                Saved
+                            </button>
+                        )
+                    }
 
                     // -- Auto Fill Logic (Existing) --
                     // We invoke this when specific sections are active
@@ -1777,13 +1817,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                 <div className="w-full mx-auto pt-0 px-4">
                                     <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
                                         <h2 className="text-2xl font-bold text-gray-900">Sign-Off & Approval</h2>
-                                        <button
-                                            onClick={() => handleInternalSave(data)}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-                                        >
-                                            <CheckCircleIcon className="h-5 w-5 mr-2" />
-                                            Save Changes
-                                        </button>
+                                        <SaveButton />
                                     </div>
                                     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                                         <ArtefactApprovalSection
@@ -1804,13 +1838,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                             <div className="w-full pb-20 px-2">
                                 <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
                                     <h2 className="text-2xl font-bold text-gray-900">{activeItem.name}</h2>
-                                    <button
-                                        onClick={() => handleInternalSave(data)}
-                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-                                    >
-                                        <CheckCircleIcon className="h-5 w-5 mr-2" />
-                                        Save Changes
-                                    </button>
+                                    <SaveButton />
                                 </div>
                                 <div className="space-y-6">
                                     {activeItem.fields.map(fieldKey => {
