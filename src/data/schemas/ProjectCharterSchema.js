@@ -39,7 +39,7 @@ export const projectCharterSchema = [
                         key: 'priority',
                         label: 'Priority',
                         type: 'select',
-                        options: ['High (Critical)', 'Medium (Important)', 'Low (Desirable)']
+                        options: ['Critical', 'High', 'Medium', 'Low']
                     }
                 ]
             }

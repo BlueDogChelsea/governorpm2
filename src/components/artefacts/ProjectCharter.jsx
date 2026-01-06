@@ -177,14 +177,14 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
 
 // -- Need Modal Component --
 const NeedModal = ({ isOpen, onClose, onSave, initialData }) => {
-    const [formData, setFormData] = useState({ stakeholder: '', description: '', priority: 'Medium (Important)' })
+    const [formData, setFormData] = useState({ stakeholder: '', description: '', priority: 'Medium' })
     useEffect(() => {
         if (isOpen) {
             setFormData(initialData ? {
                 stakeholder: initialData.stakeholder || '',
                 description: initialData.description || '',
-                priority: initialData.priority || 'Medium (Important)'
-            } : { stakeholder: '', description: '', priority: 'Medium (Important)' })
+                priority: initialData.priority || 'Medium'
+            } : { stakeholder: '', description: '', priority: 'Medium' })
         }
     }, [isOpen, initialData])
 
@@ -214,7 +214,7 @@ const NeedModal = ({ isOpen, onClose, onSave, initialData }) => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Priority</label>
                                 <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)}>
-                                    <option>High (Critical)</option><option>Medium (Important)</option><option>Low (Desirable)</option>
+                                    <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
                                 </select>
                             </div>
                         </div>
@@ -1261,11 +1261,27 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                     }
 
                     const renderNeedsList = (fieldDef) => {
-                        const rows = Array.isArray(data.stakeholderNeeds) ? data.stakeholderNeeds : []
+                        const rawRows = Array.isArray(data.stakeholderNeeds) ? data.stakeholderNeeds : []
+                        const rows = [...rawRows].sort((a, b) => {
+                            const priorityMap = { 'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3 }
+                            // Extract main priority word if it has extra text (legacy support)
+                            const getP = (p) => {
+                                if (!p) return 99
+                                if (p.includes('Critical')) return 0
+                                if (p.includes('High')) return 1
+                                if (p.includes('Medium')) return 2
+                                if (p.includes('Low')) return 3
+                                return 99
+                            }
+                            return getP(a.priority) - getP(b.priority)
+                        })
+
                         const getPriorityBadge = (p) => {
-                            if (p?.includes('High')) return 'bg-red-100 text-red-800'
-                            if (p?.includes('Medium')) return 'bg-yellow-100 text-yellow-800'
-                            if (p?.includes('Low')) return 'bg-green-100 text-green-800'
+                            if (!p) return 'bg-gray-100 text-gray-800'
+                            if (p.includes('Critical')) return 'bg-red-100 text-red-800'
+                            if (p.includes('High')) return 'bg-orange-100 text-orange-800'
+                            if (p.includes('Medium')) return 'bg-blue-100 text-blue-800'
+                            if (p.includes('Low')) return 'bg-gray-100 text-gray-800'
                             return 'bg-gray-100 text-gray-800'
                         }
                         return (

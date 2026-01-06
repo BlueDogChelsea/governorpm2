@@ -15,7 +15,7 @@
       {
         "id": "1765105034925",
         "description": "Weekly status reports",
-        "priority": "High (Critical)",
+        "priority": "High",
         "stakeholder": "Project Owner"
       },
       {
@@ -26,9 +26,21 @@
       },
       {
         "id": "1767541587780",
-        "stakeholder": "Finance Team",
-        "description": "Require timesheets to keep track of project spend.",
-        "priority": "Medium (Important)"
+        "stakeholder": "Users",
+        "description": "The user should be entirely self-sufficient because the tool enables this.  There should be no need to open a pm2 guide.",
+        "priority": "Medium"
+      },
+      {
+        "id": "1767714113357",
+        "stakeholder": "Users",
+        "description": "The user should be entirely self-sufficient because the tool enables this.  There should be no need to open a pm2 guide.",
+        "priority": "High"
+      },
+      {
+        "id": "1767714165559",
+        "stakeholder": "Users",
+        "description": "Need to print artefacts and save them in Word format.",
+        "priority": "Low"
       }
     ],
     "deliverables": [
@@ -38,6 +50,13 @@
         "description": "Full featured pm governance system compliant with pm2 standard",
         "type": "Software",
         "dueDate": "2026-01-30"
+      },
+      {
+        "id": "1767714276375",
+        "name": "Landing Page",
+        "description": "Landing page for sales and marketing of Governor",
+        "type": "Software",
+        "dueDate": "2027-03-31"
       }
     ],
     "features": [
@@ -219,9 +238,16 @@
     "costTable": [],
     "governanceStructure": "",
     "rolesResponsibilities": "",
-    "otherStakeholders": ""
+    "otherStakeholders": "",
+    "approval": {
+      "approverName": "",
+      "approvalDate": "",
+      "signature": "",
+      "isApproved": false,
+      "timestamp": null
+    }
   },
   "modifiedAfterApproval": false,
   "importPromptShown": false,
-  "lastUpdated": "2026-01-04T16:30:37.356Z"
+  "lastUpdated": "2026-01-06T15:45:26.599Z"
 }
