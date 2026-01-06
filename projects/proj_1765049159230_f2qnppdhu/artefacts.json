@@ -107,7 +107,7 @@
       "Version": "1.0",
       "executiveSummary": "<p>Create the Governor app.</p>",
       "businessCaseConsiderations": "<p>Final funding approval is still required.</p>",
-      "successCriteria": "",
+      "successCriteria": "<p>Happiness for all.</p>",
       "scopeStatement": "",
       "scopeIn": "",
       "scopeOut": "",
@@ -349,7 +349,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": false,
-    "lastUpdated": "2026-01-06T15:45:26.599Z"
+    "lastUpdated": "2026-01-06T17:13:12.794Z"
   },
   {
     "id": "initiating-phase-exit-checklist",
