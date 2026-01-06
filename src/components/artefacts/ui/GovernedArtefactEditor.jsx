@@ -38,8 +38,8 @@ const GovernedArtefactEditor = ({
 
     processLoadedContent,
     customApproval = false, // New prop to control approval section placement
-    hideGlobalSave = false // New prop to conditionally hide the global save button
-
+    hideGlobalSave = false, // New prop to conditionally hide the global save button
+    fullWidth = false // New prop to remove max-width constraint
 }) => {
     // Top-level state for the *Content* of the artefact (excluding approval)
     const [contentData, setContentData] = useState(initialData)
@@ -435,6 +435,7 @@ const GovernedArtefactEditor = ({
                 title={title}
                 description={description}
                 onBack={handleBack}
+                fullWidth={fullWidth}
                 actions={
                     <>
                         {/* Import Button */}

@@ -292,7 +292,13 @@
           "organisation": "AN Other"
         }
       ],
-      "references": [],
+      "references": [
+        {
+          "id": "1767707350222",
+          "title": "BBC",
+          "sourceOrLink": "bbc.co.uk"
+        }
+      ],
       "costSummary": "",
       "costTable": [],
       "governanceStructure": "",

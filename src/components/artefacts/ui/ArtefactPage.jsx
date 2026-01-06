@@ -1,7 +1,7 @@
 import React from 'react'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
-const ArtefactPage = ({ title, description, children, onBack, actions, banner }) => {
+const ArtefactPage = ({ title, description, children, onBack, actions, banner, fullWidth = false }) => {
     return (
         <div className="flex flex-col h-full bg-gray-100">
             {/* Header */}
@@ -32,7 +32,7 @@ const ArtefactPage = ({ title, description, children, onBack, actions, banner })
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto p-8 max-w-5xl mx-auto w-full">
+            <div className={`flex-1 overflow-auto ${fullWidth ? 'w-full p-0' : 'p-8 max-w-5xl mx-auto w-full'}`}>
                 {children}
             </div>
         </div>

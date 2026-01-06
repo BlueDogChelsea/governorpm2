@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { ArrowDownTrayIcon, BookOpenIcon, PlusIcon, TrashIcon, CheckCircleIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, BookOpenIcon, PlusIcon, TrashIcon, CheckCircleIcon, PencilSquareIcon, XMarkIcon, LightBulbIcon } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea, ArtefactSelect } from './ui/ArtefactFields'
 import RichTextEditor from './ui/RichTextEditor'
@@ -9,6 +9,57 @@ import DocumentGenerator from '../../services/DocumentGenerator'
 import projectCharterTemplate from '../../templates/ProjectCharterTemplate.json'
 import { ProjectService } from '../../services/ProjectService'
 import ArtefactApprovalSection from './ui/ArtefactApprovalSection'
+import { CHARTER_GUIDANCE } from '../../data/charterGuidance'
+
+// -- Guidance Panel Component --
+const GuidancePanel = ({ sectionId, isOpen, onClose }) => {
+    if (!isOpen) return null
+
+    const guidance = CHARTER_GUIDANCE[sectionId]
+    const displayGuidance = guidance || {
+        title: 'Guidance',
+        content: 'Select a specific section to see relevant PM² guidance tips and best practices.',
+        pm2Ref: null
+    }
+
+    return (
+        <div className="w-full h-full bg-white overflow-y-auto">
+            <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                        <LightBulbIcon className="h-5 w-5 mr-2 text-yellow-500" />
+                        PM² Guidance
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <XMarkIcon className="h-5 w-5" />
+                    </button>
+                </div>
+
+                <div className="bg-yellow-50 rounded-xl p-5 border border-yellow-100 mb-6 shadow-sm">
+                    <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">{displayGuidance.title}</h4>
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-4 font-medium">{displayGuidance.content}</p>
+                    {displayGuidance.pm2Ref && (
+                        <div className="mt-4 pt-3 border-t border-yellow-200/60 text-xs font-semibold text-yellow-800 flex items-center">
+                            <BookOpenIcon className="h-3 w-3 mr-1.5" />
+                            Ref: {displayGuidance.pm2Ref}
+                        </div>
+                    )}
+                </div>
+
+                {!guidance && (
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                        <p className="text-xs text-gray-500">Select sections like "Executive Summary" or "Features" to see specific help text.</p>
+                    </div>
+                )}
+
+                <div className="mt-10 pt-6 border-t border-gray-100 text-center">
+                    <p className="text-xs text-gray-400 font-medium">Open PM² Methodology</p>
+                    <p className="text-[10px] text-gray-300 mt-1">European Commission</p>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 // -- Risk Modal Component --
 const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
@@ -618,6 +669,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
     const [showExportMenu, setShowExportMenu] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
     const [showPreview, setShowPreview] = useState(false)
+    const [isGuidanceOpen, setIsGuidanceOpen] = useState(false)
 
     // Risk Modal State
     const [isRiskModalOpen, setIsRiskModalOpen] = useState(false)
@@ -765,6 +817,16 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
             >
                 <BookOpenIcon className="h-4 w-4 mr-2" /> Open PM² Guidance
             </button>
+            <button
+                onClick={() => setIsGuidanceOpen(!isGuidanceOpen)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors flex items-center mr-2 ${isGuidanceOpen
+                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+            >
+                <LightBulbIcon className={`h-4 w-4 mr-2 ${isGuidanceOpen ? 'text-yellow-500' : 'text-gray-400'}`} />
+                {isGuidanceOpen ? 'Hide Guidance' : 'Toggle Guidance'}
+            </button>
             <div className="relative inline-block text-left">
                 <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm flex items-center">
                     <ArrowDownTrayIcon className="h-4 w-4 mr-2" /> Export
@@ -816,6 +878,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                 processLoadedContent={processLoadedContent}
                 customApproval={true}
                 hideGlobalSave={true}
+                fullWidth={true}
             >
                 {({ data, handleContentChange, approval, onUpdateApproval, onToggleApproval }) => {
                     dataRef.current = data
@@ -1655,7 +1718,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                         // Special Case: Approval
                         if (activeSectionId === 'approval') {
                             return (
-                                <div className="max-w-4xl mx-auto pt-0">
+                                <div className="w-full mx-auto pt-0 px-4">
                                     <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
                                         <h2 className="text-2xl font-bold text-gray-900">Sign-Off & Approval</h2>
                                         <button
@@ -1682,7 +1745,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
 
                         // Generic Field Rendering
                         return (
-                            <div className="max-w-5xl mx-auto pb-20">
+                            <div className="w-full pb-20 px-2">
                                 <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
                                     <h2 className="text-2xl font-bold text-gray-900">{activeItem.name}</h2>
                                     <button
@@ -1720,9 +1783,9 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                     }
 
                     return (
-                        <div className="flex flex-1 h-full -mx-8 -my-8 relative bg-gray-50 bg-opacity-50">
-                            {/* Left Sidebar */}
-                            <div className="w-72 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto h-[calc(100vh-160px)] sticky top-0">
+                        <div className="flex flex-row w-full h-[calc(100vh-160px)] gap-4 bg-gray-50 bg-opacity-50">
+                            {/* Left Sidebar - 20% */}
+                            <div className="w-1/5 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
                                 <nav className="p-4 space-y-8">
                                     {SIDEBAR_STRUCTURE.map((group, idx) => (
                                         <div key={idx}>
@@ -1752,10 +1815,21 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                 </nav>
                             </div>
 
-                            {/* Main Content Area */}
-                            <div className="flex-1 overflow-y-auto h-[calc(100vh-160px)] p-10 bg-gray-50/50">
+                            {/* Main Content Area - 50% or Flex-1 */}
+                            <div className={`${isGuidanceOpen ? 'w-1/2' : 'flex-1'} flex-shrink-0 overflow-y-auto p-6 bg-gray-50/50 transition-all duration-300`}>
                                 {renderActiveContent()}
                             </div>
+
+                            {/* Right Sidebar: Guidance Panel - 30% or Hidden */}
+                            {isGuidanceOpen && (
+                                <div className="w-[30%] flex-shrink-0 bg-white border-l border-gray-200 transition-all duration-300 overflow-y-auto">
+                                    <GuidancePanel
+                                        sectionId={activeSectionId}
+                                        isOpen={true}
+                                        onClose={() => setIsGuidanceOpen(false)}
+                                    />
+                                </div>
+                            )}
 
                             <RiskModal
                                 isOpen={isRiskModalOpen}
