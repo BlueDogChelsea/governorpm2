@@ -46,6 +46,12 @@
         "name": "Guidance",
         "description": "Context-aware guidance that shows the user \"official\" guidance from the pm2 guide.",
         "relatedDeliverable": "Governor"
+      },
+      {
+        "id": "1767711895923",
+        "name": "Full lifecycle",
+        "description": "Full pm2 lifecycle support",
+        "relatedDeliverable": "Governor"
       }
     ],
     "constraints": [
@@ -199,14 +205,14 @@
     ],
     "references": [
       {
-        "id": "1767707702825",
-        "title": "Google",
-        "sourceOrLink": "www.google.com"
-      },
-      {
-        "id": "1767707867707",
+        "id": "1767711676570",
         "title": "BBC",
         "sourceOrLink": "www.bbc.com"
+      },
+      {
+        "id": "1767711699122",
+        "title": "Google",
+        "sourceOrLink": "www.google.com"
       }
     ],
     "costSummary": "",

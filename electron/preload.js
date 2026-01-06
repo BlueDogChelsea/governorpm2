@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, shell } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     ensureFolder: (path) => ipcRenderer.invoke('ensure-folder', path),
@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     listDir: (path) => ipcRenderer.invoke('list-dir', path),
     deletePath: (path) => ipcRenderer.invoke('delete-path', path),
     renamePath: (oldPath, newPath) => ipcRenderer.invoke('rename-path', oldPath, newPath),
-    pathExists: (path) => ipcRenderer.invoke('path-exists', path)
+    pathExists: (path) => ipcRenderer.invoke('path-exists', path),
+    openExternal: (url) => ipcRenderer.invoke('open-external', url)
 });

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -11,6 +11,15 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true,
         },
+    });
+
+    // Handle external links - prevent new Electron windows, open in system browser
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.startsWith('http:') || url.startsWith('https:')) {
+            shell.openExternal(url);
+            return { action: 'deny' };
+        }
+        return { action: 'allow' };
     });
 
     // In development, load from the Vite dev server
@@ -82,6 +91,10 @@ ipcMain.handle('rename-path', async (event, oldPath, newPath) => {
 ipcMain.handle('path-exists', async (event, targetPath) => {
     const fullPath = path.join(app.getAppPath(), targetPath);
     return fs.existsSync(fullPath);
+});
+
+ipcMain.handle('open-external', async (event, url) => {
+    await shell.openExternal(url);
 });
 
 app.whenReady().then(() => {

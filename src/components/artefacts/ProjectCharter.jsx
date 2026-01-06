@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { ArrowDownTrayIcon, BookOpenIcon, PlusIcon, TrashIcon, CheckCircleIcon, PencilSquareIcon, XMarkIcon, LightBulbIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea, ArtefactSelect } from './ui/ArtefactFields'
@@ -37,7 +39,21 @@ const GuidancePanel = ({ sectionId, isOpen, onClose }) => {
 
                 <div className="bg-yellow-50 rounded-xl p-5 border border-yellow-100 mb-6 shadow-sm">
                     <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">{displayGuidance.title}</h4>
-                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-4 font-medium">{displayGuidance.content}</p>
+                    <div className="text-sm text-gray-700 leading-relaxed font-medium">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-2 space-y-1" {...props} />,
+                                ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-2 space-y-1" {...props} />,
+                                li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                                strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
+                                p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
+                                a: ({ node, ...props }) => <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />
+                            }}
+                        >
+                            {displayGuidance.content}
+                        </ReactMarkdown>
+                    </div>
                     {displayGuidance.pm2Ref && (
                         <div className="mt-4 pt-3 border-t border-yellow-200/60 text-xs font-semibold text-yellow-800 flex items-center">
                             <BookOpenIcon className="h-3 w-3 mr-1.5" />
@@ -1077,16 +1093,22 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                                                                         <ArtefactInput type="text" value={displayValue} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="text-sm" />}
                                                                     </div>
                                                                     {hasExternalLink && (
-                                                                        <a
-                                                                            href={getUrl(displayValue)}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation()
+                                                                                const url = getUrl(displayValue)
+                                                                                if (window.electronAPI && window.electronAPI.openExternal) {
+                                                                                    window.electronAPI.openExternal(url)
+                                                                                } else {
+                                                                                    window.open(url, '_blank')
+                                                                                }
+                                                                            }}
                                                                             className="flex-shrink-0 p-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
                                                                             title="Open External Link"
-                                                                            onClick={(e) => e.stopPropagation()}
                                                                         >
                                                                             <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                                                                        </a>
+                                                                        </button>
                                                                     )}
                                                                 </div>
                                                             </td>
