@@ -104,6 +104,62 @@
     "phase": "Initiating",
     "status": "In Progress",
     "content": {
+      "Version": "1.0",
+      "executiveSummary": "<p>The project will build the Governor app, make me a billionaire (I wish) and ensure world peace.</p>",
+      "businessCaseConsiderations": "",
+      "successCriteria": "",
+      "scopeStatement": "",
+      "scopeIn": "",
+      "scopeOut": "",
+      "stakeholderNeeds": [],
+      "deliverables": [
+        {
+          "id": "1767545300414",
+          "name": "Governor",
+          "description": "The main Governor app.",
+          "type": "Software",
+          "dueDate": "2026-12-31"
+        }
+      ],
+      "features": [],
+      "constraints": [],
+      "assumptions": [],
+      "risks": [],
+      "costs": [],
+      "milestones": [],
+      "resources": [],
+      "methodology": "",
+      "projectChange": "",
+      "configurationManagement": "",
+      "organisationalChange": "",
+      "psc": {
+        "requestorSide": {
+          "po": {
+            "role": "Project Owner",
+            "name": "",
+            "responsibilities": "Sets objectives, owns the Business Case"
+          },
+          "bm": {
+            "role": "Business Manager",
+            "name": "",
+            "responsibilities": "Represents the users, ensures benefits realization"
+          }
+        },
+        "providerSide": {
+          "sp": {
+            "role": "Solution Provider",
+            "name": "",
+            "responsibilities": "Assumes overall accountability for IT/Deliverables"
+          },
+          "pm": {
+            "role": "Project Manager",
+            "name": "",
+            "responsibilities": "Manages the project day-to-day"
+          }
+        }
+      },
+      "extendedGovernance": [],
+      "references": [],
       "id": "projectCharter",
       "name": "Project Charter",
       "phase": "Initiating",

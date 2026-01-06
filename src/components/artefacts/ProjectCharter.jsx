@@ -680,9 +680,11 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
             if (window.electronAPI && projectId) {
                 try {
                     const data = await window.electronAPI.readJSON(`projects/${projectId}/projectCharter.json`)
+                    console.log('ProjectCharter: Loaded data from file:', data)
                     if (data) {
-                        setMergedArtefact(prev => ({ ...prev, content: data }))
+                        setMergedArtefact(data)
                     } else {
+                        console.log('ProjectCharter: No data file found, using prop artefact')
                         setMergedArtefact(artefact)
                     }
                 } catch (error) {
@@ -695,11 +697,32 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
 
     // -- Actions --
     const handleInternalSave = async (currentData) => {
-        const contentToSave = currentData || dataRef.current
-        if (window.electronAPI && projectId) {
-            await window.electronAPI.writeJSON(`projects/${projectId}/projectCharter.json`, contentToSave)
+        const inputData = currentData || dataRef.current
+
+        // Robustness: Determine if inputData is the full artefact or just the content
+        let fullArtefactToSave
+        if (inputData.content && inputData.id && inputData.phase) {
+            fullArtefactToSave = inputData
+        } else {
+            // It's likely just the content object (e.g. from Approval section save)
+            // Wrap it in the current artefact shell
+            fullArtefactToSave = {
+                ...mergedArtefact,
+                content: inputData
+            }
         }
-        onSave({ ...mergedArtefact, content: contentToSave })
+
+        if (window.electronAPI && projectId) {
+            // 1. Write to file
+            await window.electronAPI.writeJSON(`projects/${projectId}/projectCharter.json`, fullArtefactToSave)
+
+            // 2. Read back to ensure UI is in sync with disk (fixes glitch)
+            const freshData = await window.electronAPI.readJSON(`projects/${projectId}/projectCharter.json`)
+            if (freshData) {
+                setMergedArtefact(freshData)
+            }
+        }
+        onSave(fullArtefactToSave)
     }
 
     const handleExport = async (format) => {
@@ -775,6 +798,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
     return (
         <>
             <GovernedArtefactEditor
+                key={mergedArtefact?.lastUpdated || 'init'}
                 projectId={projectId}
                 artefact={mergedArtefact}
                 onSave={handleInternalSave}
@@ -785,6 +809,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                 initialData={initialData}
                 processLoadedContent={processLoadedContent}
                 customApproval={true}
+                hideGlobalSave={true}
             >
                 {({ data, handleContentChange, approval, onUpdateApproval, onToggleApproval }) => {
                     dataRef.current = data

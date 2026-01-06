@@ -37,7 +37,8 @@ const GovernedArtefactEditor = ({
     initialData = {},
 
     processLoadedContent,
-    customApproval = false // New prop to control approval section placement
+    customApproval = false, // New prop to control approval section placement
+    hideGlobalSave = false // New prop to conditionally hide the global save button
 
 }) => {
     // Top-level state for the *Content* of the artefact (excluding approval)
@@ -71,12 +72,14 @@ const GovernedArtefactEditor = ({
 
     // Load initial data
     useEffect(() => {
+        console.log('GovernedArtefactEditor: Syncing artefact prop:', artefact)
         if (artefact && artefact.content) {
             const { approval: savedApproval, ...restContent } = artefact.content
 
             // 1. Load Content
             // Merge with initialData to ensure structure exists
             let mergedContent = { ...initialData, ...(restContent || {}) }
+            console.log('GovernedArtefactEditor: Merged Content Keys:', Object.keys(mergedContent))
 
             // NORMALIZE: Ensure any legacy rich text values of "<p></p>" are converted to ""
             // This prevents an immediate false dirty state when the RichTexEditor component mounts (which auto-normalizes)
@@ -445,12 +448,14 @@ const GovernedArtefactEditor = ({
                         </button>
 
                         {actions}
-                        <ArtefactSaveButton
-                            onSave={handleSave}
-                            status={saveStatus}
-                            isDirty={isDirty}
-                            label="Artefact"
-                        />
+                        {!hideGlobalSave && (
+                            <ArtefactSaveButton
+                                onSave={handleSave}
+                                status={saveStatus}
+                                isDirty={isDirty}
+                                label="Artefact"
+                            />
+                        )}
                     </>
                 }
                 banner={showModifiedBanner && (
