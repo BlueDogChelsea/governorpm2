@@ -88,8 +88,8 @@ export const CHARTER_GUIDANCE: Record<string, GuidanceItem> = {
     },
     // --- Appendices ---
     'refs': {
-        title: 'References',
-        content: "Link to any related documents, such as the Project Initiation Request, Business Case, or external regulatory documents.",
+        title: 'External Resources & References',
+        content: "Don't link to internal Governor artefacts (like the Business Case)—those are already in the sidebar!\n\nUse this section for **External** links:\n* **Regulations:** Links to GDPR, ISO standards, or EU directives.\n* **Cloud Storage:** Links to SharePoint, Google Drive, or Dropbox folders.\n* **Tools:** Links to Jira boards, Figma prototypes, or Vendor sites.",
         pm2Ref: 'Appendix 1'
     }
 };

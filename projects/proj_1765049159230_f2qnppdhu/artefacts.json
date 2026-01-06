@@ -232,6 +232,11 @@
           "id": "010",
           "description": "Complete build of initiation phase",
           "targetDeliveryDate": "2026-01-31"
+        },
+        {
+          "id": "015",
+          "description": "Commence Planning Phase",
+          "targetDeliveryDate": "2026-02-06"
         }
       ],
       "resources": [
@@ -294,9 +299,14 @@
       ],
       "references": [
         {
-          "id": "1767707350222",
+          "id": "1767707702825",
+          "title": "Google",
+          "sourceOrLink": "www.google.com"
+        },
+        {
+          "id": "1767707867707",
           "title": "BBC",
-          "sourceOrLink": "bbc.co.uk"
+          "sourceOrLink": "www.bbc.com"
         }
       ],
       "costSummary": "",

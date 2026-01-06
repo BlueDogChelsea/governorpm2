@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { ArrowDownTrayIcon, BookOpenIcon, PlusIcon, TrashIcon, CheckCircleIcon, PencilSquareIcon, XMarkIcon, LightBulbIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, BookOpenIcon, PlusIcon, TrashIcon, CheckCircleIcon, PencilSquareIcon, XMarkIcon, LightBulbIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea, ArtefactSelect } from './ui/ArtefactFields'
 import RichTextEditor from './ui/RichTextEditor'
@@ -1025,6 +1025,19 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                             return 'bg-gray-100 text-gray-800'
                         }
 
+                        const isUrl = (text) => {
+                            if (typeof text !== 'string') return false
+                            const trimmed = text.trim()
+                            // Check for http, https, or www at the start
+                            return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('www.')
+                        }
+
+                        const getUrl = (text) => {
+                            const trimmed = text.trim()
+                            if (trimmed.startsWith('www.')) return `https://${trimmed}`
+                            return trimmed
+                        }
+
                         return (
                             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6" key={key}>
                                 <div className="flex justify-between items-center mb-4">
@@ -1049,16 +1062,37 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                                     {columns.map(col => {
                                                         const rawValue = row[col.key] || ''
                                                         const displayValue = (col.type !== 'richtext' && typeof rawValue === 'string' && rawValue.includes('<')) ? stripHtml(rawValue) : rawValue
+
+                                                        // Check if this is a URL field (specifically for Source / Link or generally if it looks like a URL)
+                                                        const hasExternalLink = (col.key === 'sourceOrLink' || isUrl(displayValue)) && isUrl(displayValue)
+
                                                         return (
                                                             <td key={col.key} className="px-6 py-4 min-w-[200px]">
-                                                                {col.type === 'richtext' ? <RichTextEditor value={row[col.key] || ''} onChange={(html) => updateRow(idx, col.key, html)} className="min-h-[100px]" /> :
-                                                                    col.type === 'textarea' ? <ArtefactTextarea rows={3} value={displayValue} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="resize-y text-sm" /> :
-                                                                        col.type === 'select' ? <ArtefactSelect value={row[col.key] || col.options?.[0] || ''} onChange={(e) => updateRow(idx, col.key, e.target.value)} className={`text-sm ${col.key === 'priority' ? `border ${getPriorityColor(row[col.key])} bg-opacity-20` : ''}`}>{col.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}</ArtefactSelect> :
-                                                                            col.type === 'date' ? <ArtefactInput type="date" value={row[col.key] || ''} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="text-sm" /> :
-                                                                                <ArtefactInput type="text" value={displayValue} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="text-sm" />}
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex-grow">
+                                                                        {col.type === 'richtext' ? <RichTextEditor value={row[col.key] || ''} onChange={(html) => updateRow(idx, col.key, html)} className="min-h-[100px]" /> :
+                                                                            col.type === 'textarea' ? <ArtefactTextarea rows={3} value={displayValue} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="resize-y text-sm" /> :
+                                                                                col.type === 'select' ? <ArtefactSelect value={row[col.key] || col.options?.[0] || ''} onChange={(e) => updateRow(idx, col.key, e.target.value)} className={`text-sm ${col.key === 'priority' ? `border ${getPriorityColor(row[col.key])} bg-opacity-20` : ''}`}>{col.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}</ArtefactSelect> :
+                                                                                    col.type === 'date' ? <ArtefactInput type="date" value={row[col.key] || ''} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="text-sm" /> :
+                                                                                        <ArtefactInput type="text" value={displayValue} onChange={(e) => updateRow(idx, col.key, e.target.value)} className="text-sm" />}
+                                                                    </div>
+                                                                    {hasExternalLink && (
+                                                                        <a
+                                                                            href={getUrl(displayValue)}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex-shrink-0 p-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                                                                            title="Open External Link"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                                                                        </a>
+                                                                    )}
+                                                                </div>
                                                             </td>
                                                         )
                                                     })}
+
                                                     <td className="px-6 py-4 text-right"><button onClick={() => removeRow(idx)} className="text-gray-400 hover:text-red-600"><TrashIcon className="h-5 w-5" /></button></td>
                                                 </tr>
                                             ))}
