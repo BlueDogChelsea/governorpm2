@@ -6,7 +6,7 @@
   "content": {
     "Version": "1.0",
     "executiveSummary": "<p>Create the Governor app.</p>",
-    "businessCaseConsiderations": "",
+    "businessCaseConsiderations": "<p>Final funding approval is still required.</p>",
     "successCriteria": "",
     "scopeStatement": "",
     "scopeIn": "",
@@ -197,14 +197,7 @@
     "costTable": [],
     "governanceStructure": "",
     "rolesResponsibilities": "",
-    "otherStakeholders": "",
-    "approval": {
-      "approverName": "",
-      "approvalDate": "",
-      "signature": "",
-      "isApproved": false,
-      "timestamp": null
-    }
+    "otherStakeholders": ""
   },
   "modifiedAfterApproval": false,
   "importPromptShown": false,

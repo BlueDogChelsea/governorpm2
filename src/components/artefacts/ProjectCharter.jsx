@@ -555,7 +555,13 @@ const SIDEBAR_STRUCTURE = [
     {
         title: '1. Executive Summary',
         items: [
-            { id: 'summary', name: 'Executive Summary', fields: ['executiveSummary', 'businessCaseConsiderations'] }
+            { id: 'summary', name: 'Executive Summary', fields: ['executiveSummary'] }
+        ]
+    },
+    {
+        title: '2. Considerations on Business Case',
+        items: [
+            { id: 'businessCase', name: '2. Considerations on Business Case', fields: ['businessCaseConsiderations'] }
         ]
     },
     {
