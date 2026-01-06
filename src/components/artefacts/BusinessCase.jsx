@@ -286,7 +286,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                 actions={
                     <>
                         <button
-                            onClick={() => onOpenGuidance && onOpenGuidance('Initiating Phase', 'Business Case', { tab: 'Artefacts', label: 'Business Case' })}
+                            onClick={() => onOpenGuidance && onOpenGuidance('Initiating Phase', '5.3 Business Case', { tab: 'Artefacts', label: 'Business Case' })}
                             className="flex items-center text-blue-600 bg-blue-50 hover:bg-blue-100 font-medium rounded-lg text-sm px-4 py-2 mr-2 border border-blue-200 transition-colors"
                         >
                             <BookOpenIcon className="h-5 w-5 mr-2" />

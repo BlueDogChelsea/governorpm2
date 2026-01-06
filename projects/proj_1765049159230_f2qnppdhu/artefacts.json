@@ -96,6 +96,12 @@
       ],
       "impactedDomains": [],
       "businessJustification": "<p>Fit for 10x</p>",
+      "dependencies": "",
+      "synergies": "",
+      "currentSituation": "<p>Nothing exists</p>",
+      "impactOnBusiness": "",
+      "impactOnStakeholders": "",
+      "strategicFit": "",
       "approval": {
         "approverName": "",
         "approvalDate": "",
@@ -106,7 +112,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": true,
-    "lastUpdated": "2026-01-06T17:34:11.830Z"
+    "lastUpdated": "2026-01-06T17:55:48.262Z"
   },
   {
     "id": "projectCharter",
