@@ -841,7 +841,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                     }`}
             >
                 <LightBulbIcon className={`h-4 w-4 mr-2 ${isGuidanceOpen ? 'text-yellow-500' : 'text-gray-400'}`} />
-                {isGuidanceOpen ? 'Hide Guidance' : 'Toggle Guidance'}
+                {isGuidanceOpen ? 'Hide Guidance' : 'Show Guidance'}
             </button>
             <div className="relative inline-block text-left">
                 <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm flex items-center">

@@ -256,18 +256,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         { id: 'governance', name: '5. Governance' }
     ]
 
-    const Header = ({ title }) => (
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-            <button
-                onClick={() => setIsGuidanceOpen(!isGuidanceOpen)}
-                className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-            >
-                <BookOpenIcon className="h-5 w-5 mr-1" />
-                {isGuidanceOpen ? 'Hide Guidance' : 'Show Guidance'}
-            </button>
-        </div>
-    )
+
 
     return (
         <>
@@ -292,6 +281,16 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                         >
                             <BookOpenIcon className="h-5 w-5 mr-2" />
                             Open PM² Guidance
+                        </button>
+                        <button
+                            onClick={() => setIsGuidanceOpen(!isGuidanceOpen)}
+                            className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors mr-2 shadow-sm ${isGuidanceOpen
+                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                        >
+                            <LightBulbIcon className={`h-5 w-5 mr-2 ${isGuidanceOpen ? 'text-yellow-500' : 'text-gray-500'}`} />
+                            {isGuidanceOpen ? 'Hide Guidance' : 'Show Guidance'}
                         </button>
                         <button
                             onClick={async () => {
@@ -332,6 +331,31 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                     if (!data) return <div className="p-8 text-center text-gray-500">Loading Business Case...</div>
 
                     // --- Render Helpers ---
+                    const Header = ({ title }) => (
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+                            <button
+                                onClick={triggerSave}
+                                disabled={saveStatus === 'saving'}
+                                className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md shadow-sm transition-all duration-200 ${saveStatus === 'saved'
+                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                    : 'bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent'
+                                    }`}
+                            >
+                                {saveStatus === 'saving' ? (
+                                    <>Saving...</>
+                                ) : saveStatus === 'saved' ? (
+                                    <>
+                                        <CheckCircleIcon className="h-5 w-5 mr-1.5" />
+                                        Saved!
+                                    </>
+                                ) : (
+                                    <>Save Changes</>
+                                )}
+                            </button>
+                        </div>
+                    )
+
                     const renderInput = (key, label, type = 'text', placeholder = '') => (
                         <div key={key} className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
