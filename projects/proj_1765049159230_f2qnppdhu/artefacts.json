@@ -87,7 +87,13 @@
       "Target Delivery Date": "",
       "Major Milestones": "<p>this milestone</p>",
       "costs": [],
-      "milestones": [],
+      "milestones": [
+        {
+          "id": "1767720847205",
+          "description": "Prototype shared",
+          "targetDeliveryDate": "2026-01-21"
+        }
+      ],
       "impactedDomains": [],
       "businessJustification": "<p>Fit for 10x</p>",
       "approval": {
@@ -100,7 +106,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": true,
-    "lastUpdated": "2026-01-06T17:18:55.884Z"
+    "lastUpdated": "2026-01-06T17:34:11.830Z"
   },
   {
     "id": "projectCharter",

@@ -57,21 +57,26 @@ Describe the tangible and intangible benefits (e.g., cost savings, increased rev
 `,
         pm2Ref: 'PM² Business Case'
     },
-    'planning': {
-        title: '4. Cost & Planning',
+    'costs': {
+        title: '4. Cost & Benefits',
         content: `
 ### Cost & Benefit Plan
-- **Cost Summary**: Estimated total cost of ownership (TCO).
-- **Benefit Summary**: quantified value of expected benefits.
-- **Financial Justification**: ROI, NPV, or Payback Period analysis (if applicable).
-
+- **Cost Summary**: Estimated total cost of ownership (TCO) and breakdown of expenses.
+- **Benefit Summary**: Quantified value of expected benefits (tangible and intangible).
+- **Financial Justification**: ROI (Return on Investment), NPV (Net Present Value), or Payback Period analysis to justify the investment.
+`,
+        pm2Ref: 'PM² Business Case'
+    },
+    'roadmap': {
+        title: '5. Roadmap & Milestones',
+        content: `
 ### Roadmap
-- **Dates**: Planned Start and Target Delivery dates.
+- **Dates**: Planned Start Date and Target Delivery Date.
 - **Major Milestones**: Key points in the timeline (e.g., seeking approval, prototype, go-live).
 
 ### Impact Analysis
-- **Dependencies**: Dependencies on other projects, systems, or external factors.
-- **Synergies**: Potential for shared resources or benefits with other initiatives.
+- **Dependencies**: Dependencies on other projects, systems, or external factors that could affect delivery.
+- **Synergies**: Potential for shared resources, reusable components, or aligned benefits with other initiatives.
 `,
         pm2Ref: 'PM² Business Case'
     },

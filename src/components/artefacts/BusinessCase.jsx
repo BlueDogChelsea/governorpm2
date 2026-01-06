@@ -9,7 +9,13 @@ import {
     CheckCircleIcon,
     PlusIcon,
     PencilSquareIcon,
-    TrashIcon
+    TrashIcon,
+    CurrencyDollarIcon,
+    CalendarDaysIcon,
+    ChartBarIcon,
+    BuildingOfficeIcon,
+    ScaleIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea, ArtefactSelect } from './ui/ArtefactFields'
@@ -245,15 +251,19 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         if (!Array.isArray(processed.costs)) processed.costs = []
         if (!Array.isArray(processed.milestones)) processed.milestones = []
         if (!Array.isArray(processed.impactedDomains)) processed.impactedDomains = []
+        // Init new fields
+        if (!processed.dependencies) processed.dependencies = ''
+        if (!processed.synergies) processed.synergies = ''
         return processed
     }
 
     const navigationItems = [
-        { id: 'context', name: '1. Business Context' },
-        { id: 'alternatives', name: '2. Alternatives' },
-        { id: 'solution', name: '3. Proposed Solution' },
-        { id: 'planning', name: '4. Cost & Planning' },
-        { id: 'governance', name: '5. Governance' }
+        { id: 'context', name: '1. Business Context', icon: BuildingOfficeIcon },
+        { id: 'alternatives', name: '2. Alternatives', icon: ScaleIcon },
+        { id: 'solution', name: '3. Proposed Solution', icon: LightBulbIcon },
+        { id: 'costs', name: '4. Cost & Benefits', icon: CurrencyDollarIcon },
+        { id: 'roadmap', name: '5. Roadmap & Milestones', icon: CalendarDaysIcon },
+        { id: 'governance', name: '6. Governance', icon: ShieldCheckIcon }
     ]
 
 
@@ -487,6 +497,12 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                     </div>
 
                                     {renderTextArea('strategicFit', 'Strategic Fit', 'Alignment with organizational goals...')}
+
+                                    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-6 space-y-4">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-2">Impact & Interdependencies</h4>
+                                        {renderTextArea('dependencies', 'Dependencies', 'List any dependencies on other projects, systems, or teams...')}
+                                        {renderTextArea('synergies', 'Synergies', 'Identify potential synergies or shared benefits with other initiatives...')}
+                                    </div>
                                 </div>
                             </div>
                         )
@@ -580,7 +596,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                         )
                     }
 
-                    if (activeSectionId === 'planning') {
+                    if (activeSectionId === 'costs') {
                         // Cost Matrix Calculation
                         const years = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5']
                         const categories = ['Solution Development', 'Maintenance', 'Infrastructure', 'Training', 'Change Management', 'Support', 'Other']
@@ -603,26 +619,19 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             }
                         })
 
-                        // Milestones
-                        const milestoneRows = Array.isArray(data?.milestones) ?
-                            [...data.milestones].sort((a, b) => {
-                                const dA = new Date(a.targetDeliveryDate || '9999-12-31')
-                                const dB = new Date(b.targetDeliveryDate || '9999-12-31')
-                                return dA - dB
-                            })
-                            : []
-
-
                         content = (
                             <div className="w-full pb-20 px-2">
-                                <Header title="4. Cost & Planning" />
+                                <Header title="4. Cost & Benefits" />
                                 <div className="space-y-8">
 
                                     {/* Cost Engine */}
                                     <div className="space-y-4">
                                         <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
                                             <div className="mb-4">
-                                                <h3 className="text-lg font-bold text-gray-900">Projected Costs Matrix</h3>
+                                                <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                                                    <ChartBarIcon className="h-5 w-5 mr-2 text-gray-500" />
+                                                    Projected Costs Matrix
+                                                </h3>
                                                 <p className="text-xs text-gray-500 font-medium">Auto-calculated 5-Year Projection</p>
                                             </div>
                                             <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
@@ -664,7 +673,10 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                         {/* Cost List Builder */}
                                         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                                             <div className="flex justify-between items-center mb-4">
-                                                <label className="block text-lg font-medium text-gray-900">Cost Breakdown Items</label>
+                                                <label className="block text-lg font-medium text-gray-900 flex items-center">
+                                                    <CurrencyDollarIcon className="h-5 w-5 mr-2 text-gray-500" />
+                                                    Cost Breakdown Items
+                                                </label>
                                                 <button type="button" onClick={handleOpenAddCost} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
                                                     <PlusIcon className="h-4 w-4 mr-1.5" /> Add Item
                                                 </button>
@@ -694,44 +706,63 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                         </div>
                                     </div>
 
-                                    {renderTextArea('Benefit Summary', 'Benefit Summary', 'Quantified benefits...')}
-                                    {renderTextArea('Justification (Optional)', 'Financial Justification (Optional)', 'ROI, NPV...')}
+                                    {renderTextArea('Benefit Summary', 'Benefit Summary', 'Quantified benefits and value proposition...')}
+                                    {renderTextArea('Justification (Optional)', 'Financial Justification (ROI/NPV)', 'Detail the Return on Investment, Net Present Value, etc...')}
+                                </div>
+                            </div>
+                        )
+                    }
 
-                                    <div className="relative py-4">
-                                        <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-gray-300"></div></div>
-                                        <div className="relative flex justify-center"><span className="px-2 bg-gray-50 text-sm text-gray-500 font-medium">Roadmap</span></div>
-                                    </div>
+                    if (activeSectionId === 'roadmap') {
+                        // Milestones
+                        const milestoneRows = Array.isArray(data?.milestones) ?
+                            [...data.milestones].sort((a, b) => {
+                                const dA = new Date(a.targetDeliveryDate || '9999-12-31')
+                                const dB = new Date(b.targetDeliveryDate || '9999-12-31')
+                                return dA - dB
+                            })
+                            : []
 
+                        content = (
+                            <div className="w-full pb-20 px-2">
+                                <Header title="5. Roadmap & Milestones" />
+                                <div className="space-y-8">
                                     {/* Milestone List Builder */}
                                     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <label className="block text-lg font-medium text-gray-900">Major Milestones</label>
+                                        <div className="flex justify-between items-center mb-6">
+                                            <label className="block text-lg font-medium text-gray-900">Milestones</label>
                                             <button type="button" onClick={handleOpenAddMilestone} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                                                <PlusIcon className="h-4 w-4 mr-1.5" /> Add Milestone
+                                                <PlusIcon className="h-5 w-5 mr-1.5" /> Add Milestone
                                             </button>
                                         </div>
 
-                                        {milestoneRows.length === 0 ? <p className="text-gray-500 text-sm italic">No milestones defined.</p> : (
-                                            <div className="space-y-3">
-                                                {milestoneRows.map((item, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between p-3 border border-gray-100 rounded hover:bg-gray-50">
-                                                        <div className="flex items-center space-x-4 flex-1">
-                                                            <div className="flex-shrink-0 w-32">
-                                                                <span className="text-sm font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded block text-center">
-                                                                    {item.targetDeliveryDate || 'No Date'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <p className="text-sm font-semibold text-gray-900">{item.id}</p>
-                                                                <p className="text-sm text-gray-600 line-clamp-1">{item.description}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex space-x-1 ml-4">
-                                                            <button onClick={() => handleOpenEditMilestone(idx, item)} className="p-1 text-gray-400 hover:text-blue-600"><PencilSquareIcon className="h-4 w-4" /></button>
-                                                            <button onClick={() => handleDeleteMilestone(idx)} className="p-1 text-gray-400 hover:text-red-600"><TrashIcon className="h-4 w-4" /></button>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                        {milestoneRows.length === 0 ? (
+                                            <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"><p className="text-sm text-gray-500">No milestones defined.</p></div>
+                                        ) : (
+                                            <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-20">ID</th>
+                                                            <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Milestone</th>
+                                                            <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider w-40">Target Date</th>
+                                                            <th className="px-6 py-3 text-right"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="bg-white divide-y divide-gray-200">
+                                                        {milestoneRows.map((item, idx) => (
+                                                            <tr key={item.id || idx} className="hover:bg-gray-50">
+                                                                <td className="px-6 py-4 font-bold text-gray-900">{item.id}</td>
+                                                                <td className="px-6 py-4 text-gray-900">{item.description}</td>
+                                                                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">{item.targetDeliveryDate}</td>
+                                                                <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                                    <button onClick={() => handleOpenEditMilestone(idx, item)} className="text-blue-600 hover:text-blue-900 mr-3"><PencilSquareIcon className="h-5 w-5 inline" /></button>
+                                                                    <button onClick={() => handleDeleteMilestone(idx)} className="text-red-600 hover:text-red-900"><TrashIcon className="h-5 w-5 inline" /></button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         )}
                                     </div>
@@ -743,7 +774,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                     if (activeSectionId === 'governance') {
                         content = (
                             <div className="w-full pb-20 px-2">
-                                <Header title="5. Governance" />
+                                <Header title="6. Governance" />
                                 <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-8 space-y-6">
                                     <h4 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Key Core Roles</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -789,6 +820,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                     <div className="mb-4 text-xs font-semibold text-gray-500 uppercase tracking-wider pl-3">Sections</div>
                                     {navigationItems.map(item => {
                                         const isActive = activeSectionId === item.id
+                                        const Icon = item.icon
                                         return (
                                             <button
                                                 key={item.id}
@@ -798,20 +830,12 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                                     }`}
                                             >
-                                                <span className={`w-2 h-2 mr-3 rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-gray-300 group-hover:bg-gray-400'}`}></span>
+                                                <Icon className={`h-4 w-4 mr-3 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}`} />
                                                 {item.name}
                                             </button>
                                         )
                                     })}
                                 </nav>
-                                <div className="px-4 py-4 border-t border-gray-100">
-                                    <ArtefactSaveButton
-                                        onSave={triggerSave}
-                                        status={saveStatus}
-                                        isDirty={isDirty}
-                                        label="Changes"
-                                    />
-                                </div>
                             </div>
 
                             {/* Main Content Area */}
