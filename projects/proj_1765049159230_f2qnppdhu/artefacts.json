@@ -71,7 +71,7 @@
       "Chosen_Alternative": "",
       "Chosen_Rationale": "",
       "Chosen_Summary": "",
-      "Solution Overview": "",
+      "Solution Overview": "<p>A.</p>",
       "High-level Scope": "",
       "Key Deliverables": "",
       "Expected Benefits": "",
@@ -86,7 +86,15 @@
       "Start Date": "",
       "Target Delivery Date": "",
       "Major Milestones": "<p>this milestone</p>",
-      "costs": [],
+      "costs": [
+        {
+          "category": "Other",
+          "year": "Year 1",
+          "amount": "100",
+          "description": "Subscription Costs",
+          "id": "1767789666965"
+        }
+      ],
       "milestones": [
         {
           "id": "1767720847205",
@@ -117,7 +125,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": true,
-    "lastUpdated": "2026-01-06T18:14:14.333Z"
+    "lastUpdated": "2026-01-07T12:41:33.638Z"
   },
   {
     "id": "projectCharter",
@@ -129,7 +137,7 @@
       "executiveSummary": "<p>Create the Governor app.</p>",
       "businessCaseConsiderations": "<p>Final funding approval is still required.</p>",
       "successCriteria": "<p>Happiness for all.</p>",
-      "scopeStatement": "",
+      "scopeStatement": "<p>test again</p>",
       "scopeIn": "",
       "scopeOut": "",
       "stakeholderNeeds": [
@@ -370,7 +378,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": false,
-    "lastUpdated": "2026-01-06T17:13:12.794Z"
+    "lastUpdated": "2026-01-07T12:45:22.592Z"
   },
   {
     "id": "initiating-phase-exit-checklist",

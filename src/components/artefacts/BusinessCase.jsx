@@ -631,18 +631,18 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             <div className="w-full pb-20 px-2">
                                 <Header title="3. Proposed Solution" />
                                 <div className="space-y-6">
-                                    {renderTextArea('Solution Overview', 'Solution Overview', 'High-level description...')}
-                                    {renderTextArea('High-level Scope', 'High-Level Scope', 'What is included...')}
-                                    {renderTextArea('Key Deliverables', 'Key Deliverables', 'Tangible outputs...')}
-                                    {renderTextArea('Expected Benefits', 'Expected Benefits', 'Tangible and intangible benefits...')}
+                                    {renderTextArea('Solution Overview', 'Solution Overview', 'e.g. A centralized Project Management Dashboard that consolidates data from Finance and HR systems...')}
+                                    {renderTextArea('High-level Scope', 'High-Level Scope', 'e.g. IN SCOPE: Core Modules, Reporting, User Training. OUT OF SCOPE: Mobile App (Phase 2), Legacy Data Migration...')}
+                                    {renderTextArea('Key Deliverables', 'Key Deliverables', 'e.g. 1. Working Software v1.0, 2. User Manuals, 3. Admin Training Session, 4. Final Security Audit Report...')}
+                                    {renderTextArea('Expected Benefits', 'Expected Benefits', 'e.g. 30% reduction in weekly reporting time; Real-time visibility of budget spend; Improved compliance audit scores...')}
 
                                     <div className="relative py-4">
                                         <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-gray-300"></div></div>
                                         <div className="relative flex justify-center"><span className="px-2 bg-gray-50 text-sm text-gray-500 font-medium">Success Measures</span></div>
                                     </div>
 
-                                    {renderTextArea('Critical Success Criteria', 'Critical Success Criteria', 'Essential conditions for success...')}
-                                    {renderTextArea('General Success Criteria', 'General Success Criteria', 'Additional measures...')}
+                                    {renderTextArea('Critical Success Criteria', 'Critical Success Criteria', 'e.g. System adoption by 80% of Project Managers within the first 3 months...')}
+                                    {renderTextArea('General Success Criteria', 'General Success Criteria', 'e.g. Positive user feedback score > 4.5/5; Zero critical bugs at Go-Live...')}
                                 </div>
                             </div>
                         )
@@ -758,8 +758,8 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                         </div>
                                     </div>
 
-                                    {renderTextArea('Benefit Summary', 'Benefit Summary', 'Quantified benefits and value proposition...')}
-                                    {renderTextArea('Justification (Optional)', 'Financial Justification (ROI/NPV)', 'Detail the Return on Investment, Net Present Value, etc...')}
+                                    {renderTextArea('Benefit Summary', 'Benefit Summary', 'e.g. Projected savings of €1.2M over 5 years due to automation efficiencies; Reduction of FTE effort by 20%...')}
+                                    {renderTextArea('Justification (Optional)', 'Financial Justification (ROI/NPV)', 'e.g. ROI expected within 18 months; Net Present Value (NPV) positive by Year 2. Internal Rate of Return (IRR) estimated at 12%.')}
                                 </div>
                             </div>
                         )

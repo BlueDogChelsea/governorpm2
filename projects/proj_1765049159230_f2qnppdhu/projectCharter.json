@@ -8,7 +8,7 @@
     "executiveSummary": "<p>Create the Governor app.</p>",
     "businessCaseConsiderations": "<p>Final funding approval is still required.</p>",
     "successCriteria": "<p>Happiness for all.</p>",
-    "scopeStatement": "",
+    "scopeStatement": "<p>test again</p>",
     "scopeIn": "",
     "scopeOut": "",
     "stakeholderNeeds": [
@@ -249,5 +249,5 @@
   },
   "modifiedAfterApproval": false,
   "importPromptShown": false,
-  "lastUpdated": "2026-01-06T17:13:12.794Z"
+  "lastUpdated": "2026-01-07T12:45:22.592Z"
 }
