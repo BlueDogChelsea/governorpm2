@@ -302,8 +302,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
 
     // Helper: Map new IDs to Guidance Keys
     const getGuidanceId = (sectionId) => {
-        if (sectionId.startsWith('context')) return 'context'
-        return sectionId || 'context'
+        return sectionId || 'context-justification'
     }
 
     return (
@@ -502,10 +501,10 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             <div className="w-full pb-20 px-2">
                                 <Header title="1.1 Justification & Current State" />
                                 <div className="space-y-6">
-                                    {renderTextArea('businessJustification', 'Business Justification', 'Why is this project needed now?')}
-                                    {renderTextArea('currentSituation', 'Current Situation (AS-IS)', 'Describe existing processes...')}
+                                    {renderTextArea('businessJustification', 'Business Justification', 'e.g. Market demand requires a 20% reduction in processing time...')}
+                                    {renderTextArea('currentSituation', 'Current Situation (AS-IS)', 'e.g. Processes are currently manual and decentralized, leading to data fragmentation...')}
                                     {/* New Field as per Request */}
-                                    {renderTextArea('impactDoingNothing', 'Impact of Doing Nothing', 'What happens if we do nothing?')}
+                                    {renderTextArea('impactDoingNothing', 'Impact of Doing Nothing', 'e.g. Continued loss of market share, risk of non-compliance fines, or operational bottlenecks...')}
                                 </div>
                             </div>
                         )
@@ -536,8 +535,8 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                             ))}
                                         </div>
                                     </div>
-                                    {renderTextArea('impactOnBusiness', 'Impact on Processes & Strategy', 'How does doing nothing affect the business strategy?')}
-                                    {renderTextArea('impactOnStakeholders', 'Impact on Users & Staff', 'How are people affected?')}
+                                    {renderTextArea('impactOnBusiness', 'Impact on Processes & Strategy', 'e.g. Requires a complete re-engineering of the procurement workflow...')}
+                                    {renderTextArea('impactOnStakeholders', 'Impact on Users & Staff', 'e.g. Staff will need retraining on the new platform; daily workload will decrease by 2 hours...')}
                                 </div>
                             </div>
                         )
@@ -548,13 +547,13 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             <div className="w-full pb-20 px-2">
                                 <Header title="1.3 Strategic Fit & Synergy" />
                                 <div className="space-y-6">
-                                    {renderTextArea('strategicFit', 'Strategic Alignment', 'Alignment with organizational goals...')}
-                                    {renderTextArea('regulatoryDrivers', 'Regulatory Drivers', 'Are there any legal or regulatory requirements?')}
+                                    {renderTextArea('strategicFit', 'Strategic Alignment', 'e.g. Directly supports the \'Digital Transformation 2025\' pillar by automating core services...')}
+                                    {renderTextArea('regulatoryDrivers', 'Regulatory Drivers', 'e.g. GDPR Compliance, Financial Reporting Standards (IFRS), ISO 27001...')}
 
                                     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-6 space-y-4">
                                         <h4 className="text-lg font-bold text-gray-900 mb-2">Impact & Interdependencies</h4>
-                                        {renderTextArea('dependencies', 'Dependencies', 'List any dependencies on other projects, systems, or teams...')}
-                                        {renderTextArea('synergies', 'Synergies', 'Identify potential synergies or shared benefits with other initiatives...')}
+                                        {renderTextArea('dependencies', 'Dependencies', 'e.g. We cannot commence UAT until the \'Cloud Migration Project\' is complete...')}
+                                        {renderTextArea('synergies', 'Synergies', 'e.g. This solution can utilize the same hosting infrastructure as Project X...')}
                                     </div>
                                 </div>
                             </div>
@@ -931,7 +930,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                         </div>
                     )
                 }}
-            </GovernedArtefactEditor>
+            </GovernedArtefactEditor >
 
             <DocumentPreviewModal
                 isOpen={showPreview}

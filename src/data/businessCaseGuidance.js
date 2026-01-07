@@ -1,19 +1,48 @@
 export const BUSINESS_CASE_GUIDANCE = {
-    'context': {
-        title: '1. Business Context',
+    'context-justification': {
+        title: '1.1 Justification & Current State',
         content: `
 ### Business Justification
 Explain the reasoning behind the project. Why is this project needed now? What specific business problem or opportunity does it address?
 
-### Current Situation
-Describe the current state (AS-IS). What are the existing processes, systems, or issues? 
+### Current Situation (AS-IS)
+Describe the current state. What are the existing processes, systems, or issues?
 
 ### Impact of Doing Nothing
 What are the consequences if this project is not undertaken? (e.g., loss of market share, non-compliance, operational inefficiencies).
+`,
+        pm2Ref: 'PM² Business Case'
+    },
+    'context-impact': {
+        title: '1.2 Impact Analysis',
+        content: `
+### Impacted Domains
+Select the functional areas of the organization that will be affected by this project.
 
-### Strategic Fit
-- **Strategic Alignment**: How does this project align with the organization's goals and strategy?
-- **Regulatory Drivers**: Are there any legal or regulatory requirements driving this project?
+### Impact on Processes & Strategy
+Describe the organizational impact.
+* Does this change how we work?
+* Does it support a new strategic goal?
+
+### Impact on Users & Staff
+Describe the impact from a stakeholder perspective.
+* Will staff require training?
+* Will workflows change for end-users?
+`,
+        pm2Ref: 'PM² Business Case'
+    },
+    'context-strategy': {
+        title: '1.3 Strategic Fit & Synergy',
+        content: `
+### Strategic Alignment
+How does this project align with the organization's goals and strategy? Link to specific strategic pillars if possible.
+
+### Regulatory Drivers
+Are there any legal or regulatory requirements driving this project? (e.g., GDPR, Financial Compliance).
+
+### Interdependencies & Synergies
+* **Dependencies:** List other projects or systems this initiative relies on.
+* **Synergies:** Can this project share resources or benefits with other initiatives?
 `,
         pm2Ref: 'PM² Business Case'
     },
