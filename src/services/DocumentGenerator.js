@@ -546,7 +546,9 @@ const renderPdfField = (contentArray, field, value) => {
         contentArray.push({
             table: {
                 headerRows: 1,
-                widths: Array(field.columns.length).fill('*'),
+                widths: field.key === 'risks'
+                    ? ['40%', '10%', '10%', '10%', '10%', '10%', '10%', '*'] // Custom widths for Risks
+                    : Array(field.columns.length).fill('*'),
                 body: tableBody
             },
             layout: 'lightHorizontalLines',
@@ -1053,23 +1055,28 @@ const renderHtmlPscMatrix = (pscData) => {
 }
 
 const renderHtmlApproval = (approvalData) => {
-    if (!approvalData) return ''
+    // Robustness: If no data, provide empty structure for manual signing
+    const data = approvalData || {}
+    const approverName = data.approverName || '______________________'
+    const approvalDate = data.approvalDate || '______________________'
+    const signature = data.signature ? '/s/ ' + data.signature : '______________________'
+
     return `
         <div class="field-pair" style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background-color: #fafafa; margin-top: 20px;">
             <h4 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Authorization</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
                     <span class="field-label">Approver Name</span>
-                    <div class="field-value">${approvalData.approverName || '-'}</div>
+                    <div class="field-value">${approverName}</div>
                 </div>
                  <div>
                     <span class="field-label">Date</span>
-                    <div class="field-value">${approvalData.approvalDate || '-'}</div>
+                    <div class="field-value">${approvalDate}</div>
                 </div>
                 <div style="grid-column: span 2;">
                     <span class="field-label">Signature</span>
-                    <div class="field-value" style="font-family: 'Brush Script MT', cursive, serif; font-size: 1.2em; color: #005A9C;">
-                        ${approvalData.signature ? '/s/ ' + approvalData.signature : '-'}
+                    <div class="field-value" style="font-family: 'Brush Script MT', cursive, serif; font-size: 1.2em; color: ${data.signature ? '#005A9C' : '#ccc'};">
+                        ${signature}
                     </div>
                 </div>
             </div>
@@ -1114,7 +1121,11 @@ const renderPdfPscMatrix = (contentArray, pscData) => {
 }
 
 const renderPdfApproval = (contentArray, approvalData) => {
-    if (!approvalData) return
+    // Only return if we have at least the object, but if values missing, use lines
+    const data = approvalData || {}
+    const approverName = data.approverName || '______________________'
+    const approvalDate = data.approvalDate || '______________________'
+    const signature = data.signature ? '/s/ ' + data.signature : '______________________'
 
     contentArray.push({
         stack: [
@@ -1124,15 +1135,15 @@ const renderPdfApproval = (contentArray, approvalData) => {
                     widths: ['*', '*'],
                     body: [
                         [
-                            { stack: [{ text: 'Approver Name', style: 'fieldLabel' }, { text: approvalData.approverName || '-', style: 'fieldValue' }], margin: [0, 5, 0, 5] },
-                            { stack: [{ text: 'Date', style: 'fieldLabel' }, { text: approvalData.approvalDate || '-', style: 'fieldValue' }], margin: [0, 5, 0, 5] }
+                            { stack: [{ text: 'Approver Name', style: 'fieldLabel' }, { text: approverName, style: 'fieldValue' }], margin: [0, 5, 0, 5] },
+                            { stack: [{ text: 'Date', style: 'fieldLabel' }, { text: approvalDate, style: 'fieldValue' }], margin: [0, 5, 0, 5] }
                         ],
                         [
                             {
                                 colSpan: 2,
                                 stack: [
                                     { text: 'Signature', style: 'fieldLabel' },
-                                    { text: approvalData.signature ? '/s/ ' + approvalData.signature : '-', style: 'fieldValue', italics: true, color: '#005A9C', fontSize: 12, margin: [0, 5, 0, 5] }
+                                    { text: signature, style: 'fieldValue', italics: !!data.signature, color: data.signature ? '#005A9C' : '#000000', fontSize: 12, margin: [0, 5, 0, 5] }
                                 ]
                             },
                             {}
@@ -1192,27 +1203,30 @@ const renderDocxPscMatrix = (childrenArray, pscData) => {
 }
 
 const renderDocxApproval = (childrenArray, approvalData) => {
-    if (!approvalData) return
+    const data = approvalData || {}
+    const approverName = data.approverName || '______________________'
+    const approvalDate = data.approvalDate || '______________________'
+    const signature = data.signature ? '/s/ ' + data.signature : '______________________'
 
     // Container box simulation using a 1x1 table or just spacing
     const nameRun = new Paragraph({
         children: [
             new TextRun({ text: "Approver Name: ", bold: true }),
-            new TextRun({ text: approvalData.approverName || '-' })
+            new TextRun({ text: approverName })
         ]
     })
 
     const dateRun = new Paragraph({
         children: [
             new TextRun({ text: "Date: ", bold: true }),
-            new TextRun({ text: approvalData.approvalDate || '-' })
+            new TextRun({ text: approvalDate })
         ]
     })
 
     const sigRun = new Paragraph({
         children: [
             new TextRun({ text: "Signature: ", bold: true }),
-            new TextRun({ text: approvalData.signature ? '/s/ ' + approvalData.signature : '-', italics: true, color: "005A9C" })
+            new TextRun({ text: signature, italics: !!data.signature, color: data.signature ? "005A9C" : "000000" })
         ]
     })
 

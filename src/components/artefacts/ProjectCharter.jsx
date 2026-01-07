@@ -84,7 +84,9 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
         likelihood: 'Medium',
         impact: 'Medium',
         riskLevel: 'Medium',
-        status: 'Open'
+        status: 'Open',
+        responseStrategy: 'Mitigate',
+        actionDetails: ''
     })
 
     useEffect(() => {
@@ -94,13 +96,17 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
                 likelihood: initialData.likelihood || 'Medium',
                 impact: initialData.impact || 'Medium',
                 riskLevel: initialData.riskLevel || 'Medium',
-                status: initialData.status || 'Open'
+                status: initialData.status || 'Open',
+                responseStrategy: initialData.responseStrategy || 'Mitigate',
+                actionDetails: initialData.actionDetails || ''
             } : {
                 description: '',
                 likelihood: 'Medium',
                 impact: 'Medium',
                 riskLevel: 'Medium',
-                status: 'Open'
+                status: 'Open',
+                responseStrategy: 'Mitigate',
+                actionDetails: ''
             })
         }
     }, [isOpen, initialData])
@@ -161,6 +167,18 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
                                     <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.status} onChange={(e) => handleChange('status', e.target.value)}>
                                         <option>Open</option><option>Closed</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Response Strategy</label>
+                                    <select className="mt-1 block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" value={formData.responseStrategy} onChange={(e) => handleChange('responseStrategy', e.target.value)}>
+                                        <option>Avoid</option><option>Mitigate</option><option>Transfer</option><option>Accept</option><option>Contingency</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Action Details</label>
+                                    <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.actionDetails} onChange={(e) => handleChange('actionDetails', e.target.value)} placeholder="Action to take..." />
                                 </div>
                             </div>
                         </div>
@@ -897,7 +915,7 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                 fullWidth={true}
             >
                 {({ data, handleContentChange, approval, onUpdateApproval, onToggleApproval, isDirty, saveStatus, triggerSave }) => {
-                    dataRef.current = data
+                    dataRef.current = { ...data, approval }
 
                     const SaveButton = () => {
                         const isSaving = saveStatus === 'saving'

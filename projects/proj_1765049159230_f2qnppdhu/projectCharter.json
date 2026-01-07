@@ -7,10 +7,10 @@
     "Version": "1.0",
     "executiveSummary": "<p>Create the Governor app.</p>",
     "businessCaseConsiderations": "<p>Final funding approval is still required.</p>",
-    "successCriteria": "<p>Happiness for all.</p>",
     "scopeStatement": "<p>test again</p>",
-    "scopeIn": "",
-    "scopeOut": "",
+    "scopeIn": "<p>App development </p>",
+    "scopeOut": "<p>Save the world</p>",
+    "successCriteria": "<p>Happiness for all.</p>",
     "stakeholderNeeds": [
       {
         "id": "1765105034925",
@@ -121,6 +121,16 @@
         "impact": "High",
         "riskLevel": "High",
         "status": "Open"
+      },
+      {
+        "id": "1767800037105",
+        "description": "Test for new risk fields",
+        "likelihood": "High",
+        "impact": "High",
+        "riskLevel": "High",
+        "status": "Open",
+        "responseStrategy": "Contingency",
+        "actionDetails": "Extend Schedule"
       }
     ],
     "costs": [
@@ -178,10 +188,6 @@
         "quantity": "1"
       }
     ],
-    "methodology": "",
-    "projectChange": "",
-    "configurationManagement": "",
-    "organisationalChange": "",
     "psc": {
       "requestorSide": {
         "po": {
@@ -222,6 +228,10 @@
         "organisation": "AN Other"
       }
     ],
+    "methodology": "<p>PM2 obvs.</p>",
+    "projectChange": "<p>PM2 standard.</p>",
+    "configurationManagement": "<p>Errrr. Mainly Governor. I think.</p>",
+    "organisationalChange": "<p>Yeah. Who knows?</p>",
     "references": [
       {
         "id": "1767711676570",
@@ -234,20 +244,20 @@
         "sourceOrLink": "www.google.com"
       }
     ],
-    "costSummary": "",
-    "costTable": [],
-    "governanceStructure": "",
-    "rolesResponsibilities": "",
-    "otherStakeholders": "",
     "approval": {
       "approverName": "",
       "approvalDate": "",
       "signature": "",
       "isApproved": false,
       "timestamp": null
-    }
+    },
+    "costSummary": "",
+    "costTable": [],
+    "governanceStructure": "",
+    "rolesResponsibilities": "",
+    "otherStakeholders": ""
   },
   "modifiedAfterApproval": false,
   "importPromptShown": false,
-  "lastUpdated": "2026-01-07T12:45:22.592Z"
+  "lastUpdated": "2026-01-07T15:34:21.361Z"
 }
