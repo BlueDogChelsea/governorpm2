@@ -343,11 +343,12 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             onClick={async () => {
                                 if (!artefact) return
                                 try {
-                                    const html = await DocumentGenerator.generateForPreview(
-                                        'business-case',
-                                        'Business Case',
-                                        artefact.content || {}, // Pass content safely
-                                        ProjectService.getActiveProject()?.name || 'Project'
+                                    const html = await DocumentGenerator.generateDocument(
+                                        { ...(artefact?.content || {}), projectName: ProjectService.getActiveProject()?.name || 'Project' },
+                                        businessCaseSchema,
+                                        businessCaseTemplate,
+                                        'html',
+                                        'preview'
                                     )
                                     setPreviewHtml(html)
                                     setShowPreview(true)
