@@ -8,7 +8,9 @@ const ArtefactApprovalSection = ({
     onToggleApproval,
     isOpen,
     onToggle,
-    isModified // New prop
+    isModified, // New prop
+    approverPlaceholder = "Enter approver name",
+    signaturePlaceholder = "Enter digital signature (text)"
 }) => {
     const { approverName, approvalDate, signature, isApproved } = approvalState || {}
 
@@ -44,7 +46,7 @@ const ArtefactApprovalSection = ({
                     <ArtefactInput
                         value={approverName || ''}
                         onChange={(e) => handleChange('approverName', e.target.value)}
-                        placeholder="Enter approver name"
+                        placeholder={approverPlaceholder}
                     />
                 </ArtefactField>
                 <ArtefactField label="Approval Date">
@@ -59,7 +61,7 @@ const ArtefactApprovalSection = ({
                         <ArtefactInput
                             value={signature || ''}
                             onChange={(e) => handleChange('signature', e.target.value)}
-                            placeholder="Enter digital signature (text)"
+                            placeholder={signaturePlaceholder}
                         />
                     </ArtefactField>
                 </div>
