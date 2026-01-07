@@ -584,41 +584,41 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                                 <div className="space-y-6">
                                     {alternativesTab === 'A' && (
                                         <div className="space-y-6">
-                                            {renderTextArea('AltA_Description', 'Description (Do Nothing)', 'Describe the baseline scenario...')}
+                                            {renderTextArea('AltA_Description', 'Description (Do Nothing)', 'e.g. The legacy system remains in place; manual workarounds continue with high risk of data error...')}
                                             <div className="bg-white p-4 rounded border border-gray-200 shadow-sm">
                                                 <h5 className="font-semibold text-gray-800 mb-4 block">SWOT Analysis (Alt A)</h5>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {renderTextArea('AltA_Strengths', 'Strengths')}
-                                                    {renderTextArea('AltA_Weaknesses', 'Weaknesses')}
-                                                    {renderTextArea('AltA_Opportunities', 'Opportunities')}
-                                                    {renderTextArea('AltA_Threats', 'Threats')}
+                                                    {renderTextArea('AltA_Strengths', 'Strengths', 'e.g. Zero implementation cost; staff are already familiar...')}
+                                                    {renderTextArea('AltA_Weaknesses', 'Weaknesses', 'e.g. Increasing maintenance costs; security vulnerabilities...')}
+                                                    {renderTextArea('AltA_Opportunities', 'Opportunities', 'e.g. Zero immediate cost allows budget reallocation to urgent maintenance...')}
+                                                    {renderTextArea('AltA_Threats', 'Threats', 'e.g. Risk of total system failure increases by 15% year-over-year...')}
                                                 </div>
                                             </div>
-                                            {renderTextArea('AltA_Qualitative', 'Qualitative Analysis', 'Risks and issues of doing nothing...')}
+                                            {renderTextArea('AltA_Qualitative', 'Qualitative Analysis', 'e.g. High risk of failure due to end-of-life support expiring in 2026...')}
                                         </div>
                                     )}
 
                                     {alternativesTab === 'B' && (
                                         <div className="space-y-6">
-                                            {renderTextArea('AltB_Description', 'Description (Proposed Solution)', 'Describe the proposed solution...')}
+                                            {renderTextArea('AltB_Description', 'Description (Proposed Solution)', 'e.g. Develop a custom cloud-native application integrated with the corporate User Directory...')}
                                             <div className="bg-white p-4 rounded border border-gray-200 shadow-sm">
                                                 <h5 className="font-semibold text-gray-800 mb-4 block">SWOT Analysis (Alt B)</h5>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {renderTextArea('AltB_Strengths', 'Strengths')}
-                                                    {renderTextArea('AltB_Weaknesses', 'Weaknesses')}
-                                                    {renderTextArea('AltB_Opportunities', 'Opportunities')}
-                                                    {renderTextArea('AltB_Threats', 'Threats')}
+                                                    {renderTextArea('AltB_Strengths', 'Strengths', 'e.g. Modern architecture supports 10k+ concurrent users; Native mobile support...')}
+                                                    {renderTextArea('AltB_Weaknesses', 'Weaknesses', 'e.g. High initial upfront cost; 3-month learning curve for staff...')}
+                                                    {renderTextArea('AltB_Opportunities', 'Opportunities', 'e.g. Enables future AI integration; Opens new revenue channel in Asia...')}
+                                                    {renderTextArea('AltB_Threats', 'Threats', 'e.g. Dependency on 3rd party vendor API pricing...')}
                                                 </div>
                                             </div>
-                                            {renderTextArea('AltB_Qualitative', 'Viability Assessment', 'Qualitative assessment...')}
+                                            {renderTextArea('AltB_Qualitative', 'Viability Assessment', 'e.g. Highly viable; Vendor guarantees 99.9% SLA and migration support...')}
                                         </div>
                                     )}
 
                                     {alternativesTab === 'Decision' && (
                                         <div className="space-y-6 bg-blue-50 p-6 rounded-lg border border-blue-100">
                                             {renderInput('Chosen_Alternative', 'Chosen Alternative', 'text', 'e.g. Alternative B')}
-                                            {renderTextArea('Chosen_Rationale', 'Rationale for Selection', 'Why was this alternative selected?')}
-                                            {renderTextArea('Chosen_Summary', 'Preference Summary', 'Summary of why this is preferred...')}
+                                            {renderTextArea('Chosen_Rationale', 'Rationale for Selection', 'e.g. Option B offers the best balance of long-term flexibility vs. immediate implementation cost...')}
+                                            {renderTextArea('Chosen_Summary', 'Preference Summary', 'e.g. Key stakeholders unanimously prefer Option B due to the superior mobile experience...')}
                                         </div>
                                     )}
                                 </div>
