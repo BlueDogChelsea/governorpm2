@@ -220,10 +220,51 @@ const MilestoneModal = ({ isOpen, onClose, onSave, initialData }) => {
     )
 }
 
+const SIDEBAR_STRUCTURE = [
+    {
+        title: '1. BUSINESS CONTEXT',
+        items: [
+            { id: 'context-justification', name: '1.1 Justification & Current State' },
+            { id: 'context-impact', name: '1.2 Impact Analysis' },
+            { id: 'context-strategy', name: '1.3 Strategic Fit & Synergy' }
+        ]
+    },
+    {
+        title: '2. ANALYSIS OF ALTERNATIVES',
+        items: [
+            { id: 'alternatives', name: '2.1 Options & Decision' }
+        ]
+    },
+    {
+        title: '3. PROPOSED SOLUTION',
+        items: [
+            { id: 'solution', name: '3.1 Scope & Outcomes' }
+        ]
+    },
+    {
+        title: '4. COST & BENEFITS',
+        items: [
+            { id: 'costs', name: '4.1 Financial Plan' }
+        ]
+    },
+    {
+        title: '5. ROADMAP & MILESTONES',
+        items: [
+            { id: 'roadmap', name: '5.1 Timeline' }
+        ]
+    },
+    {
+        title: '6. GOVERNANCE',
+        items: [
+            { id: 'governance', name: '6.1 Approval' }
+        ]
+    }
+]
+
 const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // -- State --
     const [alternativesTab, setAlternativesTab] = useState('A') // A, B, Decision
-    const [activeSectionId, setActiveSectionId] = useState('context')
+    const [activeSectionId, setActiveSectionId] = useState('context-justification')
     const [isGuidanceOpen, setIsGuidanceOpen] = useState(true)
     const [showPreview, setShowPreview] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
@@ -254,19 +295,16 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         // Init new fields
         if (!processed.dependencies) processed.dependencies = ''
         if (!processed.synergies) processed.synergies = ''
+        if (!processed.regulatoryDrivers) processed.regulatoryDrivers = ''
+        if (!processed.impactDoingNothing) processed.impactDoingNothing = ''
         return processed
     }
 
-    const navigationItems = [
-        { id: 'context', name: '1. Business Context', icon: BuildingOfficeIcon },
-        { id: 'alternatives', name: '2. Alternatives', icon: ScaleIcon },
-        { id: 'solution', name: '3. Proposed Solution', icon: LightBulbIcon },
-        { id: 'costs', name: '4. Cost & Benefits', icon: CurrencyDollarIcon },
-        { id: 'roadmap', name: '5. Roadmap & Milestones', icon: CalendarDaysIcon },
-        { id: 'governance', name: '6. Governance', icon: ShieldCheckIcon }
-    ]
-
-
+    // Helper: Map new IDs to Guidance Keys
+    const getGuidanceId = (sectionId) => {
+        if (sectionId.startsWith('context')) return 'context'
+        return sectionId || 'context'
+    }
 
     return (
         <>
@@ -459,44 +497,59 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                     // --- Main Content Switch ---
                     let content = null
 
-                    if (activeSectionId === 'context') {
+                    if (activeSectionId === 'context-justification') {
+                        content = (
+                            <div className="w-full pb-20 px-2">
+                                <Header title="1.1 Justification & Current State" />
+                                <div className="space-y-6">
+                                    {renderTextArea('businessJustification', 'Business Justification', 'Why is this project needed now?')}
+                                    {renderTextArea('currentSituation', 'Current Situation (AS-IS)', 'Describe existing processes...')}
+                                    {/* New Field as per Request */}
+                                    {renderTextArea('impactDoingNothing', 'Impact of Doing Nothing', 'What happens if we do nothing?')}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    if (activeSectionId === 'context-impact') {
                         const domains = [
                             'Human Resources', 'Finance', 'IT / Technical', 'Legal', 'Operations', 'Sales / Marketing'
                         ]
                         const currentDomains = Array.isArray(data.impactedDomains) ? data.impactedDomains : []
-
                         content = (
                             <div className="w-full pb-20 px-2">
-                                <Header title="1. Business Context" />
+                                <Header title="1.2 Impact Analysis" />
                                 <div className="space-y-6">
-                                    {renderTextArea('businessJustification', 'Business Justification', 'Why is this project needed now?')}
-                                    {renderTextArea('currentSituation', 'Current Situation (AS-IS)', 'Describe existing processes...')}
-
-                                    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-6">
-                                        <h4 className="font-bold text-gray-900 mb-4 text-lg">Impact Analysis</h4>
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Impacted Domains</label>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                                {domains.map(d => (
-                                                    <label key={d} className="inline-flex items-center space-x-2 p-2 rounded bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                                                            checked={currentDomains.includes(d)}
-                                                            onChange={() => handleDomainToggle(d)}
-                                                        />
-                                                        <span className="text-sm text-gray-700 font-medium">{d}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {renderTextArea('impactOnBusiness', 'Impact on Processes & Strategy', 'How does doing nothing affect the business strategy?')}
-                                            {renderTextArea('impactOnStakeholders', 'Impact on Users & Staff', 'How are people affected?')}
+                                    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                                        <h4 className="font-bold text-gray-900 mb-4 text-lg">Impacted Domains</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {domains.map(d => (
+                                                <label key={d} className="inline-flex items-center space-x-2 p-2 rounded bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                                                        checked={currentDomains.includes(d)}
+                                                        onChange={() => handleDomainToggle(d)}
+                                                    />
+                                                    <span className="text-sm text-gray-700 font-medium">{d}</span>
+                                                </label>
+                                            ))}
                                         </div>
                                     </div>
+                                    {renderTextArea('impactOnBusiness', 'Impact on Processes & Strategy', 'How does doing nothing affect the business strategy?')}
+                                    {renderTextArea('impactOnStakeholders', 'Impact on Users & Staff', 'How are people affected?')}
+                                </div>
+                            </div>
+                        )
+                    }
 
-                                    {renderTextArea('strategicFit', 'Strategic Fit', 'Alignment with organizational goals...')}
+                    if (activeSectionId === 'context-strategy') {
+                        content = (
+                            <div className="w-full pb-20 px-2">
+                                <Header title="1.3 Strategic Fit & Synergy" />
+                                <div className="space-y-6">
+                                    {renderTextArea('strategicFit', 'Strategic Alignment', 'Alignment with organizational goals...')}
+                                    {renderTextArea('regulatoryDrivers', 'Regulatory Drivers', 'Are there any legal or regulatory requirements?')}
 
                                     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mt-6 space-y-4">
                                         <h4 className="text-lg font-bold text-gray-900 mb-2">Impact & Interdependencies</h4>
@@ -816,25 +869,32 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                         <div className="flex h-full bg-gray-100">
                             {/* Left Sidebar Navigation */}
                             <div className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-                                <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-                                    <div className="mb-4 text-xs font-semibold text-gray-500 uppercase tracking-wider pl-3">Sections</div>
-                                    {navigationItems.map(item => {
-                                        const isActive = activeSectionId === item.id
-                                        const Icon = item.icon
-                                        return (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => setActiveSectionId(item.id)}
-                                                className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${isActive
-                                                    ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                                    }`}
-                                            >
-                                                <Icon className={`h-4 w-4 mr-3 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}`} />
-                                                {item.name}
-                                            </button>
-                                        )
-                                    })}
+                                <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+                                    {SIDEBAR_STRUCTURE.map((group, idx) => (
+                                        <div key={idx}>
+                                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">
+                                                {group.title}
+                                            </h3>
+                                            <div className="space-y-1">
+                                                {group.items.map(item => {
+                                                    const isActive = activeSectionId === item.id
+                                                    return (
+                                                        <button
+                                                            key={item.id}
+                                                            onClick={() => setActiveSectionId(item.id)}
+                                                            className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${isActive
+                                                                ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100'
+                                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                                }`}
+                                                        >
+                                                            <span className={`w-2 h-2 mr-3 rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-transparent group-hover:bg-gray-300'}`}></span>
+                                                            {item.name}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </nav>
                             </div>
 
@@ -847,7 +907,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             {isGuidanceOpen && (
                                 <div className="w-80 lg:w-1/3 flex-shrink-0 bg-white border-l border-gray-200 overflow-hidden transition-all duration-300">
                                     <GuidancePanel
-                                        sectionId={activeSectionId}
+                                        sectionId={getGuidanceId(activeSectionId)}
                                         isOpen={true}
                                         onClose={() => setIsGuidanceOpen(false)}
                                     />

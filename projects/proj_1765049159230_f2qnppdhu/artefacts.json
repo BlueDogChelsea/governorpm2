@@ -94,7 +94,10 @@
           "targetDeliveryDate": "2026-01-21"
         }
       ],
-      "impactedDomains": [],
+      "impactedDomains": [
+        "Human Resources",
+        "Sales / Marketing"
+      ],
       "businessJustification": "<p>Fit for 10x</p>",
       "dependencies": "",
       "synergies": "",
@@ -102,6 +105,8 @@
       "impactOnBusiness": "",
       "impactOnStakeholders": "",
       "strategicFit": "",
+      "regulatoryDrivers": "",
+      "impactDoingNothing": "<p>Nothing.</p>",
       "approval": {
         "approverName": "",
         "approvalDate": "",
@@ -112,7 +117,7 @@
     },
     "modifiedAfterApproval": false,
     "importPromptShown": true,
-    "lastUpdated": "2026-01-06T17:55:48.262Z"
+    "lastUpdated": "2026-01-06T18:14:14.333Z"
   },
   {
     "id": "projectCharter",
