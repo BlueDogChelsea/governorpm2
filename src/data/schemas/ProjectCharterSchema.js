@@ -8,29 +8,28 @@ export const projectCharterSchema = [
     },
     {
         id: 'business_case_considerations',
-        title: '2. Business Case and Success Criteria',
+        title: '2. Considerations on Business Case',
         fields: [
-            { key: 'businessCaseConsiderations', label: 'Considerations on the Business Case', type: 'richtext', placeholder: 'Describe considerations regarding the Business Case...' },
-            { key: 'successCriteria', label: 'Success Criteria', group: '2.1 Success Criteria', type: 'richtext', placeholder: 'Define success criteria...' }
+            { key: 'businessCaseConsiderations', label: 'Considerations on the Business Case', type: 'richtext', placeholder: 'Describe considerations regarding the Business Case...' }
         ]
     },
     {
-        id: 'project_scope',
-        title: '3. Project Scope',
+        id: 'project_description',
+        title: '3. Project Description',
         fields: [
+            // 3.1 Scope
             { key: 'scopeStatement', label: 'Scope Statement', group: '3.1 Scope', type: 'richtext', placeholder: 'Define the project scope...' },
             { key: 'scopeIn', label: 'Includes (In Scope)', group: '3.1 Scope', type: 'richtext', placeholder: 'What is included in the scope?' },
-            { key: 'scopeOut', label: 'Excludes (Out of Scope)', group: '3.1 Scope', type: 'richtext', placeholder: 'What is excluded from the scope?' }
-        ]
-    },
-    {
-        id: 'stakeholder_needs',
-        title: '4. Stakeholder and User Needs',
-        fields: [
+            { key: 'scopeOut', label: 'Excludes (Out of Scope)', group: '3.1 Scope', type: 'richtext', placeholder: 'What is excluded from the scope?' },
+
+            // 3.2 Success Criteria
+            { key: 'successCriteria', label: 'Success Criteria', group: '3.2 Success Criteria', type: 'richtext', placeholder: 'Define success criteria...' },
+
+            // 3.3 Stakeholder Needs
             {
                 key: 'stakeholderNeeds',
                 label: 'Stakeholder and User Needs',
-                group: '4.1 Stakeholder and User Needs',
+                group: '3.3 Stakeholder Needs',
                 type: 'table',
                 columns: [
                     { key: 'stakeholder', label: 'Stakeholder / Group', type: 'text', placeholder: 'e.g., Finance Team, Client Proxy...' },
@@ -42,18 +41,13 @@ export const projectCharterSchema = [
                         options: ['Critical', 'High', 'Medium', 'Low']
                     }
                 ]
-            }
-        ]
-    },
-    {
-        id: 'project_description',
-        title: '5. Project Description',
-        fields: [
-            // 5.1 Deliverables (Repeating)
+            },
+
+            // 3.4 Deliverables
             {
                 key: 'deliverables',
                 label: 'Deliverables',
-                group: '5.1 Deliverables',
+                group: '3.4 Deliverables',
                 type: 'table',
                 columns: [
                     { key: 'name', label: 'Deliverable Name', type: 'text' },
@@ -68,24 +62,24 @@ export const projectCharterSchema = [
                 ]
             },
 
-            // 5.2 Features (Repeating)
+            // 3.5 Features
             {
                 key: 'features',
                 label: 'Features',
-                group: '5.2 Features',
+                group: '3.5 Features',
                 type: 'table',
                 columns: [
                     { key: 'name', label: 'Feature Name', type: 'text' },
                     { key: 'description', label: 'Description', type: 'textarea' },
-                    { key: 'relatedDeliverable', label: 'Related Deliverable', type: 'select', options: [] } // Options populated dynamically in UI
+                    { key: 'relatedDeliverable', label: 'Related Deliverable', type: 'select', options: [] }
                 ]
             },
 
-            // 5.3 Constraints
+            // 3.6 Constraints
             {
                 key: 'constraints',
                 label: 'Constraints',
-                group: '5.3 Constraints',
+                group: '3.6 Constraints',
                 type: 'table',
                 columns: [
                     { key: 'description', label: 'Constraint Description', type: 'textarea' },
@@ -98,11 +92,11 @@ export const projectCharterSchema = [
                 ]
             },
 
-            // 5.4 Assumptions
+            // 3.7 Assumptions
             {
                 key: 'assumptions',
                 label: 'Assumptions',
-                group: '5.4 Assumptions',
+                group: '3.7 Assumptions',
                 type: 'table',
                 columns: [
                     { key: 'description', label: 'Assumption Description', type: 'textarea' },
@@ -115,15 +109,15 @@ export const projectCharterSchema = [
                 ]
             },
 
-            // 5.5 Risks (Repeating)
+            // 3.8 Risks
             {
                 key: 'risks',
                 label: 'Risks',
-                group: '5.5 Risks',
+                group: '3.8 Risks',
                 type: 'table',
                 columns: [
                     { key: 'description', label: 'Risk Description', type: 'text' },
-                    { key: 'status', label: 'Status', type: 'text' }, // Select?
+                    { key: 'status', label: 'Status', type: 'text' },
                     { key: 'likelihood', label: 'Likelihood', type: 'text' },
                     { key: 'impact', label: 'Impact', type: 'text' },
                     { key: 'riskLevel', label: 'Level', type: 'text' },
@@ -135,14 +129,14 @@ export const projectCharterSchema = [
         ]
     },
     {
-        id: 'cost_timing_resources',
-        title: '6. Cost, Timing, Resources',
+        id: 'cost_timing',
+        title: '4. Cost & Timing',
         fields: [
-            // 6.1 Cost & Budget
+            // 4.1 Cost & Budget
             {
                 key: 'costs',
                 label: 'Cost Breakdown',
-                group: '6.1 Cost & Budget',
+                group: '4.1 Cost & Budget',
                 type: 'table',
                 columns: [
                     { key: 'category', label: 'Category', type: 'select', options: ['Solution Development', 'Maintenance', 'Support', 'Training', 'Infrastructure', 'Other'] },
@@ -152,11 +146,11 @@ export const projectCharterSchema = [
                 ]
             },
 
-            // 6.2 Timing & Milestones
+            // 4.2 Milestones
             {
                 key: 'milestones',
                 label: 'Timing & Milestones',
-                group: '6.2 Timing & Milestones',
+                group: '4.2 Milestones',
                 type: 'table',
                 columns: [
                     { key: 'id', label: 'ID', type: 'text' },
@@ -165,11 +159,11 @@ export const projectCharterSchema = [
                 ]
             },
 
-            // 6.3 Planned Resources
+            // 4.3 Planned Resources
             {
                 key: 'resources',
                 label: 'Planned Resources',
-                group: '6.3 Planned Resources',
+                group: '4.3 Planned Resources',
                 type: 'table',
                 columns: [
                     { key: 'id', label: 'ID', type: 'text' },
@@ -181,27 +175,14 @@ export const projectCharterSchema = [
         ]
     },
     {
-        id: 'approach',
-        title: '7. Approach',
-        fields: [
-            // 7.1 Methodology
-            { key: 'methodology', label: 'Methodology', group: '7.1 Methodology', type: 'richtext', placeholder: 'Describe the project methodology...' },
-
-            // 7.2 Change Management
-            { key: 'projectChange', label: 'Project Change Management', group: '7.2 Change Management', type: 'richtext', placeholder: 'How usage of changes will be managed...' },
-            { key: 'configurationManagement', label: 'Configuration Management', group: '7.2 Change Management', type: 'richtext', placeholder: 'Configuration management approach...' },
-            { key: 'organisationalChange', label: 'Organisational Change', group: '7.2 Change Management', type: 'richtext', placeholder: 'Organisational change management...' }
-        ]
-    },
-    {
-        id: 'governance_stakeholders',
-        title: '8. Governance & Stakeholders',
+        id: 'governance',
+        title: '6. Governance',
         fields: [
             {
                 key: 'psc',
                 label: 'Project Steering Committee (PSC)',
-                group: '8.1 PSC Matrix',
-                type: 'pscMatrix', // Custom type handled in component
+                group: 'Roles & Responsibilities',
+                type: 'pscMatrix',
                 structure: {
                     requestorSide: {
                         po: { role: 'Project Owner', name: '', responsibilities: 'Sets objectives, owns the Business Case' },
@@ -216,7 +197,7 @@ export const projectCharterSchema = [
             {
                 key: 'extendedGovernance',
                 label: 'Extended Governance',
-                group: '8.2 Extended Governance',
+                group: 'Roles & Responsibilities',
                 type: 'table',
                 columns: [
                     { key: 'role', label: 'Role', type: 'text' },
@@ -227,8 +208,19 @@ export const projectCharterSchema = [
         ]
     },
     {
-        id: 'references',
-        title: 'Appendix 1: References & Related Documents',
+        id: 'approach',
+        title: '7. Approach',
+        fields: [
+            // Methodology & Change
+            { key: 'methodology', label: 'Methodology', group: 'Methodology & Change', type: 'richtext', placeholder: 'Describe the project methodology...' },
+            { key: 'projectChange', label: 'Project Change Management', group: 'Methodology & Change', type: 'richtext', placeholder: 'How usage of changes will be managed...' },
+            { key: 'configurationManagement', label: 'Configuration Management', group: 'Methodology & Change', type: 'richtext', placeholder: 'Configuration management approach...' },
+            { key: 'organisationalChange', label: 'Organisational Change', group: 'Methodology & Change', type: 'richtext', placeholder: 'Organisational change management...' }
+        ]
+    },
+    {
+        id: 'appendix',
+        title: 'Appendix',
         fields: [
             {
                 key: 'references',
@@ -238,6 +230,17 @@ export const projectCharterSchema = [
                     { key: 'title', label: 'Title', type: 'text' },
                     { key: 'sourceOrLink', label: 'Source / Link', type: 'text' }
                 ]
+            }
+        ]
+    },
+    {
+        id: 'authorization',
+        title: 'Authorization',
+        fields: [
+            {
+                key: 'approval',
+                label: 'Sign-Off / Approval',
+                type: 'approval'
             }
         ]
     }

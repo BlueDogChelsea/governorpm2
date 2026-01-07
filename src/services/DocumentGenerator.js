@@ -267,11 +267,19 @@ const generateHtml = (data, sections, template, meta) => {
 }
 
 const renderHtmlField = (field, value) => {
-    if (isEmpty(value) && field.type !== 'costMatrix') return ''
+    if (isEmpty(value) && !['costMatrix', 'pscMatrix', 'approval'].includes(field.type)) return ''
 
     // SPECIAL TYPES
     if (field.type === 'costMatrix') {
         return renderHtmlCostMatrix(value)
+    }
+
+    if (field.type === 'pscMatrix') {
+        return renderHtmlPscMatrix(value)
+    }
+
+    if (field.type === 'approval') {
+        return renderHtmlApproval(value)
     }
 
     if (field.type === 'table') {
@@ -458,7 +466,7 @@ const generatePdf = async (data, sections, template, fileName, meta) => {
 }
 
 const renderPdfField = (contentArray, field, value) => {
-    if (isEmpty(value) && field.type !== 'costMatrix') return
+    if (isEmpty(value) && !['costMatrix', 'pscMatrix', 'approval'].includes(field.type)) return
 
     // Special Types
     if (field.type === 'costMatrix') {
@@ -507,6 +515,16 @@ const renderPdfField = (contentArray, field, value) => {
             layout: 'lightHorizontalLines',
             margin: [0, 5, 0, 15]
         })
+        return
+    }
+
+    if (field.type === 'pscMatrix') {
+        renderPdfPscMatrix(contentArray, value)
+        return
+    }
+
+    if (field.type === 'approval') {
+        renderPdfApproval(contentArray, value)
         return
     }
 
@@ -744,7 +762,7 @@ const generateDocx = async (data, sections, template, fileName, meta) => {
 }
 
 const renderDocxField = (childrenArray, field, value) => {
-    if (isEmpty(value) && field.type !== 'costMatrix') return
+    if (isEmpty(value) && !['costMatrix', 'pscMatrix', 'approval'].includes(field.type)) return
 
     // Label
     childrenArray.push(new Paragraph({
@@ -760,6 +778,16 @@ const renderDocxField = (childrenArray, field, value) => {
     }))
 
     // Special Types
+    if (field.type === 'pscMatrix') {
+        renderDocxPscMatrix(childrenArray, value)
+        return
+    }
+
+    if (field.type === 'approval') {
+        renderDocxApproval(childrenArray, value)
+        return
+    }
+
     if (field.type === 'costMatrix') {
         const { matrix, years, categories } = calculateCostMatrix(value)
 
@@ -992,3 +1020,223 @@ const processMetrics = (node) => {
 }
 
 export default DocumentGenerator
+
+// --- New Renderers for PSC and Approval ---
+
+const renderHtmlPscMatrix = (pscData) => {
+    if (!pscData) return ''
+    const rows = [
+        { role: 'Project Owner', ...pscData.requestorSide?.po },
+        { role: 'Business Manager', ...pscData.requestorSide?.bm },
+        { role: 'Solution Provider', ...pscData.providerSide?.sp },
+        { role: 'Project Manager', ...pscData.providerSide?.pm }
+    ]
+
+    let html = `
+        <div class="field-pair">
+            <span class="field-label">Project Roles & Responsibilities</span>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Name</th>
+                        <th>Responsibilities</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `
+    rows.forEach(r => {
+        html += `<tr><td>${r.role || ''}</td><td>${r.name || ''}</td><td>${r.responsibilities || ''}</td></tr>`
+    })
+    html += `</tbody></table></div>`
+    return html
+}
+
+const renderHtmlApproval = (approvalData) => {
+    if (!approvalData) return ''
+    return `
+        <div class="field-pair" style="border: 1px solid #ddd; padding: 15px; border-radius: 4px; background-color: #fafafa; margin-top: 20px;">
+            <h4 style="margin-top:0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Authorization</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <span class="field-label">Approver Name</span>
+                    <div class="field-value">${approvalData.approverName || '-'}</div>
+                </div>
+                 <div>
+                    <span class="field-label">Date</span>
+                    <div class="field-value">${approvalData.approvalDate || '-'}</div>
+                </div>
+                <div style="grid-column: span 2;">
+                    <span class="field-label">Signature</span>
+                    <div class="field-value" style="font-family: 'Brush Script MT', cursive, serif; font-size: 1.2em; color: #005A9C;">
+                        ${approvalData.signature ? '/s/ ' + approvalData.signature : '-'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `
+}
+
+const renderPdfPscMatrix = (contentArray, pscData) => {
+    if (!pscData) return
+    const rows = [
+        { role: 'Project Owner', ...pscData.requestorSide?.po },
+        { role: 'Business Manager', ...pscData.requestorSide?.bm },
+        { role: 'Solution Provider', ...pscData.providerSide?.sp },
+        { role: 'Project Manager', ...pscData.providerSide?.pm }
+    ]
+
+    const tableBody = []
+    tableBody.push([
+        { text: 'Role', bold: true, fillColor: '#f3f4f6' },
+        { text: 'Name', bold: true, fillColor: '#f3f4f6' },
+        { text: 'Responsibilities', bold: true, fillColor: '#f3f4f6' }
+    ])
+
+    rows.forEach(r => {
+        tableBody.push([
+            { text: r.role || '', style: 'tableCell' },
+            { text: r.name || '', style: 'tableCell' },
+            { text: r.responsibilities || '', style: 'tableCell' }
+        ])
+    })
+
+    contentArray.push({ text: 'Project Roles & Responsibilities', style: 'fieldLabel' })
+    contentArray.push({
+        table: {
+            headerRows: 1,
+            widths: ['30%', '30%', '40%'],
+            body: tableBody
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 5, 0, 15]
+    })
+}
+
+const renderPdfApproval = (contentArray, approvalData) => {
+    if (!approvalData) return
+
+    contentArray.push({
+        stack: [
+            { text: 'Authorization', style: 'sectionHeader', fontSize: 14, margin: [0, 0, 0, 10] },
+            {
+                table: {
+                    widths: ['*', '*'],
+                    body: [
+                        [
+                            { stack: [{ text: 'Approver Name', style: 'fieldLabel' }, { text: approvalData.approverName || '-', style: 'fieldValue' }], margin: [0, 5, 0, 5] },
+                            { stack: [{ text: 'Date', style: 'fieldLabel' }, { text: approvalData.approvalDate || '-', style: 'fieldValue' }], margin: [0, 5, 0, 5] }
+                        ],
+                        [
+                            {
+                                colSpan: 2,
+                                stack: [
+                                    { text: 'Signature', style: 'fieldLabel' },
+                                    { text: approvalData.signature ? '/s/ ' + approvalData.signature : '-', style: 'fieldValue', italics: true, color: '#005A9C', fontSize: 12, margin: [0, 5, 0, 5] }
+                                ]
+                            },
+                            {}
+                        ]
+                    ]
+                },
+                layout: {
+                    hLineWidth: (i) => i === 1 ? 1 : 0,
+                    vLineWidth: () => 0,
+                    hLineColor: '#eeeeee'
+                }
+            }
+        ],
+        margin: [0, 10, 0, 10],
+        style: 'htmlContent', // reuse existing style or generic
+        fillColor: '#fafafa'
+    })
+}
+
+const renderDocxPscMatrix = (childrenArray, pscData) => {
+    if (!pscData) return
+
+    childrenArray.push(new Paragraph({
+        children: [new TextRun({ text: "Project Roles & Responsibilities", bold: true, color: "333333" })],
+        spacing: { before: 240, after: 120 }
+    }))
+
+    const rows = [
+        { role: 'Project Owner', ...pscData.requestorSide?.po },
+        { role: 'Business Manager', ...pscData.requestorSide?.bm },
+        { role: 'Solution Provider', ...pscData.providerSide?.sp },
+        { role: 'Project Manager', ...pscData.providerSide?.pm }
+    ]
+
+    const headerRow = new TableRow({
+        children: [
+            new TableCell({ children: [new Paragraph({ text: "Role", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Name", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Responsibilities", bold: true })] })
+        ]
+    })
+
+    const dataRows = rows.map(r => new TableRow({
+        children: [
+            new TableCell({ children: [new Paragraph(r.role || '')] }),
+            new TableCell({ children: [new Paragraph(r.name || '')] }),
+            new TableCell({ children: [new Paragraph(r.responsibilities || '')] })
+        ]
+    }))
+
+    const table = new Table({
+        rows: [headerRow, ...dataRows],
+        width: { size: 100, type: WidthType.PERCENTAGE }
+    })
+    childrenArray.push(table)
+    childrenArray.push(new Paragraph({ text: "" }))
+}
+
+const renderDocxApproval = (childrenArray, approvalData) => {
+    if (!approvalData) return
+
+    // Container box simulation using a 1x1 table or just spacing
+    const nameRun = new Paragraph({
+        children: [
+            new TextRun({ text: "Approver Name: ", bold: true }),
+            new TextRun({ text: approvalData.approverName || '-' })
+        ]
+    })
+
+    const dateRun = new Paragraph({
+        children: [
+            new TextRun({ text: "Date: ", bold: true }),
+            new TextRun({ text: approvalData.approvalDate || '-' })
+        ]
+    })
+
+    const sigRun = new Paragraph({
+        children: [
+            new TextRun({ text: "Signature: ", bold: true }),
+            new TextRun({ text: approvalData.signature ? '/s/ ' + approvalData.signature : '-', italics: true, color: "005A9C" })
+        ]
+    })
+
+    // Wrap in a table for border effect? Or just list them. A table looks cleaner.
+    const table = new Table({
+        rows: [
+            new TableRow({ children: [new TableCell({ children: [nameRun] }), new TableCell({ children: [dateRun] })] }),
+            new TableRow({ children: [new TableCell({ children: [sigRun], columnSpan: 2 })] })
+        ],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" },
+            insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" },
+            insideVertical: { style: BorderStyle.SINGLE, size: 2, color: "DDDDDD" }
+        }
+    })
+
+    childrenArray.push(new Paragraph({
+        children: [new TextRun({ text: "Authorization", bold: true, size: 28 })],
+        spacing: { before: 360, after: 120 }
+    }))
+    childrenArray.push(table)
+    childrenArray.push(new Paragraph({ text: "" }))
+}
