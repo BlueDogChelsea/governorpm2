@@ -267,7 +267,29 @@ const generateHtml = (data, sections, template, meta) => {
 }
 
 const renderHtmlField = (field, value) => {
-    if (isEmpty(value)) return ''
+    if (isEmpty(value) && field.type !== 'costMatrix') return ''
+
+    // SPECIAL TYPES
+    if (field.type === 'costMatrix') {
+        return renderHtmlCostMatrix(value)
+    }
+
+    if (field.type === 'table') {
+        return renderHtmlTable(field, value)
+    }
+
+    if (field.type === 'list') {
+        const list = Array.isArray(value) ? value : []
+        if (list.length === 0) return ''
+        return `
+            <div class="field-pair">
+                <span class="field-label">${getLabel(field)}</span>
+                <ul class="field-value">
+                    ${list.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            </div>
+        `
+    }
 
     let content = value
     // Check if rich text
@@ -285,6 +307,66 @@ const renderHtmlField = (field, value) => {
             <div class="field-value">${content}</div>
         </div>
     `
+}
+
+const renderHtmlTable = (field, rows) => {
+    const safeRows = Array.isArray(rows) ? rows : []
+    if (safeRows.length === 0) return ''
+
+    const headers = field.columns.map(c => `<th>${c.label}</th>`).join('')
+    const body = safeRows.map(row => {
+        const cells = field.columns.map(c => `<td>${row[c.key] || ''}</td>`).join('')
+        return `<tr>${cells}</tr>`
+    }).join('')
+
+    return `
+        <div class="field-pair">
+            <span class="field-label">${getLabel(field)}</span>
+            <table>
+                <thead><tr>${headers}</tr></thead>
+                <tbody>${body}</tbody>
+            </table>
+        </div>
+    `
+}
+
+const renderHtmlCostMatrix = (costItems) => {
+    const { matrix, years, categories } = calculateCostMatrix(costItems)
+    const grandTotal = categories.reduce((sum, cat) => sum + matrix[cat].total, 0)
+
+    let html = `
+        <div class="field-pair">
+            <span class="field-label">Projected Costs Matrix</span>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        ${years.map(y => `<th style="text-align:right">${y}</th>`).join('')}
+                        <th style="text-align:right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `
+
+    categories.forEach(cat => {
+        html += `<tr><td>${cat}</td>`
+        years.forEach(y => {
+            const val = matrix[cat][y]
+            html += `<td style="text-align:right">${val > 0 ? val.toLocaleString() : '-'}</td>`
+        })
+        html += `<td style="text-align:right"><strong>${matrix[cat].total > 0 ? matrix[cat].total.toLocaleString() : '-'}</strong></td></tr>`
+    })
+
+    // Footer
+    html += `<tr style="background:#f0f0f0; font-weight:bold;"><td>GRAND TOTAL</td>`
+    years.forEach(y => {
+        const yTotal = categories.reduce((sum, cat) => sum + matrix[cat][y], 0)
+        html += `<td style="text-align:right">${yTotal > 0 ? yTotal.toLocaleString() : '-'}</td>`
+    })
+    html += `<td style="text-align:right">${grandTotal.toLocaleString()}</td></tr>`
+
+    html += `</tbody></table></div>`
+    return html
 }
 
 // --- PDF Generation ---
@@ -376,7 +458,70 @@ const generatePdf = async (data, sections, template, fileName, meta) => {
 }
 
 const renderPdfField = (contentArray, field, value) => {
-    if (isEmpty(value)) return
+    if (isEmpty(value) && field.type !== 'costMatrix') return
+
+    // Special Types
+    if (field.type === 'costMatrix') {
+        const { matrix, years, categories } = calculateCostMatrix(value)
+        contentArray.push({ text: 'Projected Costs Matrix', style: 'fieldLabel' })
+
+        const tableBody = []
+        // Header
+        const headerRow = [
+            { text: 'Category', bold: true, fillColor: '#f3f4f6' },
+            ...years.map(y => ({ text: y, bold: true, alignment: 'right', fillColor: '#f3f4f6' })),
+            { text: 'Total', bold: true, alignment: 'right', fillColor: '#f3f4f6' }
+        ]
+        tableBody.push(headerRow)
+
+        // Rows
+        categories.forEach(cat => {
+            const row = [
+                { text: cat, style: 'tableCell' },
+                ...years.map(y => ({ text: matrix[cat][y] > 0 ? matrix[cat][y].toLocaleString() : '-', alignment: 'right', style: 'tableCell' })),
+                { text: matrix[cat].total > 0 ? matrix[cat].total.toLocaleString() : '-', alignment: 'right', bold: true, style: 'tableCell' }
+            ]
+            tableBody.push(row)
+        })
+
+        contentArray.push({
+            table: {
+                headerRows: 1,
+                widths: ['*', ...years.map(() => 'auto'), 'auto'],
+                body: tableBody
+            },
+            layout: 'lightHorizontalLines',
+            margin: [0, 5, 0, 15]
+        })
+        return
+    }
+
+    if (field.type === 'table') {
+        const rows = Array.isArray(value) ? value : []
+        if (rows.length === 0) return
+
+        contentArray.push({ text: getLabel(field), style: 'fieldLabel' })
+
+        const tableBody = []
+        // Header
+        tableBody.push(field.columns.map(c => ({ text: c.label, bold: true, fillColor: '#f3f4f6' })))
+
+        // Rows
+        rows.forEach(r => {
+            tableBody.push(field.columns.map(c => ({ text: r[c.key] || '', style: 'htmlContent' })))
+        })
+
+        contentArray.push({
+            table: {
+                headerRows: 1,
+                widths: Array(field.columns.length).fill('*'),
+                body: tableBody
+            },
+            layout: 'lightHorizontalLines',
+            margin: [0, 5, 0, 15]
+        })
+        return
+    }
 
     contentArray.push({ text: getLabel(field), style: 'fieldLabel' })
 
@@ -572,7 +717,7 @@ const generateDocx = async (data, sections, template, fileName, meta) => {
 }
 
 const renderDocxField = (childrenArray, field, value) => {
-    if (isEmpty(value)) return
+    if (isEmpty(value) && field.type !== 'costMatrix') return
 
     // Label
     childrenArray.push(new Paragraph({
@@ -586,6 +731,56 @@ const renderDocxField = (childrenArray, field, value) => {
         ],
         spacing: { before: 120, after: 60 } // ~6pt space
     }))
+
+    // Special Types
+    if (field.type === 'costMatrix') {
+        const { matrix, years, categories } = calculateCostMatrix(value)
+
+        const headerRow = new TableRow({
+            children: [
+                new TableCell({ children: [new Paragraph({ text: "Category", bold: true })] }),
+                ...years.map(y => new TableCell({ children: [new Paragraph({ text: y, bold: true, alignment: AlignmentType.RIGHT })] })),
+                new TableCell({ children: [new Paragraph({ text: "Total", bold: true, alignment: AlignmentType.RIGHT })] })
+            ]
+        })
+
+        const dataRows = categories.map(cat => new TableRow({
+            children: [
+                new TableCell({ children: [new Paragraph(cat)] }),
+                ...years.map(y => new TableCell({ children: [new Paragraph({ text: matrix[cat][y] > 0 ? matrix[cat][y].toLocaleString() : '-', alignment: AlignmentType.RIGHT })] })),
+                new TableCell({ children: [new Paragraph({ text: matrix[cat].total > 0 ? matrix[cat].total.toLocaleString() : '-', bold: true, alignment: AlignmentType.RIGHT })] })
+            ]
+        }))
+
+        const table = new Table({
+            rows: [headerRow, ...dataRows],
+            width: { size: 100, type: WidthType.PERCENTAGE }
+        })
+        childrenArray.push(table)
+        childrenArray.push(new Paragraph({ text: "" })) // Spacer
+        return
+    }
+
+    if (field.type === 'table') {
+        const rows = Array.isArray(value) ? value : []
+        if (rows.length === 0) return
+
+        const headerRow = new TableRow({
+            children: field.columns.map(c => new TableCell({ children: [new Paragraph({ text: c.label, bold: true })] }))
+        })
+
+        const dataRows = rows.map(r => new TableRow({
+            children: field.columns.map(c => new TableCell({ children: [new Paragraph(r[c.key] || '')] }))
+        }))
+
+        const table = new Table({
+            rows: [headerRow, ...dataRows],
+            width: { size: 100, type: WidthType.PERCENTAGE }
+        })
+        childrenArray.push(table)
+        childrenArray.push(new Paragraph({ text: "" }))
+        return
+    }
 
     // Value
     if (field.type === 'richtext' || field.type === 'textarea' || typeIsRich(field.type, value)) {
@@ -683,6 +878,31 @@ const parseHtmlToDocx = (html) => {
     })
 
     return paragraphs
+}
+
+const calculateCostMatrix = (costItems) => {
+    const years = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5']
+    const categories = ['Solution Development', 'Maintenance', 'Infrastructure', 'Training', 'Change Management', 'Support', 'Other']
+    const matrix = {}
+
+    // Init
+    categories.forEach(cat => {
+        matrix[cat] = { total: 0 }
+        years.forEach(y => matrix[cat][y] = 0)
+    })
+
+    // Calc
+    if (Array.isArray(costItems)) {
+        costItems.forEach(item => {
+            if (!item || !item.category) return
+            const amt = parseFloat(item.amount) || 0
+            if (matrix[item.category] && matrix[item.category][item.year] !== undefined) {
+                matrix[item.category][item.year] += amt
+                matrix[item.category].total += amt
+            }
+        })
+    }
+    return { matrix, years, categories }
 }
 
 const processMetrics = (node) => {

@@ -266,6 +266,7 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
     const [alternativesTab, setAlternativesTab] = useState('A') // A, B, Decision
     const [activeSectionId, setActiveSectionId] = useState('context-justification')
     const [isGuidanceOpen, setIsGuidanceOpen] = useState(true)
+    const [showExportMenu, setShowExportMenu] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
 
@@ -298,6 +299,50 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         if (!processed.regulatoryDrivers) processed.regulatoryDrivers = ''
         if (!processed.impactDoingNothing) processed.impactDoingNothing = ''
         return processed
+    }
+
+    const handleExport = async (format) => {
+        setShowExportMenu(false)
+        if (!artefact) return
+
+        // Prepare content with defaults
+        const content = {
+            ...artefact.content,
+            projectName: ProjectService.getActiveProject()?.name || 'Project',
+            // Ensure lists are present
+            costs: Array.isArray(artefact.content?.costs) ? artefact.content.costs : [],
+            milestones: Array.isArray(artefact.content?.milestones) ? artefact.content.milestones : [],
+            impactedDomains: Array.isArray(artefact.content?.impactedDomains) ? artefact.content.impactedDomains : []
+        }
+
+        if (format === 'html') {
+            try {
+                const html = await DocumentGenerator.generateDocument(
+                    content,
+                    businessCaseSchema,
+                    businessCaseTemplate,
+                    'html',
+                    'preview'
+                )
+                setPreviewHtml(html)
+                setShowPreview(true)
+            } catch (error) {
+                console.error('Preview failed:', error)
+            }
+        } else {
+            try {
+                const projName = content.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+                await DocumentGenerator.generateDocument(
+                    content,
+                    businessCaseSchema,
+                    businessCaseTemplate,
+                    format,
+                    `BusinessCase_${projName}_v${content['Version'] || '1.0'}`
+                )
+            } catch (error) {
+                console.error('Export failed:', error)
+            }
+        }
     }
 
     // Helper: Map new IDs to Guidance Keys
@@ -339,28 +384,24 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                             <LightBulbIcon className={`h-5 w-5 mr-2 ${isGuidanceOpen ? 'text-yellow-500' : 'text-gray-500'}`} />
                             {isGuidanceOpen ? 'Hide Guidance' : 'Show Guidance'}
                         </button>
-                        <button
-                            onClick={async () => {
-                                if (!artefact) return
-                                try {
-                                    const html = await DocumentGenerator.generateDocument(
-                                        { ...(artefact?.content || {}), projectName: ProjectService.getActiveProject()?.name || 'Project' },
-                                        businessCaseSchema,
-                                        businessCaseTemplate,
-                                        'html',
-                                        'preview'
-                                    )
-                                    setPreviewHtml(html)
-                                    setShowPreview(true)
-                                } catch (error) {
-                                    console.error('Preview failed:', error)
-                                }
-                            }}
-                            className="flex items-center text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2 mr-2 transition-colors shadow-sm"
-                        >
-                            <ArrowDownTrayIcon className="h-5 w-5 mr-2 text-gray-500" />
-                            Preview / Export
-                        </button>
+                        <div className="relative inline-block text-left">
+                            <button
+                                onClick={() => setShowExportMenu(!showExportMenu)}
+                                className="flex items-center text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2 mr-2 transition-colors shadow-sm"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5 mr-2 text-gray-500" />
+                                Export
+                            </button>
+                            {showExportMenu && (
+                                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                    <div className="py-1">
+                                        <button onClick={() => handleExport('pdf')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download PDF</button>
+                                        <button onClick={() => handleExport('docx')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download DOCX</button>
+                                        <button onClick={() => handleExport('html')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Preview (HTML)</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </>
                 }
             >
