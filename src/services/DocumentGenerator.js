@@ -826,18 +826,10 @@ const renderDocxField = (childrenArray, field, value) => {
     }
 
     if (field.type === 'list') {
-        const list = Array.isArray(value) ? value : []
+        const list = Array.isArray(value) ? value.filter(item => item && item.trim() !== '') : []
         if (list.length === 0) return
 
-        childrenArray.push(new Paragraph({
-            children: [new TextRun({
-                text: getLabel(field),
-                bold: true,
-                color: PM2_COLORS.Label.replace('#', ''),
-                size: 22
-            })],
-            spacing: { before: 120, after: 60 }
-        }))
+        // Label is already added at the top of the function
 
         list.forEach(item => {
             childrenArray.push(new Paragraph({

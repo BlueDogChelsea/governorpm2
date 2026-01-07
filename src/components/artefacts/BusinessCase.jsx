@@ -280,6 +280,10 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
     const [currentMilestoneData, setCurrentMilestoneData] = useState(null)
     const [editingMilestoneIndex, setEditingMilestoneIndex] = useState(null)
 
+    // Refs for Export (Capture current form state)
+    const dataRef = useRef(null)
+    const approvalRef = useRef(null)
+
     // Debug
     useEffect(() => {
         console.log('BusinessCase Mounted', { projectId, artefact })
@@ -306,18 +310,23 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
         if (!artefact) return
 
         // Prepare content with defaults
+        const currentData = dataRef.current || artefact?.content || {}
+        const currentApproval = approvalRef.current || artefact?.approval || {}
+
         const content = {
-            ...artefact.content,
+            ...currentData,
             projectName: ProjectService.getActiveProject()?.name || 'Project',
             // Ensure lists are present
-            costs: Array.isArray(artefact.content?.costs) ? artefact.content.costs : [],
-            milestones: Array.isArray(artefact.content?.milestones) ? artefact.content.milestones : [],
-            impactedDomains: Array.isArray(artefact.content?.impactedDomains) ? artefact.content.impactedDomains : [],
+            costs: Array.isArray(currentData.costs) ? currentData.costs : [],
+            milestones: Array.isArray(currentData.milestones) ? currentData.milestones : [],
+            impactedDomains: Array.isArray(currentData.impactedDomains)
+                ? currentData.impactedDomains.map(d => (typeof d === 'object' ? d.label : d) || '')
+                : [],
 
             // Map Approval Fields
-            approverName: artefact.approval?.approverName || '',
-            approvalDate: artefact.approval?.date || '',
-            signature: artefact.approval?.signature || ''
+            approverName: currentApproval.approverName || '[Pending Approval]',
+            approvalDate: currentApproval.date || '[Pending Approval]',
+            signature: currentApproval.signature || '[Pending Approval]'
         }
 
         if (format === 'html') {
@@ -420,6 +429,10 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
                     saveStatus,
                     triggerSave
                 }) => {
+
+                    // Capture current state for export
+                    dataRef.current = data
+                    approvalRef.current = approval
 
                     // Defensive check
                     if (!data) return <div className="p-8 text-center text-gray-500">Loading Business Case...</div>
