@@ -87,5 +87,20 @@ export const businessCaseSchema = [
                 ]
             }
         ]
+    },
+    {
+        id: 'governance',
+        title: '8. Governance & Approvals',
+        fields: [
+            // key core roles
+            { key: 'PO_Name', label: 'Name', group: 'Project Owner (PO)', type: 'text' },
+            { key: 'PO_Title', label: 'Title', group: 'Project Owner (PO)', type: 'text' },
+            { key: 'SP_Name', label: 'Name', group: 'Solution Provider (SP)', type: 'text' },
+            { key: 'SP_Title', label: 'Title', group: 'Solution Provider (SP)', type: 'text' },
+            // authorization
+            { key: 'approverName', label: 'Authorized By', group: 'Authorization', type: 'text' },
+            { key: 'approvalDate', label: 'Date', group: 'Authorization', type: 'text' },
+            { key: 'signature', label: 'Signature', group: 'Authorization', type: 'text' }
+        ]
     }
 ];

@@ -484,6 +484,20 @@ const renderPdfField = (contentArray, field, value) => {
             tableBody.push(row)
         })
 
+        // Grand Total Row
+        const totalRow = [
+            { text: 'GRAND TOTAL', bold: true, fillColor: '#f3f4f6', style: 'tableCell' },
+            ...years.map(y => {
+                const yTotal = categories.reduce((sum, cat) => sum + matrix[cat][y], 0)
+                return { text: yTotal > 0 ? yTotal.toLocaleString() : '-', alignment: 'right', bold: true, fillColor: '#f3f4f6', style: 'tableCell' }
+            }),
+            {
+                text: categories.reduce((sum, cat) => sum + matrix[cat].total, 0).toLocaleString(),
+                alignment: 'right', bold: true, fillColor: '#f3f4f6', style: 'tableCell'
+            }
+        ]
+        tableBody.push(totalRow)
+
         contentArray.push({
             table: {
                 headerRows: 1,
@@ -519,6 +533,19 @@ const renderPdfField = (contentArray, field, value) => {
             },
             layout: 'lightHorizontalLines',
             margin: [0, 5, 0, 15]
+        })
+        return
+    }
+
+    if (field.type === 'list') {
+        const list = Array.isArray(value) ? value : []
+        if (list.length === 0) return
+
+        contentArray.push({ text: getLabel(field), style: 'fieldLabel' })
+        contentArray.push({
+            ul: list,
+            margin: [0, 2, 0, 10],
+            style: 'fieldValue'
         })
         return
     }
@@ -752,8 +779,24 @@ const renderDocxField = (childrenArray, field, value) => {
             ]
         }))
 
+        const grandTotalRow = new TableRow({
+            children: [
+                new TableCell({ children: [new Paragraph({ text: "GRAND TOTAL", bold: true })] }),
+                ...years.map(y => {
+                    const yTotal = categories.reduce((sum, cat) => sum + matrix[cat][y], 0)
+                    return new TableCell({ children: [new Paragraph({ text: yTotal > 0 ? yTotal.toLocaleString() : '-', bold: true, alignment: AlignmentType.RIGHT })] })
+                }),
+                new TableCell({
+                    children: [new Paragraph({
+                        text: categories.reduce((sum, cat) => sum + matrix[cat].total, 0).toLocaleString(),
+                        bold: true, alignment: AlignmentType.RIGHT
+                    })]
+                })
+            ]
+        })
+
         const table = new Table({
-            rows: [headerRow, ...dataRows],
+            rows: [headerRow, ...dataRows, grandTotalRow],
             width: { size: 100, type: WidthType.PERCENTAGE }
         })
         childrenArray.push(table)
@@ -779,6 +822,29 @@ const renderDocxField = (childrenArray, field, value) => {
         })
         childrenArray.push(table)
         childrenArray.push(new Paragraph({ text: "" }))
+        return
+    }
+
+    if (field.type === 'list') {
+        const list = Array.isArray(value) ? value : []
+        if (list.length === 0) return
+
+        childrenArray.push(new Paragraph({
+            children: [new TextRun({
+                text: getLabel(field),
+                bold: true,
+                color: PM2_COLORS.Label.replace('#', ''),
+                size: 22
+            })],
+            spacing: { before: 120, after: 60 }
+        }))
+
+        list.forEach(item => {
+            childrenArray.push(new Paragraph({
+                text: item,
+                bullet: { level: 0 }
+            }))
+        })
         return
     }
 

@@ -312,7 +312,12 @@ const BusinessCase = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) =
             // Ensure lists are present
             costs: Array.isArray(artefact.content?.costs) ? artefact.content.costs : [],
             milestones: Array.isArray(artefact.content?.milestones) ? artefact.content.milestones : [],
-            impactedDomains: Array.isArray(artefact.content?.impactedDomains) ? artefact.content.impactedDomains : []
+            impactedDomains: Array.isArray(artefact.content?.impactedDomains) ? artefact.content.impactedDomains : [],
+
+            // Map Approval Fields
+            approverName: artefact.approval?.approverName || '',
+            approvalDate: artefact.approval?.date || '',
+            signature: artefact.approval?.signature || ''
         }
 
         if (format === 'html') {
