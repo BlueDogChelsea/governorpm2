@@ -382,7 +382,8 @@ const renderHtmlCostMatrix = (costItems) => {
 const generatePdf = async (data, sections, template, fileName, meta) => {
     const docDefinition = {
         pageSize: 'A4',
-        pageMargins: PM2_LAYOUT.Margins.PDF,
+        pageOrientation: 'landscape',
+        pageMargins: [42, 60, 42, 60], // 15mm sides, ~20mm top/bottom
         content: [],
         styles: {
             titleMain: { fontSize: 26, bold: true, color: PM2_COLORS.BodyText, alignment: 'center', margin: [0, 150, 0, 20] },
@@ -466,10 +467,10 @@ const generatePdf = async (data, sections, template, fileName, meta) => {
 }
 
 const renderPdfField = (contentArray, field, value) => {
-    if (isEmpty(value) && !['costMatrix', 'pscMatrix', 'approval'].includes(field.type)) return
+    if (isEmpty(value) && !['costMatrix', 'pscMatrix', 'approval'].includes(field.type) && field.key !== 'costs') return
 
     // Special Types
-    if (field.type === 'costMatrix') {
+    if (field.type === 'costMatrix' || field.key === 'costs') {
         const { matrix, years, categories } = calculateCostMatrix(value)
         contentArray.push({ text: 'Projected Costs Matrix', style: 'fieldLabel' })
 
@@ -547,7 +548,7 @@ const renderPdfField = (contentArray, field, value) => {
             table: {
                 headerRows: 1,
                 widths: field.key === 'risks'
-                    ? ['40%', '10%', '10%', '10%', '10%', '10%', '10%', '*'] // Custom widths for Risks
+                    ? ['*', 42, 42, 42, 42, 60, 100, 170] // Polished Widths: Desc (*), Stats (42pt), Owner (60pt), Strat (100pt), Action (170pt)
                     : Array(field.columns.length).fill('*'),
                 body: tableBody
             },
@@ -790,7 +791,7 @@ const renderDocxField = (childrenArray, field, value) => {
         return
     }
 
-    if (field.type === 'costMatrix') {
+    if (field.type === 'costMatrix' || field.key === 'costs') {
         const { matrix, years, categories } = calculateCostMatrix(value)
 
         const headerRow = new TableRow({

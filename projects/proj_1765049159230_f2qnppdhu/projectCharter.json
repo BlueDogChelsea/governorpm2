@@ -130,7 +130,7 @@
         "riskLevel": "High",
         "status": "Open",
         "responseStrategy": "Contingency",
-        "actionDetails": "Extend Schedule"
+        "actionDetails": "Extend Schedule to allow extra time for other things to happen slowly and badly."
       }
     ],
     "costs": [
@@ -245,9 +245,9 @@
       }
     ],
     "approval": {
-      "approverName": "",
-      "approvalDate": "",
-      "signature": "",
+      "approverName": "Ian Richmond",
+      "approvalDate": "2026-01-07",
+      "signature": "Fred Bloggs",
       "isApproved": false,
       "timestamp": null
     },
@@ -259,5 +259,5 @@
   },
   "modifiedAfterApproval": false,
   "importPromptShown": false,
-  "lastUpdated": "2026-01-07T15:34:21.361Z"
+  "lastUpdated": "2026-01-07T15:58:43.445Z"
 }

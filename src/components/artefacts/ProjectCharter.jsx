@@ -178,7 +178,7 @@ const RiskModal = ({ isOpen, onClose, onSave, initialData }) => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Action Details</label>
-                                    <input type="text" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" value={formData.actionDetails} onChange={(e) => handleChange('actionDetails', e.target.value)} placeholder="Action to take..." />
+                                    <textarea className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" rows={3} value={formData.actionDetails} onChange={(e) => handleChange('actionDetails', e.target.value)} placeholder="Action to take..." />
                                 </div>
                             </div>
                         </div>
@@ -1236,6 +1236,10 @@ const ProjectCharter = ({ projectId, artefact, onSave, onBack, onOpenGuidance })
                                                     <p className="text-gray-900 text-sm line-clamp-2">
                                                         {risk.description || 'No description provided.'}
                                                     </p>
+                                                    <div className="mt-2 space-y-1">
+                                                        <p className="text-xs text-gray-600"><span className="font-semibold text-gray-700">Strategy:</span> {risk.responseStrategy || '-'}</p>
+                                                        <p className="text-xs text-gray-600 line-clamp-2"><span className="font-semibold text-gray-700">Action:</span> {risk.actionDetails || '-'}</p>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center space-x-2 flex-shrink-0">
                                                     <button
