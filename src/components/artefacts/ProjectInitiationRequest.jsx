@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
@@ -10,12 +10,14 @@ import {
     CheckCircleIcon,
     ArrowLeftIcon,
     LightBulbIcon,
-    XMarkIcon
+    XMarkIcon,
+    PencilSquareIcon
 } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea } from './ui/ArtefactFields'
 import RichTextEditor from './ui/RichTextEditor'
 import DocumentPreviewModal from './ui/DocumentPreviewModal'
+import { RiskModal, ConstraintModal, AssumptionModal } from './ui/GovernanceModals'
 
 import { ProjectService } from '../../services/ProjectService'
 import DocumentGenerator from '../../services/DocumentGenerator'
@@ -61,63 +63,6 @@ const GuidancePanel = ({ sectionId, isOpen, onClose }) => {
     )
 }
 
-// -- Helpers --
-const StakeholderSelector = ({ label, value, onChange, placeholder }) => {
-    const OPTIONS = [
-        { id: '1', name: 'Dr. Maria Gonzalez', role: 'Head of Digital' },
-        { id: '2', name: 'John Smith', role: 'IT Director' },
-        { id: '3', name: 'Steering Committee', role: 'Board' },
-    ]
-    return (
-        <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-            <input
-                type="text"
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                placeholder={placeholder}
-                value={value?.name || value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                list={`list-${label.replace(/\s/g, '')}`}
-            />
-            <datalist id={`list-${label.replace(/\s/g, '')}`}>
-                {OPTIONS.map(opt => <option key={opt.id} value={opt.name}>{opt.role}</option>)}
-            </datalist>
-        </div>
-    )
-}
-
-const ListBuilder = ({ label, items = [], onItemAdd, onItemRemove, placeholder }) => {
-    const [newItem, setNewItem] = useState('')
-    const handleAdd = () => { if (newItem.trim()) { onItemAdd(newItem); setNewItem('') } }
-    return (
-        <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">{label}</label>
-                <span className="text-xs text-gray-400">{items.length} items</span>
-            </div>
-            <div className="space-y-2 mb-3">
-                {items.map((item, idx) => (
-                    <div key={idx} className="flex items-start bg-gray-50 p-3 rounded border border-gray-200">
-                        <span className="flex-1 text-sm text-gray-700">{typeof item === 'string' ? item : item.description}</span>
-                        <button type="button" onClick={() => onItemRemove(idx)} className="text-gray-400 hover:text-red-500"><TrashIcon className="h-4 w-4" /></button>
-                    </div>
-                ))}
-            </div>
-            <div className="flex gap-2">
-                <input
-                    type="text"
-                    className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm p-2 border"
-                    placeholder={placeholder}
-                    value={newItem}
-                    onChange={(e) => setNewItem(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                />
-                <button type="button" onClick={handleAdd} className="px-3 py-2 bg-blue-50 text-blue-700 rounded border border-blue-100 hover:bg-blue-100"><PlusIcon className="h-4 w-4 mr-1 inline" />Add</button>
-            </div>
-        </div>
-    )
-}
-
 // -- Main Component --
 const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
     // 1. Navigation Structure
@@ -150,16 +95,32 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
     // 2. State
     const [activeSectionId, setActiveSectionId] = useState('identity')
     const [isGuidanceOpen, setIsGuidanceOpen] = useState(false)
-    const [showExportMenu, setShowExportMenu] = useState(false) // Fix missing state
+    const [showExportMenu, setShowExportMenu] = useState(false)
     const [saveState, setSaveState] = useState('idle')
     const [showPreview, setShowPreview] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
+
+    // Data State
     const [data, setData] = useState({
-        identity: { projectTitle: '', initiator: '', projectOwner: '', approvingAuthority: '' },
-        meta: { dateOfRequest: '', targetDeliveryDate: '', methodology: 'Standard', deliveryType: 'In-house' },
+        identity: { projectTitle: '', initiator: '', projectOwner: '', approvingAuthority: '', businessManager: '', solutionProvider: '' },
+        meta: { dateOfRequest: '', targetDeliveryDate: '', deliveryType: 'In-house' },
         strategy: { businessNeed: '', legalBasis: '', outcomes: '', successCriteria: '', impact: '' },
         factors: { risks: [], constraints: [], assumptions: [] }
     })
+    const [stakeholderData, setStakeholderData] = useState(null)
+
+    // Modal States
+    const [isRiskModalOpen, setIsRiskModalOpen] = useState(false)
+    const [editingRiskIndex, setEditingRiskIndex] = useState(null)
+    const [currentRiskData, setCurrentRiskData] = useState(null)
+
+    const [isConstraintModalOpen, setIsConstraintModalOpen] = useState(false)
+    const [editingConstraintIndex, setEditingConstraintIndex] = useState(null)
+    const [currentConstraintData, setCurrentConstraintData] = useState(null)
+
+    const [isAssumptionModalOpen, setIsAssumptionModalOpen] = useState(false)
+    const [editingAssumptionIndex, setEditingAssumptionIndex] = useState(null)
+    const [currentAssumptionData, setCurrentAssumptionData] = useState(null)
 
     // 3. Load Data
     useEffect(() => {
@@ -169,13 +130,32 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                     // Load Project Settings for Title
                     const settings = await window.electronAPI.readJSON(`projects/${projectId}/settings.json`)
 
+                    // Load PIR Data
                     const loaded = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/project-initiation-request.json`)
+
+                    // Load Stakeholder Data (Contextual)
+                    let stakeholders = null
+                    try {
+                        stakeholders = await window.electronAPI.readJSON(`projects/${projectId}/initialStakeholders.json`)
+                        setStakeholderData(stakeholders)
+                    } catch (e) {
+                        console.log("No stakeholder data found")
+                    }
+
                     let newData = { ...data }
                     if (loaded && loaded.identity) newData = { ...newData, ...loaded }
 
-                    // Override Project Title from Global Context
+                    // Apply Global Project Title
                     if (settings && settings.name) {
                         newData.identity.projectTitle = settings.name
+                    }
+
+                    // Pre-populate Roles from Stakeholders if available and not set (or always?) 
+                    // Requirement: "Automatically pre-populate... Display... as read-only contextual roles"
+                    if (stakeholders) {
+                        if (stakeholders.projectOwner?.name) newData.identity.projectOwner = stakeholders.projectOwner.name
+                        if (stakeholders.businessManager?.name) newData.identity.businessManager = stakeholders.businessManager.name
+                        if (stakeholders.solutionProvider?.name) newData.identity.solutionProvider = stakeholders.solutionProvider.name
                     }
 
                     setData(newData)
@@ -237,13 +217,67 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
         )
     }
 
-    // 5. Renderers
+    // -- Modal Handlers --
+    // Risk
+    const handleRiskSave = (riskData) => {
+        const newRisks = [...data.factors.risks]
+        if (editingRiskIndex !== null) {
+            newRisks[editingRiskIndex] = riskData
+        } else {
+            newRisks.push(riskData)
+        }
+        setData(d => ({ ...d, factors: { ...d.factors, risks: newRisks } }))
+        setIsRiskModalOpen(false)
+        setEditingRiskIndex(null)
+    }
+    const handleDeleteRisk = (idx) => {
+        const newRisks = data.factors.risks.filter((_, i) => i !== idx)
+        setData(d => ({ ...d, factors: { ...d.factors, risks: newRisks } }))
+    }
+
+    // Constraint
+    const handleConstraintSave = (itemData) => {
+        const newItems = [...data.factors.constraints]
+        if (editingConstraintIndex !== null) {
+            newItems[editingConstraintIndex] = itemData
+        } else {
+            newItems.push(itemData)
+        }
+        setData(d => ({ ...d, factors: { ...d.factors, constraints: newItems } }))
+        setIsConstraintModalOpen(false)
+        setEditingConstraintIndex(null)
+    }
+    const handleDeleteConstraint = (idx) => {
+        const newItems = data.factors.constraints.filter((_, i) => i !== idx)
+        setData(d => ({ ...d, factors: { ...d.factors, constraints: newItems } }))
+    }
+
+    // Assumption
+    const handleAssumptionSave = (itemData) => {
+        const newItems = [...data.factors.assumptions]
+        if (editingAssumptionIndex !== null) {
+            newItems[editingAssumptionIndex] = itemData
+        } else {
+            newItems.push(itemData)
+        }
+        setData(d => ({ ...d, factors: { ...d.factors, assumptions: newItems } }))
+        setIsAssumptionModalOpen(false)
+        setEditingAssumptionIndex(null)
+    }
+    const handleDeleteAssumption = (idx) => {
+        const newItems = data.factors.assumptions.filter((_, i) => i !== idx)
+        setData(d => ({ ...d, factors: { ...d.factors, assumptions: newItems } }))
+    }
+
+
+    // 5. Export & Preview
     const prepareExportData = () => {
-        const listToHtml = (items) => items?.map(i => `<li>${typeof i === 'string' ? i : i.description}</li>`).join('') || ''
+        const listToHtml = (items) => items?.map(i => `<li><strong>${i.description}</strong> ${i.impact ? `(Impact: ${i.impact})` : ''}</li>`).join('') || ''
         return {
             'Project Name': data.identity.projectTitle,
             'Date': data.meta.dateOfRequest,
             'Project Owner': data.identity.projectOwner,
+            'Initiator': data.identity.initiator,
             'problem': data.strategy.businessNeed,
             'alignment': data.strategy.legalBasis,
             'benefits': data.strategy.outcomes,
@@ -264,19 +298,19 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
     const handlePreview = () => {
         setShowExportMenu(false)
         const content = prepareExportData()
-        // Simple HTML generation for preview
         const html = `
             <div class="p-8 prose max-w-none">
-                <h1 class="text-2xl font-bold mb-4">${data.identity.projectTitle} - Project Initiation Request</h1>
-                <p><strong>Date:</strong> ${data.meta.dateOfRequest}</p>
-                <p><strong>Owner:</strong> ${data.identity.projectOwner}</p>
+                <h1 class="text-2xl font-bold mb-4">${data.identity.projectTitle || 'Project'} - Project Initiation Request</h1>
+                <p><strong>Initiator:</strong> ${data.identity.initiator || '-'}</p>
+                <p><strong>Date:</strong> ${data.meta.dateOfRequest || '-'}</p>
+                <p><strong>Owner:</strong> ${data.identity.projectOwner || '-'}</p>
                 <hr class="my-4"/>
                 <h3>Business Need</h3>
-                <div>${content.problem}</div>
+                <div>${content.problem || 'Not defined'}</div>
                 <h3>Legal Basis</h3>
-                <div>${content.alignment}</div>
+                <div>${content.alignment || 'Not defined'}</div>
                 <h3>Outcomes</h3>
-                <div>${content.benefits}</div>
+                <div>${content.benefits || 'Not defined'}</div>
                 <h3>Risks</h3>
                 ${content.risks}
                 <h3>Constraints</h3>
@@ -290,7 +324,6 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
     }
 
     const renderActiveContent = () => {
-        // Find Active Item for Title
         let activeItemTitle = ''
         PIR_SIDEBAR_STRUCTURE.forEach(g => g.items.forEach(i => { if (i.id === activeSectionId) activeItemTitle = i.name }))
 
@@ -309,24 +342,59 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                         <div className="col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
                             <input
-                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-500 cursor-not-allowed border focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-500 cursor-not-allowed border"
                                 value={data.identity.projectTitle}
                                 readOnly={true}
-                                placeholder="Project Title set in Global Context"
+                                placeholder="Project Title set in Settings"
                             />
                         </div>
-                        <StakeholderSelector
-                            label="Project Owner (PO)"
-                            placeholder="Search for PO..."
-                            value={data.identity.projectOwner}
-                            onChange={v => setData(d => ({ ...d, identity: { ...d.identity, projectOwner: v } }))}
-                        />
-                        <StakeholderSelector
-                            label="Approving Authority"
-                            placeholder="Who signs off?"
-                            value={data.identity.approvingAuthority}
-                            onChange={v => setData(d => ({ ...d, identity: { ...d.identity, approvingAuthority: v } }))}
-                        />
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Initiator <span className="text-red-500">*</span></label>
+                            <input
+                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                                value={data.identity.initiator}
+                                onChange={e => setData(d => ({ ...d, identity: { ...d.identity, initiator: e.target.value } }))}
+                                placeholder="Name of person initiating the request"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Project Owner (PO)</label>
+                            <input
+                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-600 cursor-not-allowed border"
+                                value={data.identity.projectOwner}
+                                readOnly={true}
+                                placeholder="Defined in Stakeholder Identification"
+                            />
+                            {!data.identity.projectOwner && <p className="text-xs text-amber-600 mt-1">Not yet defined in Stakeholder Identification</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Approving Authority</label>
+                            <input
+                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                                value={data.identity.approvingAuthority}
+                                onChange={e => setData(d => ({ ...d, identity: { ...d.identity, approvingAuthority: e.target.value } }))}
+                                placeholder="Who signs off?"
+                            />
+                        </div>
+                        {/* Read-Only Contextual Roles */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">Business Manager (Context)</label>
+                            <input
+                                className="block w-full rounded-md border border-gray-100 shadow-sm p-2 bg-gray-50 text-gray-500 cursor-not-allowed"
+                                value={data.identity.businessManager || ''}
+                                readOnly={true}
+                                placeholder="Defined in Stakeholder Identification"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">Solution Provider (Context)</label>
+                            <input
+                                className="block w-full rounded-md border border-gray-100 shadow-sm p-2 bg-gray-50 text-gray-500 cursor-not-allowed"
+                                value={data.identity.solutionProvider || ''}
+                                readOnly={true}
+                                placeholder="Defined in Stakeholder Identification"
+                            />
+                        </div>
                     </div>
                 </div>
             )
@@ -344,16 +412,7 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                             <input type="date" className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
                                 value={data.meta.targetDeliveryDate} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, targetDeliveryDate: e.target.value } }))} />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Methodology</label>
-                            <select className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                                value={data.meta.methodology} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, methodology: e.target.value } }))}>
-                                <option>Standard PM²</option>
-                                <option>PM² Agile</option>
-                                <option>Lite / Quick</option>
-                            </select>
-                        </div>
-                        <div>
+                        <div className="col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
                             <select className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
                                 value={data.meta.deliveryType} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, deliveryType: e.target.value } }))}>
@@ -365,6 +424,7 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                     </div>
                 </div>
             )
+            // Sections 2.1-2.3 (Context) unchanged in logic, just re-rendering
             case 'context': return (
                 <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
                     <CardHeader />
@@ -406,43 +466,107 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                     </div>
                 </div>
             )
+            // Sections 3.1-3.3 (Factors) - NEW IMPLEMENTATION
             case 'risks': return (
                 <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
                     <CardHeader />
-                    <div className="bg-red-50 p-4 rounded-lg border border-red-100 mb-6">
-                        <p className="text-sm text-red-800">Note: Risks added here will be available to import into the full Risk Log.</p>
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6 sm:flex sm:items-center sm:justify-between">
+                        <div className="flex items-center">
+                            <InformationCircleIcon className="h-5 w-5 text-blue-600 mr-2" />
+                            <p className="text-sm text-blue-800">Identify high-level risks. These can be promoted to the Risk Log later.</p>
+                        </div>
+                        <button onClick={() => { setEditingRiskIndex(null); setCurrentRiskData(null); setIsRiskModalOpen(true) }} className="mt-3 sm:mt-0 px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            + Add Risk
+                        </button>
                     </div>
-                    <ListBuilder
-                        label="Initial Risks"
-                        placeholder="Add a risk description..."
-                        items={data.factors.risks}
-                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, risks: [...d.factors.risks, { description: txt }] } }))}
-                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, risks: d.factors.risks.filter((_, i) => i !== idx) } }))}
-                    />
+                    <div className="space-y-3">
+                        {data.factors.risks.map((risk, idx) => (
+                            <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative group">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">{risk.description || 'No description'}</h4>
+                                        <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded">Impact: {risk.impact}</span>
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded">Likelihood: {risk.likelihood}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => { setEditingRiskIndex(idx); setCurrentRiskData(risk); setIsRiskModalOpen(true) }} className="text-gray-400 hover:text-blue-500 p-1">
+                                            <PencilSquareIcon className="h-4 w-4" />
+                                        </button>
+                                        <button onClick={() => handleDeleteRisk(idx)} className="text-gray-400 hover:text-red-500 p-1">
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {data.factors.risks.length === 0 && (
+                            <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                                No risks identified yet.
+                            </div>
+                        )}
+                    </div>
                 </div>
             )
             case 'constraints': return (
                 <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
                     <CardHeader />
-                    <ListBuilder
-                        label="Constraints"
-                        placeholder="Add a constraint..."
-                        items={data.factors.constraints}
-                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, constraints: [...d.factors.constraints, { description: txt }] } }))}
-                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, constraints: d.factors.constraints.filter((_, i) => i !== idx) } }))}
-                    />
+                    <div className="flex justify-end mb-6">
+                        <button onClick={() => { setEditingConstraintIndex(null); setCurrentConstraintData(null); setIsConstraintModalOpen(true) }} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            + Add Constraint
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {data.factors.constraints.map((c, idx) => (
+                            <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm group">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">{c.description}</h4>
+                                        <span className="inline-block mt-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{c.type}</span>
+                                    </div>
+                                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => { setEditingConstraintIndex(idx); setCurrentConstraintData(c); setIsConstraintModalOpen(true) }} className="text-gray-400 hover:text-blue-500 p-1">
+                                            <PencilSquareIcon className="h-4 w-4" />
+                                        </button>
+                                        <button onClick={() => handleDeleteConstraint(idx)} className="text-gray-400 hover:text-red-500 p-1">
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )
             case 'assumptions': return (
                 <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
                     <CardHeader />
-                    <ListBuilder
-                        label="Assumptions"
-                        placeholder="Add an assumption..."
-                        items={data.factors.assumptions}
-                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, assumptions: [...d.factors.assumptions, { description: txt }] } }))}
-                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, assumptions: d.factors.assumptions.filter((_, i) => i !== idx) } }))}
-                    />
+                    <div className="flex justify-end mb-6">
+                        <button onClick={() => { setEditingAssumptionIndex(null); setCurrentAssumptionData(null); setIsAssumptionModalOpen(true) }} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            + Add Assumption
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {data.factors.assumptions.map((a, idx) => (
+                            <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm group">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">{a.description}</h4>
+                                        <span className="inline-block mt-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Impact if false: {a.impact}</span>
+                                    </div>
+                                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => { setEditingAssumptionIndex(idx); setCurrentAssumptionData(a); setIsAssumptionModalOpen(true) }} className="text-gray-400 hover:text-blue-500 p-1">
+                                            <PencilSquareIcon className="h-4 w-4" />
+                                        </button>
+                                        <button onClick={() => handleDeleteAssumption(idx)} className="text-gray-400 hover:text-red-500 p-1">
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )
             default: return <div>Select a section</div>
@@ -451,7 +575,7 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
 
     return (
         <div className="flex flex-col h-full bg-gray-100">
-            {/* 6. Global Header Toolbar (Matches Charter) */}
+            {/* Global Header Toolbar */}
             <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm z-10 sticky top-0 h-16">
                 <div className="flex items-center">
                     <button onClick={onBack} className="mr-4 text-gray-400 hover:text-gray-600"><ArrowLeftIcon className="h-5 w-5" /></button>
@@ -486,7 +610,7 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                 </div>
             </div>
 
-            {/* 7. Three-Pane Layout */}
+            {/* Three-Pane Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Nav (20%) */}
                 <nav className="w-1/5 bg-white border-r border-gray-200 h-full overflow-y-auto p-4">
@@ -531,7 +655,27 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
                 title="PIR Preview"
                 htmlContent={previewHtml}
             />
-        </div >
+
+            {/* Modals */}
+            <RiskModal
+                isOpen={isRiskModalOpen}
+                onClose={() => setIsRiskModalOpen(false)}
+                onSave={handleRiskSave}
+                initialData={currentRiskData}
+            />
+            <ConstraintModal
+                isOpen={isConstraintModalOpen}
+                onClose={() => setIsConstraintModalOpen(false)}
+                onSave={handleConstraintSave}
+                initialData={currentConstraintData}
+            />
+            <AssumptionModal
+                isOpen={isAssumptionModalOpen}
+                onClose={() => setIsAssumptionModalOpen(false)}
+                onSave={handleAssumptionSave}
+                initialData={currentAssumptionData}
+            />
+        </div>
     )
 }
 

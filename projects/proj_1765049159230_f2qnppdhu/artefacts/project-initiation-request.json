@@ -1,9 +1,11 @@
 {
   "identity": {
-    "projectTitle": "Test project",
+    "projectTitle": "Governor PM2",
     "initiator": "",
-    "projectOwner": "",
-    "approvingAuthority": ""
+    "projectOwner": "Oliver Owner",
+    "approvingAuthority": "",
+    "businessManager": "Bob Manager",
+    "solutionProvider": "Tech Solutions Inc."
   },
   "meta": {
     "dateOfRequest": "",
@@ -19,7 +21,17 @@
     "impact": ""
   },
   "factors": {
-    "risks": [],
+    "risks": [
+      {
+        "description": "Underestimation",
+        "likelihood": "Medium",
+        "impact": "Medium",
+        "riskLevel": "Medium",
+        "status": "Open",
+        "responseStrategy": "Contingency",
+        "actionDetails": "Review estimates, apply contingency"
+      }
+    ],
     "constraints": [],
     "assumptions": []
   }

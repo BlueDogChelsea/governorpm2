@@ -155,6 +155,8 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
         solutionProvider: { name: '', organisation: '', expectations: '' },
         additionalStakeholders: []
     })
+    const [baselineData, setBaselineData] = useState(null)
+    const [isDirty, setIsDirty] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [saveState, setSaveState] = useState('idle')
 
@@ -166,15 +168,18 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
                     const filePath = `projects/${projectId}/initialStakeholders.json`
                     const loadedData = await window.electronAPI.readJSON(filePath)
                     if (loadedData) {
-                        setData({
+                        const normalizedData = {
                             projectOwner: { name: '', organisation: '', expectations: '', ...loadedData.projectOwner },
                             businessManager: { name: '', organisation: '', expectations: '', ...loadedData.businessManager },
                             solutionProvider: { name: '', organisation: '', expectations: '', ...loadedData.solutionProvider },
                             additionalStakeholders: loadedData.additionalStakeholders || []
-                        })
+                        }
+                        setData(normalizedData)
+                        setBaselineData(normalizedData)
                     } else {
                         // Create default if not exists
                         await window.electronAPI.writeJSON(filePath, data)
+                        setBaselineData(data)
                     }
                 } catch (e) {
                     console.error("Error loading stakeholder data", e)
@@ -187,6 +192,14 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
         load()
     }, [projectId])
 
+    // Detect Changes
+    useEffect(() => {
+        if (baselineData) {
+            const isChanged = JSON.stringify(data) !== JSON.stringify(baselineData)
+            setIsDirty(isChanged)
+        }
+    }, [data, baselineData])
+
     // 4. Save Logic
     const handleSave = async () => {
         if (saveState === 'saving') return
@@ -198,6 +211,7 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
             }
             setTimeout(() => {
                 setSaveState('success')
+                setBaselineData(data) // Update baseline
                 setTimeout(() => setSaveState('idle'), 2000)
             }, 800)
         } catch (e) {
@@ -248,13 +262,18 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
                 content = <><CheckCircleIcon className="h-4 w-4 mr-2" />Saved!</>
                 break;
             default: // idle
-                btnClass += "bg-emerald-600 text-white hover:bg-emerald-700"
-                content = <><ArrowDownTrayIcon className="h-4 w-4 mr-2" />Save Changes</>
+                if (isDirty) {
+                    btnClass += "bg-emerald-600 text-white hover:bg-emerald-700"
+                    content = <><ArrowDownTrayIcon className="h-4 w-4 mr-2" />Save Changes</>
+                } else {
+                    btnClass += "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    content = <><CheckCircleIcon className="h-4 w-4 mr-2" />Saved</>
+                }
                 break;
         }
 
         return (
-            <button onClick={handleSave} disabled={saveState === 'saving'} className={btnClass}>
+            <button onClick={handleSave} disabled={saveState === 'saving' || (!isDirty && saveState === 'idle')} className={btnClass}>
                 {content}
             </button>
         )
@@ -307,19 +326,25 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
             case 'projectOwner':
                 content = <StepProjectOwner
                     data={data.projectOwner}
-                    onChange={(field, val) => setData(d => ({ ...d, projectOwner: { ...d.projectOwner, [field]: val } }))}
+                    onChange={(field, val) => {
+                        setData(d => ({ ...d, projectOwner: { ...d.projectOwner, [field]: val } }))
+                    }}
                 />
                 break;
             case 'businessManager':
                 content = <StepBusinessManager
                     data={data.businessManager}
-                    onChange={(field, val) => setData(d => ({ ...d, businessManager: { ...d.businessManager, [field]: val } }))}
+                    onChange={(field, val) => {
+                        setData(d => ({ ...d, businessManager: { ...d.businessManager, [field]: val } }))
+                    }}
                 />
                 break;
             case 'solutionProvider':
                 content = <StepSolutionProvider
                     data={data.solutionProvider}
-                    onChange={(field, val) => setData(d => ({ ...d, solutionProvider: { ...d.solutionProvider, [field]: val } }))}
+                    onChange={(field, val) => {
+                        setData(d => ({ ...d, solutionProvider: { ...d.solutionProvider, [field]: val } }))
+                    }}
                 />
                 break;
             case 'additional':
@@ -327,7 +352,9 @@ const StakeholderWizard = ({ projectId, onBack, onOpenGuidance }) => {
                     stakeholders={data.additionalStakeholders}
                     onAdd={handleAddStakeholder}
                     onEdit={handleEditStakeholder}
-                    onDelete={(id) => setData(d => ({ ...d, additionalStakeholders: d.additionalStakeholders.filter(s => s.id !== id) }))}
+                    onDelete={(id) => {
+                        setData(d => ({ ...d, additionalStakeholders: d.additionalStakeholders.filter(s => s.id !== id) }))
+                    }}
                 />
                 break;
             default:
