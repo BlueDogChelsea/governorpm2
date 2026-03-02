@@ -4,11 +4,8 @@ import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Placeholder from '@tiptap/extension-placeholder'
 import {
-    BoldIcon,
-    ItalicIcon,
     ListBulletIcon,
-    NumberedListIcon,
-    H3Icon
+    NumberedListIcon
 } from '@heroicons/react/24/outline'
 
 const MenuButton = ({ onClick, isActive, disabled, children, title }) => (
@@ -99,14 +96,14 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
                         isActive={editor.isActive('bold')}
                         title="Bold"
                     >
-                        <BoldIcon className="w-4 h-4" />
+                        <span className="font-bold font-serif w-4 h-4 flex items-center justify-center">B</span>
                     </MenuButton>
                     <MenuButton
                         onClick={() => editor.chain().focus().toggleItalic().run()}
                         isActive={editor.isActive('italic')}
                         title="Italic"
                     >
-                        <ItalicIcon className="w-4 h-4" />
+                        <span className="italic font-serif w-4 h-4 flex items-center justify-center">I</span>
                     </MenuButton>
                     {/* Headings */}
                     <MenuButton
@@ -114,7 +111,7 @@ const RichTextEditor = ({ value, onChange, placeholder, disabled, className = ""
                         isActive={editor.isActive('heading', { level: 3 })}
                         title="Heading 3 (H3)"
                     >
-                        <H3Icon className="w-4 h-4" />
+                        <span className="text-xs font-bold leading-none w-5 flex items-center justify-center">H3</span>
                     </MenuButton>
                     <MenuButton
                         onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}

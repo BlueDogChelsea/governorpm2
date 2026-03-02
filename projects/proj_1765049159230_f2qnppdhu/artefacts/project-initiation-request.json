@@ -1,0 +1,26 @@
+{
+  "identity": {
+    "projectTitle": "Test project",
+    "initiator": "",
+    "projectOwner": "",
+    "approvingAuthority": ""
+  },
+  "meta": {
+    "dateOfRequest": "",
+    "targetDeliveryDate": "",
+    "methodology": "Standard",
+    "deliveryType": "In-house"
+  },
+  "strategy": {
+    "businessNeed": "",
+    "legalBasis": "",
+    "outcomes": "",
+    "successCriteria": "",
+    "impact": ""
+  },
+  "factors": {
+    "risks": [],
+    "constraints": [],
+    "assumptions": []
+  }
+}

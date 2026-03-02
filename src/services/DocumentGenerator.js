@@ -1199,6 +1199,7 @@ const renderDocxPscMatrix = (childrenArray, pscData) => {
         rows: [headerRow, ...dataRows],
         width: { size: 100, type: WidthType.PERCENTAGE }
     })
+
     childrenArray.push(table)
     childrenArray.push(new Paragraph({ text: "" }))
 }

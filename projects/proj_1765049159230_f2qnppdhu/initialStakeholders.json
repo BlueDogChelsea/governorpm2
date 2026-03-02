@@ -1,13 +1,13 @@
 {
   "projectOwner": {
-    "name": "Owen Owner",
-    "organisation": "HQ",
-    "expectations": "<p>Benefits to be achieved.</p>"
+    "name": "Oliver Owner",
+    "organisation": "IT Services",
+    "expectations": "<p>Oliver needs some more please.</p><p></p>"
   },
   "businessManager": {
     "name": "Bob Manager",
     "organisation": "Business Unit",
-    "expectations": "<p>The earth</p>"
+    "expectations": "<p>The earth an the stars</p>"
   },
   "solutionProvider": {
     "name": "Tech Solutions Inc.",
@@ -28,6 +28,13 @@
       "role": "AN Other",
       "organisation": "AN Other",
       "expectations": "<p>Others</p>"
+    },
+    {
+      "id": 1767888613867,
+      "name": "Steve Stakeholder",
+      "role": "Holder of Stake",
+      "organisation": "Stake Inc.",
+      "expectations": "<p>Stakes to be held</p>"
     }
   ]
 }

@@ -11,11 +11,7 @@ import {
     PencilSquareIcon,
     TrashIcon,
     CurrencyDollarIcon,
-    CalendarDaysIcon,
-    ChartBarIcon,
-    BuildingOfficeIcon,
-    ScaleIcon,
-    ShieldCheckIcon
+    ChartBarIcon
 } from '@heroicons/react/24/outline'
 import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
 import { ArtefactField, ArtefactInput, ArtefactTextarea, ArtefactSelect } from './ui/ArtefactFields'

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import {
     ArrowDownTrayIcon,
     BookOpenIcon,
@@ -6,204 +8,195 @@ import {
     PlusIcon,
     TrashIcon,
     CheckCircleIcon,
-    ArrowLeftIcon
+    ArrowLeftIcon,
+    LightBulbIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline'
+import GovernedArtefactEditor from './ui/GovernedArtefactEditor'
+import { ArtefactField, ArtefactInput, ArtefactTextarea } from './ui/ArtefactFields'
+import RichTextEditor from './ui/RichTextEditor'
+import DocumentPreviewModal from './ui/DocumentPreviewModal'
+
 import { ProjectService } from '../../services/ProjectService'
 import DocumentGenerator from '../../services/DocumentGenerator'
 import { projectInitiationRequestSchema } from '../../data/schemas/ProjectInitiationRequestSchema'
 import pirTemplate from '../../templates/PIRTemplate.json'
+import { PIR_GUIDANCE } from '../../data/pirGuidance'
 
-// -- Styled Components & UI Helpers --
+// -- Guidance Panel --
+const GuidancePanel = ({ sectionId, isOpen, onClose }) => {
+    if (!isOpen) return null
+    const guidance = PIR_GUIDANCE[sectionId] || {
+        title: 'Guidance',
+        content: 'Select a section to view PM² guidance.',
+        pm2Ref: null
+    }
 
-const GuidanceToggle = ({ text }) => {
-    const [isOpen, setIsOpen] = useState(false)
     return (
-        <div className="relative inline-block ml-2">
-            <InformationCircleIcon
-                className="h-4 w-4 text-blue-400 cursor-pointer hover:text-blue-600"
-                onClick={() => setIsOpen(!isOpen)}
-            />
-            {isOpen && (
-                <div className="absolute z-10 w-64 p-3 mt-1 -ml-2 text-xs text-slate-600 bg-white border border-blue-100 rounded-lg shadow-lg z-50">
-                    {text}
-                    <div className="absolute top-0 left-2 w-2 h-2 -mt-1 bg-white border-t border-l border-blue-100 transform rotate-45"></div>
+        <div className="w-full h-full bg-white overflow-y-auto border-l border-gray-200">
+            <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                        <LightBulbIcon className="h-5 w-5 mr-2 text-yellow-500" />
+                        PM² Guidance
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <XMarkIcon className="h-5 w-5" />
+                    </button>
                 </div>
-            )}
+
+                <div className="bg-yellow-50 rounded-xl p-5 border border-yellow-100 mb-6 shadow-sm">
+                    <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">{guidance.title}</h4>
+                    <div className="text-sm text-gray-700 leading-relaxed font-medium">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{guidance.content}</ReactMarkdown>
+                    </div>
+                    {guidance.pm2Ref && (
+                        <div className="mt-4 pt-3 border-t border-yellow-200 text-xs text-yellow-800 font-semibold">
+                            Ref: {guidance.pm2Ref}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
 
+// -- Helpers --
 const StakeholderSelector = ({ label, value, onChange, placeholder }) => {
     const OPTIONS = [
         { id: '1', name: 'Dr. Maria Gonzalez', role: 'Head of Digital' },
         { id: '2', name: 'John Smith', role: 'IT Director' },
-        { id: '3', name: 'Sarah Jones', role: 'Compliance Officer' },
-        { id: '4', name: 'Steering Committee', role: 'Board' },
+        { id: '3', name: 'Steering Committee', role: 'Board' },
     ]
-
     return (
         <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                {label}
-            </label>
-            <div className="relative">
-                <input
-                    type="text"
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                    placeholder={placeholder}
-                    value={value?.name || value || ''}
-                    onChange={(e) => onChange(e.target.value)}
-                    list={`list-${label.replace(/\s/g, '')}`}
-                />
-                <datalist id={`list-${label.replace(/\s/g, '')}`}>
-                    {OPTIONS.map(opt => (
-                        <option key={opt.id} value={opt.name}>{opt.role}</option>
-                    ))}
-                </datalist>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <input
+                type="text"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                placeholder={placeholder}
+                value={value?.name || value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                list={`list-${label.replace(/\s/g, '')}`}
+            />
+            <datalist id={`list-${label.replace(/\s/g, '')}`}>
+                {OPTIONS.map(opt => <option key={opt.id} value={opt.name}>{opt.role}</option>)}
+            </datalist>
         </div>
     )
 }
 
 const ListBuilder = ({ label, items = [], onItemAdd, onItemRemove, placeholder }) => {
     const [newItem, setNewItem] = useState('')
-
-    const handleAdd = () => {
-        if (!newItem.trim()) return
-        onItemAdd(newItem)
-        setNewItem('')
-    }
-
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            handleAdd()
-        }
-    }
-
+    const handleAdd = () => { if (newItem.trim()) { onItemAdd(newItem); setNewItem('') } }
     return (
         <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">{label}</label>
                 <span className="text-xs text-gray-400">{items.length} items</span>
             </div>
-
             <div className="space-y-2 mb-3">
                 {items.map((item, idx) => (
-                    <div key={idx} className="flex items-start group bg-gray-50 p-2 rounded border border-gray-200">
+                    <div key={idx} className="flex items-start bg-gray-50 p-3 rounded border border-gray-200">
                         <span className="flex-1 text-sm text-gray-700">{typeof item === 'string' ? item : item.description}</span>
-                        <button
-                            onClick={() => onItemRemove(idx)}
-                            className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <TrashIcon className="h-4 w-4" />
-                        </button>
+                        <button type="button" onClick={() => onItemRemove(idx)} className="text-gray-400 hover:text-red-500"><TrashIcon className="h-4 w-4" /></button>
                     </div>
                 ))}
             </div>
-
             <div className="flex gap-2">
                 <input
                     type="text"
-                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                    className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm p-2 border"
                     placeholder={placeholder}
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 />
-                <button
-                    onClick={handleAdd}
-                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none"
-                >
-                    <PlusIcon className="h-4 w-4 mr-1" /> Add
-                </button>
+                <button type="button" onClick={handleAdd} className="px-3 py-2 bg-blue-50 text-blue-700 rounded border border-blue-100 hover:bg-blue-100"><PlusIcon className="h-4 w-4 mr-1 inline" />Add</button>
             </div>
         </div>
     )
 }
 
 // -- Main Component --
-
 const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenGuidance }) => {
-    // -- State --
-    const [activeSection, setActiveSection] = useState('identity')
-    const [saveState, setSaveState] = useState('idle') // idle, saving, success
-    const [showExportMenu, setShowExportMenu] = useState(false)
-
-    // PM2 Data Model for PIR
-    const [data, setData] = useState({
-        identity: {
-            projectTitle: '',
-            initiator: '',
-            projectOwner: '',
-            solutionProvider: '',
-            approvingAuthority: '',
-            referenceNumber: ''
+    // 1. Navigation Structure
+    const PIR_SIDEBAR_STRUCTURE = [
+        {
+            title: 'PROJECT INFORMATION',
+            items: [
+                { id: 'identity', name: '1.1 Project Identity' },
+                { id: 'classification', name: '1.2 Classification & Planning' }
+            ]
         },
-        strategy: {
-            businessNeed: '',
-            legalBasis: '',
-            outcomes: '',
-            impact: ''
+        {
+            title: 'CONTEXT & STRATEGY',
+            items: [
+                { id: 'context', name: '2.1 Business Need' },
+                { id: 'strategy', name: '2.2 Legal & Strategy' },
+                { id: 'value', name: '2.3 Outcomes & Value' }
+            ]
         },
-        factors: {
-            risks: [],
-            constraints: [],
-            assumptions: []
-        },
-        meta: {
-            status: 'Draft',
-            version: '1.0'
+        {
+            title: 'PROJECT FACTORS',
+            items: [
+                { id: 'risks', name: '3.1 Initial Risks' },
+                { id: 'constraints', name: '3.2 Constraints' },
+                { id: 'assumptions', name: '3.3 Assumptions' }
+            ]
         }
+    ]
+
+    // 2. State
+    const [activeSectionId, setActiveSectionId] = useState('identity')
+    const [isGuidanceOpen, setIsGuidanceOpen] = useState(false)
+    const [showExportMenu, setShowExportMenu] = useState(false) // Fix missing state
+    const [saveState, setSaveState] = useState('idle')
+    const [showPreview, setShowPreview] = useState(false)
+    const [previewHtml, setPreviewHtml] = useState('')
+    const [data, setData] = useState({
+        identity: { projectTitle: '', initiator: '', projectOwner: '', approvingAuthority: '' },
+        meta: { dateOfRequest: '', targetDeliveryDate: '', methodology: 'Standard', deliveryType: 'In-house' },
+        strategy: { businessNeed: '', legalBasis: '', outcomes: '', successCriteria: '', impact: '' },
+        factors: { risks: [], constraints: [], assumptions: [] }
     })
 
-    const contentRef = useRef(null)
-    const sectionRefs = useRef({})
-
-    // -- Effects --
+    // 3. Load Data
     useEffect(() => {
-        // Load Data
         const load = async () => {
             if (projectId && window.electronAPI) {
                 try {
-                    // Try specialized file first
+                    // Load Project Settings for Title
+                    const settings = await window.electronAPI.readJSON(`projects/${projectId}/settings.json`)
+
                     const loaded = await window.electronAPI.readJSON(`projects/${projectId}/artefacts/project-initiation-request.json`)
-                    if (loaded && loaded.identity) {
-                        setData(prev => ({ ...prev, ...loaded }))
-                    } else {
-                        // Fallback: Try monolithic artefacts.json content if migrating
-                        // Or just use defaults
-                        if (artefact && artefact.content) {
-                            // TODO: Add migration logic from flat content to nested if needed
-                            // For now assume new structure or empty
-                        }
+                    let newData = { ...data }
+                    if (loaded && loaded.identity) newData = { ...newData, ...loaded }
+
+                    // Override Project Title from Global Context
+                    if (settings && settings.name) {
+                        newData.identity.projectTitle = settings.name
                     }
+
+                    setData(newData)
                 } catch (e) {
-                    console.log("No existing PIR, starting fresh")
+                    console.log("No existing PIR data")
                 }
             }
         }
         load()
-    }, [projectId, artefact])
+    }, [projectId])
 
-    // -- Actions --
+    // 4. Save Logic
     const handleSaveInternal = async () => {
         if (saveState === 'saving') return
         setSaveState('saving')
-
         try {
             if (window.electronAPI && projectId) {
                 await window.electronAPI.ensureFolder(`projects/${projectId}/artefacts`)
                 await window.electronAPI.writeJSON(`projects/${projectId}/artefacts/project-initiation-request.json`, data)
             }
-
-            // Sync back to parent/monolithic for status tracking (optional but good)
-            if (onSave) {
-                // We pass a simplified version or just the status update to the parent
-                onSave({ ...artefact, status: 'In Progress' })
-            }
-
-            // Artificial delay for UX "feel"
+            if (onSave) onSave({ ...artefact, status: 'In Progress' })
             setTimeout(() => {
                 setSaveState('success')
                 setTimeout(() => setSaveState('idle'), 2000)
@@ -214,320 +207,331 @@ const ProjectInitiationRequest = ({ projectId, artefact, onSave, onBack, onOpenG
         }
     }
 
-    const scrollToSection = (id) => {
-        setActiveSection(id)
-        if (sectionRefs.current[id]) {
-            sectionRefs.current[id].scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const SaveButton = () => {
+        let btnClass = "flex items-center px-4 py-2 text-sm font-medium rounded shadow-sm transition-all "
+        let content = <><ArrowDownTrayIcon className="h-4 w-4 mr-2" />Save</>
+
+        switch (saveState) {
+            case 'saving':
+                btnClass += "bg-gray-400 text-white cursor-not-allowed"
+                content = <><ArrowDownTrayIcon className="h-4 w-4 mr-2" />Saving...</>
+                break;
+            case 'success':
+                btnClass += "bg-white text-green-600 border border-green-500"
+                content = <><CheckCircleIcon className="h-4 w-4 mr-2" />Saved!</>
+                break;
+            default: // idle
+                btnClass += "bg-green-600 text-white hover:bg-green-700"
+                content = <><ArrowDownTrayIcon className="h-4 w-4 mr-2" />Save</>
+                break;
         }
-    }
-
-    const prepareExportData = () => {
-        // Map Nested State -> Flat Schema Keys
-        const listToHtml = (items) => {
-            if (!items || items.length === 0) return ''
-            return `<ul>${items.map(i => `<li>${typeof i === 'string' ? i : i.description}</li>`).join('')}</ul>`
-        }
-
-        return {
-            'Project Name': data.identity.projectTitle,
-            'Date': new Date().toISOString().split('T')[0],
-            'Version': data.meta.version,
-            'Project Owner': data.identity.projectOwner,
-            'Project Manager': data.identity.initiator, // Mapping Initiator to Manager roughly
-            'problem': data.strategy.businessNeed,
-            'alignment': data.strategy.legalBasis,
-            'benefits': data.strategy.outcomes,
-            'risks': listToHtml(data.factors.risks),
-            'constraints': listToHtml(data.factors.constraints),
-            'assumptions': listToHtml(data.factors.assumptions),
-            // Default others
-            'background': '',
-            'objectives': '',
-            'In Scope': '',
-            'Out of Scope': '',
-            'stakeholders': '',
-            'approach': '',
-            'dependencies': ''
-        }
-    }
-
-    const handleExport = async (format) => {
-        setShowExportMenu(false)
-        const content = prepareExportData()
-        const sections = projectInitiationRequestSchema
-
-        if (format === 'html') {
-            // Preview Logic
-            // Not implemented fully in this View version yet, rely on download for now or implement modal
-            console.log("HTML Preview request")
-        } else {
-            const projName = ProjectService.getActiveProject()?.name || 'Project'
-            DocumentGenerator.generateDocument(
-                { ...content, projectName: projName },
-                sections,
-                pirTemplate,
-                format,
-                `PIR_${projName}_v${data.meta.version}`
-            )
-        }
-    }
-
-    // -- Sub-Renderers --
-
-    const renderNav = () => {
-        const sections = [
-            { id: 'identity', label: '1. Project Identity', sub: ['1.1 Basics', '1.2 Roles'] },
-            { id: 'strategy', label: '2. Strategic Fit', sub: ['2.1 Need', '2.2 Outcomes'] },
-            { id: 'factors', label: '3. Project Factors', sub: ['3.1 Risks', '3.2 Constraints'] },
-        ]
 
         return (
-            <nav className="w-72 bg-gray-50 border-r border-gray-200 h-full overflow-y-auto flex-shrink-0">
-                <div className="px-4 py-4 mb-2">
-                    <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Outline</h2>
-                </div>
-                {sections.map(section => (
-                    <div key={section.id} className="mb-2">
-                        <button
-                            onClick={() => scrollToSection(section.id)}
-                            className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-4 ${activeSection === section.id
-                                ? 'bg-blue-50 text-blue-700 border-blue-600'
-                                : 'text-gray-600 border-transparent hover:bg-gray-100 hover:text-gray-900'
-                                }`}
-                        >
-                            {section.label}
-                        </button>
-                        {activeSection === section.id && (
-                            <div className="bg-blue-50/50">
-                                {section.sub.map(s => (
-                                    <div key={s} className="pl-8 py-2 text-xs text-blue-600/80 cursor-default">{s}</div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </nav>
+            <button
+                onClick={handleSaveInternal}
+                disabled={saveState === 'saving'}
+                className={btnClass}
+            >
+                {content}
+            </button>
         )
     }
 
-    const renderHeader = () => (
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm z-10 sticky top-0">
-            <div className="flex items-center">
-                <button onClick={onBack} className="mr-4 text-gray-400 hover:text-gray-600">
-                    <ArrowLeftIcon className="h-5 w-5" />
-                </button>
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900">Project Initiation Request</h1>
-                    <p className="text-xs text-gray-500">PM² Governance Artefact</p>
-                </div>
+    // 5. Renderers
+    const prepareExportData = () => {
+        const listToHtml = (items) => items?.map(i => `<li>${typeof i === 'string' ? i : i.description}</li>`).join('') || ''
+        return {
+            'Project Name': data.identity.projectTitle,
+            'Date': data.meta.dateOfRequest,
+            'Project Owner': data.identity.projectOwner,
+            'problem': data.strategy.businessNeed,
+            'alignment': data.strategy.legalBasis,
+            'benefits': data.strategy.outcomes,
+            'risks': `<ul>${listToHtml(data.factors.risks)}</ul>`,
+            'constraints': `<ul>${listToHtml(data.factors.constraints)}</ul>`,
+            'assumptions': `<ul>${listToHtml(data.factors.assumptions)}</ul>`
+        }
+    }
+
+    const handleExport = (format) => {
+        setShowExportMenu(false)
+        const content = prepareExportData()
+        const sections = projectInitiationRequestSchema
+        const projName = ProjectService.getActiveProject()?.name || data.identity.projectTitle || 'Project'
+        DocumentGenerator.generateDocument({ ...content, projectName: projName }, sections, pirTemplate, format, `PIR_${projName}`)
+    }
+
+    const handlePreview = () => {
+        setShowExportMenu(false)
+        const content = prepareExportData()
+        // Simple HTML generation for preview
+        const html = `
+            <div class="p-8 prose max-w-none">
+                <h1 class="text-2xl font-bold mb-4">${data.identity.projectTitle} - Project Initiation Request</h1>
+                <p><strong>Date:</strong> ${data.meta.dateOfRequest}</p>
+                <p><strong>Owner:</strong> ${data.identity.projectOwner}</p>
+                <hr class="my-4"/>
+                <h3>Business Need</h3>
+                <div>${content.problem}</div>
+                <h3>Legal Basis</h3>
+                <div>${content.alignment}</div>
+                <h3>Outcomes</h3>
+                <div>${content.benefits}</div>
+                <h3>Risks</h3>
+                ${content.risks}
+                <h3>Constraints</h3>
+                ${content.constraints}
+                <h3>Assumptions</h3>
+                ${content.assumptions}
             </div>
+        `
+        setPreviewHtml(html)
+        setShowPreview(true)
+    }
 
-            <div className="flex items-center space-x-3">
-                <button
-                    onClick={() => { }} // Import logic placeholder
-                    className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                >
-                    <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                    Import Data
-                </button>
-                <button
-                    onClick={() => onOpenGuidance('Initiating Phase', '5.2 Project Initiation Request', { tab: 'Artefacts', label: 'Project Initiation Request' })}
-                    className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                >
-                    <BookOpenIcon className="h-4 w-4 mr-2" />
-                    Open PM² Guidance
-                </button>
-                <div className="h-6 w-px bg-gray-300 mx-2"></div>
+    const renderActiveContent = () => {
+        // Find Active Item for Title
+        let activeItemTitle = ''
+        PIR_SIDEBAR_STRUCTURE.forEach(g => g.items.forEach(i => { if (i.id === activeSectionId) activeItemTitle = i.name }))
 
-                <div className="relative">
-                    <button
-                        onClick={() => setShowExportMenu(!showExportMenu)}
-                        className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                        Export
-                    </button>
-                    {showExportMenu && (
-                        <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                            <div className="py-1">
-                                <button onClick={() => handleExport('pdf')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download PDF</button>
-                                <button onClick={() => handleExport('docx')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download DOCX</button>
-                            </div>
+        const CardHeader = () => (
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                <h2 className="text-xl font-bold text-gray-900">{activeItemTitle}</h2>
+                <SaveButton />
+            </div>
+        )
+
+        switch (activeSectionId) {
+            case 'identity': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+                            <input
+                                className="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-500 cursor-not-allowed border focus:ring-blue-500 focus:border-blue-500"
+                                value={data.identity.projectTitle}
+                                readOnly={true}
+                                placeholder="Project Title set in Global Context"
+                            />
                         </div>
-                    )}
+                        <StakeholderSelector
+                            label="Project Owner (PO)"
+                            placeholder="Search for PO..."
+                            value={data.identity.projectOwner}
+                            onChange={v => setData(d => ({ ...d, identity: { ...d.identity, projectOwner: v } }))}
+                        />
+                        <StakeholderSelector
+                            label="Approving Authority"
+                            placeholder="Who signs off?"
+                            value={data.identity.approvingAuthority}
+                            onChange={v => setData(d => ({ ...d, identity: { ...d.identity, approvingAuthority: v } }))}
+                        />
+                    </div>
                 </div>
-
-                <button
-                    onClick={handleSaveInternal}
-                    disabled={saveState === 'saving'}
-                    className={`flex items-center px-4 py-1.5 text-sm font-medium text-white rounded shadow-sm transition-all ${saveState === 'success'
-                        ? 'bg-white text-green-600 border border-green-500' // Success State
-                        : saveState === 'saving'
-                            ? 'bg-gray-400 cursor-not-allowed' // Saving State
-                            : 'bg-emerald-600 hover:bg-emerald-700' // Idle State
-                        }`}
-                >
-                    {saveState === 'success' ? (
-                        <>
-                            <CheckCircleIcon className="h-4 w-4 mr-2" />
-                            Saved!
-                        </>
-                    ) : (
-                        <>
-                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                            {saveState === 'saving' ? 'Saving...' : 'Save Changes'}
-                        </>
-                    )}
-                </button>
-            </div>
-        </div>
-    )
+            )
+            case 'classification': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Request</label>
+                            <input type="date" className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                value={data.meta.dateOfRequest} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, dateOfRequest: e.target.value } }))} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Target Delivery Date</label>
+                            <input type="date" className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                value={data.meta.targetDeliveryDate} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, targetDeliveryDate: e.target.value } }))} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Methodology</label>
+                            <select className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                value={data.meta.methodology} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, methodology: e.target.value } }))}>
+                                <option>Standard PM²</option>
+                                <option>PM² Agile</option>
+                                <option>Lite / Quick</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+                            <select className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                value={data.meta.deliveryType} onChange={e => setData(d => ({ ...d, meta: { ...d.meta, deliveryType: e.target.value } }))}>
+                                <option>In-house Development</option>
+                                <option>Outsourced / Vendor</option>
+                                <option>Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            )
+            case 'context': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="space-y-6">
+                        <label className="block text-sm font-medium text-gray-700">Business Need / Problem Statement</label>
+                        <RichTextEditor
+                            value={data.strategy.businessNeed}
+                            onChange={v => setData(d => ({ ...d, strategy: { ...d.strategy, businessNeed: v } }))}
+                            placeholder="Describe the current problem and why this project is needed..."
+                        />
+                    </div>
+                </div>
+            )
+            case 'strategy': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Legal Basis</label>
+                            <textarea className="w-full rounded-md border-gray-300 p-2 border h-24"
+                                value={data.strategy.legalBasis} onChange={e => setData(d => ({ ...d, strategy: { ...d.strategy, legalBasis: e.target.value } }))} />
+                        </div>
+                    </div>
+                </div>
+            )
+            case 'value': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="space-y-8">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Expected Outcomes</label>
+                            <RichTextEditor value={data.strategy.outcomes} onChange={v => setData(d => ({ ...d, strategy: { ...d.strategy, outcomes: v } }))} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Success Criteria</label>
+                            <div className="text-xs text-gray-500 mb-2">These will populate the Project Charter.</div>
+                            <RichTextEditor value={data.strategy.successCriteria} onChange={v => setData(d => ({ ...d, strategy: { ...d.strategy, successCriteria: v } }))} />
+                        </div>
+                    </div>
+                </div>
+            )
+            case 'risks': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <div className="bg-red-50 p-4 rounded-lg border border-red-100 mb-6">
+                        <p className="text-sm text-red-800">Note: Risks added here will be available to import into the full Risk Log.</p>
+                    </div>
+                    <ListBuilder
+                        label="Initial Risks"
+                        placeholder="Add a risk description..."
+                        items={data.factors.risks}
+                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, risks: [...d.factors.risks, { description: txt }] } }))}
+                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, risks: d.factors.risks.filter((_, i) => i !== idx) } }))}
+                    />
+                </div>
+            )
+            case 'constraints': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <ListBuilder
+                        label="Constraints"
+                        placeholder="Add a constraint..."
+                        items={data.factors.constraints}
+                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, constraints: [...d.factors.constraints, { description: txt }] } }))}
+                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, constraints: d.factors.constraints.filter((_, i) => i !== idx) } }))}
+                    />
+                </div>
+            )
+            case 'assumptions': return (
+                <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+                    <CardHeader />
+                    <ListBuilder
+                        label="Assumptions"
+                        placeholder="Add an assumption..."
+                        items={data.factors.assumptions}
+                        onItemAdd={txt => setData(d => ({ ...d, factors: { ...d.factors, assumptions: [...d.factors.assumptions, { description: txt }] } }))}
+                        onItemRemove={idx => setData(d => ({ ...d, factors: { ...d.factors, assumptions: d.factors.assumptions.filter((_, i) => i !== idx) } }))}
+                    />
+                </div>
+            )
+            default: return <div>Select a section</div>
+        }
+    }
 
     return (
         <div className="flex flex-col h-full bg-gray-100">
-            {renderHeader()}
-
-            <div className="flex flex-1 overflow-hidden">
-                {renderNav()}
-
-                <main
-                    ref={contentRef}
-                    className="flex-1 overflow-y-auto p-8 space-y-8"
-                >
-                    {/* SECTION 1: IDENTITY */}
-                    <div id="identity" ref={el => sectionRefs.current['identity'] = el} className="scroll-mt-6">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2">1. PROJECT INFORMATION</h3>
-
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
-                                    <input
-                                        type="text"
-                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                                        placeholder="e.g. Digital Transformation 2026"
-                                        value={data.identity.projectTitle}
-                                        onChange={e => setData(d => ({ ...d, identity: { ...d.identity, projectTitle: e.target.value } }))}
-                                    />
-                                </div>
-
-                                <StakeholderSelector
-                                    label="Initiator / Requestor"
-                                    placeholder="Who is asking for this?"
-                                    value={data.identity.initiator}
-                                    onChange={val => setData(d => ({ ...d, identity: { ...d.identity, initiator: val } }))}
-                                />
-
-                                <StakeholderSelector
-                                    label="Project Owner"
-                                    placeholder="Who will own the outcome?"
-                                    value={data.identity.projectOwner}
-                                    onChange={val => setData(d => ({ ...d, identity: { ...d.identity, projectOwner: val } }))}
-                                />
-
-                                <StakeholderSelector
-                                    label="Solution Provider"
-                                    placeholder="Who will build/deliver it?"
-                                    value={data.identity.solutionProvider}
-                                    onChange={val => setData(d => ({ ...d, identity: { ...d.identity, solutionProvider: val } }))}
-                                />
-
-                                <StakeholderSelector
-                                    label="Approving Authority"
-                                    placeholder="Who signs the check?"
-                                    value={data.identity.approvingAuthority}
-                                    onChange={val => setData(d => ({ ...d, identity: { ...d.identity, approvingAuthority: val } }))}
-                                />
+            {/* 6. Global Header Toolbar (Matches Charter) */}
+            <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm z-10 sticky top-0 h-16">
+                <div className="flex items-center">
+                    <button onClick={onBack} className="mr-4 text-gray-400 hover:text-gray-600"><ArrowLeftIcon className="h-5 w-5" /></button>
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">Project Initiation Request</h1>
+                        <p className="text-xs text-gray-500">PM² Governance Artefact</p>
+                    </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <button className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        <ArrowDownTrayIcon className="h-4 w-4 mr-2" />Import data from earlier steps
+                    </button>
+                    <button onClick={() => onOpenGuidance('Initiating Phase', '5.2 Project Initiation Request', { tab: 'Artefacts', label: 'Project Initiation Request' })} className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        <BookOpenIcon className="h-4 w-4 mr-2" />Open PM² Guidance
+                    </button>
+                    <button onClick={() => setIsGuidanceOpen(!isGuidanceOpen)} className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        <LightBulbIcon className="h-4 w-4 mr-2" />{isGuidanceOpen ? 'Hide Guidance' : 'Show Guidance'}
+                    </button>
+                    <div className="h-6 w-px bg-gray-300 mx-2"></div>
+                    <div className="relative">
+                        <button onClick={() => setShowExportMenu(!showExportMenu)} className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                            Export
+                        </button>
+                        {showExportMenu && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
+                                <button onClick={() => handleExport('pdf')} className="block w-full text-left px-4 py-2 hover:bg-gray-50">PDF</button>
+                                <button onClick={() => handleExport('docx')} className="block w-full text-left px-4 py-2 hover:bg-gray-50">DOCX</button>
+                                <button onClick={handlePreview} className="block w-full text-left px-4 py-2 hover:bg-gray-50">HTML Preview</button>
                             </div>
-                        </div>
+                        )}
                     </div>
-
-                    {/* SECTION 2: STRATEGY */}
-                    <div id="strategy" ref={el => sectionRefs.current['strategy'] = el} className="scroll-mt-6">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2">2. STRATEGIC FIT</h3>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
-                                        2.1 Business Need / Problem
-                                        <GuidanceToggle text="Describe the business problem or opportunity. Why are we doing this now?" />
-                                    </label>
-                                    <textarea
-                                        rows={4}
-                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                                        placeholder="The current system is obsolete..."
-                                        value={data.strategy.businessNeed}
-                                        onChange={e => setData(d => ({ ...d, strategy: { ...d.strategy, businessNeed: e.target.value } }))}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
-                                        2.2 Legal Basis
-                                        <GuidanceToggle text="Is this required by law, regulation, or policy? Cite the specific mandate." />
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                                        placeholder="e.g. GDPR Compliance Directive 2016/679"
-                                        value={data.strategy.legalBasis}
-                                        onChange={e => setData(d => ({ ...d, strategy: { ...d.strategy, legalBasis: e.target.value } }))}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
-                                        2.3 Expected Outcomes
-                                        <GuidanceToggle text="What will change? Be specific about the end state." />
-                                    </label>
-                                    <textarea
-                                        rows={4}
-                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                                        placeholder="1. Automated reporting reduction by 50%..."
-                                        value={data.strategy.outcomes}
-                                        onChange={e => setData(d => ({ ...d, strategy: { ...d.strategy, outcomes: e.target.value } }))}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* SECTION 3: FACTORS */}
-                    <div id="factors" ref={el => sectionRefs.current['factors'] = el} className="scroll-mt-6">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2">3. PROJECT FACTORS</h3>
-
-                            <ListBuilder
-                                label="3.1 Initial Risks"
-                                placeholder="Add a risk (e.g. Budget cuts may delay start)..."
-                                items={data.factors.risks}
-                                onItemAdd={(txt) => setData(d => ({ ...d, factors: { ...d.factors, risks: [...d.factors.risks, { description: txt }] } }))}
-                                onItemRemove={(idx) => setData(d => ({ ...d, factors: { ...d.factors, risks: d.factors.risks.filter((_, i) => i !== idx) } }))}
-                            />
-
-                            <ListBuilder
-                                label="3.2 Constraints"
-                                placeholder="Add a constraint (e.g. Must complete by Dec 31)..."
-                                items={data.factors.constraints}
-                                onItemAdd={(txt) => setData(d => ({ ...d, factors: { ...d.factors, constraints: [...d.factors.constraints, { description: txt }] } }))}
-                                onItemRemove={(idx) => setData(d => ({ ...d, factors: { ...d.factors, constraints: d.factors.constraints.filter((_, i) => i !== idx) } }))}
-                            />
-
-                            <ListBuilder
-                                label="3.3 Assumptions"
-                                placeholder="Add an assumption (e.g. Staff will be trained)..."
-                                items={data.factors.assumptions}
-                                onItemAdd={(txt) => setData(d => ({ ...d, factors: { ...d.factors, assumptions: [...d.factors.assumptions, { description: txt }] } }))}
-                                onItemRemove={(idx) => setData(d => ({ ...d, factors: { ...d.factors, assumptions: d.factors.assumptions.filter((_, i) => i !== idx) } }))}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Footer Spacer */}
-                    <div className="h-24"></div>
-                </main>
+                </div>
             </div>
-        </div>
+
+            {/* 7. Three-Pane Layout */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Left Nav (20%) */}
+                <nav className="w-1/5 bg-white border-r border-gray-200 h-full overflow-y-auto p-4">
+                    {PIR_SIDEBAR_STRUCTURE.map((group, i) => (
+                        <div key={i} className="mb-6">
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">{group.title}</h3>
+                            <div className="space-y-1">
+                                {group.items.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActiveSectionId(item.id)}
+                                        className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeSectionId === item.id
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <span className={`w-2 h-2 mr-3 rounded-full ${activeSectionId === item.id ? 'bg-blue-600' : 'bg-gray-300'}`}></span>
+                                        {item.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </nav>
+
+                {/* Center Content (Flexible) */}
+                <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
+                    {renderActiveContent()}
+                </main>
+
+                {/* Right Guidance (30% Collapsible) */}
+                {isGuidanceOpen && (
+                    <aside className="w-[30%] bg-white border-l border-gray-200 h-full overflow-y-auto transition-all shadow-lg">
+                        <GuidancePanel sectionId={activeSectionId} isOpen={true} onClose={() => setIsGuidanceOpen(false)} />
+                    </aside>
+                )}
+            </div>
+
+            <DocumentPreviewModal
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                title="PIR Preview"
+                htmlContent={previewHtml}
+            />
+        </div >
     )
 }
 

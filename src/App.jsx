@@ -305,8 +305,8 @@ function App() {
     const [activeProjectId, setActiveProjectId] = useState(null)
 
     const navItems = [
-        { name: 'Projects', icon: Squares2X2Icon },
         { name: 'Home', icon: HomeIcon },
+        { name: 'Projects', icon: Squares2X2Icon },
         {
             name: 'Lifecycle',
             icon: ArrowPathIcon,
